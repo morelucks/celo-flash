@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import { useGameState } from '../context/GameStateContext';
 import { playSound } from '../utils/audio';
+import CanvasGame from './CanvasGame';
 
 export default function GameScreen({ onOpenStore }) {
   const {
@@ -12,17 +13,16 @@ export default function GameScreen({ onOpenStore }) {
     setBestScore,
     points,
     setPoints,
+    setCash,
     difficulty,
     setDifficulty,
     playing,
     setPlaying,
     soundEnabled,
-    character,
     powerups,
     setPowerups,
     activePowerups,
     setActivePowerups,
-    gamesPlayed,
     setGamesPlayed,
     selectedTourney,
     setSelectedTourney,
@@ -32,12 +32,6 @@ export default function GameScreen({ onOpenStore }) {
   const [showStartOverlay, setShowStartOverlay] = useState(true);
   const [showGameOverOverlay, setShowGameOverOverlay] = useState(false);
   const [pointsEarned, setPointsEarned] = useState(0);
-
-  const canvasRef = useRef(null);
-
-  // Initial stats values to show
-  const displayScore = score;
-  const displayTimer = timer;
 
   const handleStartGame = () => {
     playSound('click', soundEnabled);
@@ -56,6 +50,44 @@ export default function GameScreen({ onOpenStore }) {
     setPlaying(true);
     setShowStartOverlay(false);
     setShowGameOverOverlay(false);
+  };
+
+  const handleGameEnd = () => {
+    setPlaying(false);
+    
+    const earned = Math.round(score / 10);
+    setPoints(prev => prev + earned);
+    setPointsEarned(earned);
+    setGamesPlayed(prev => prev + 1);
+
+    // Tournament handler wagers/pot
+    if (selectedTourney) {
+      if (score > selectedTourney.highScore) {
+        submitTournamentScore(selectedTourney.id, score);
+        const winnings = selectedTourney.pot * 0.1;
+        setCash(prev => Number((prev + winnings).toFixed(2)));
+        alert(`🏆 New Tournament Leader! You claimed temporary rank #1 and won $${winnings.toFixed(2)} USDm!`);
+      } else {
+        alert(`Score submitted successfully to ${selectedTourney.title}! Your Score: ${score.toLocaleString()}. Leader: ${selectedTourney.highScore.toLocaleString()}.`);
+      }
+      setSelectedTourney(null);
+    }
+
+    if (score > bestScore) {
+      setBestScore(score);
+      playSound('victory', soundEnabled);
+    } else {
+      playSound('gameover', soundEnabled);
+    }
+
+    // Reset powerups active state
+    setActivePowerups({
+      magnet: false,
+      shield: false,
+      clock: false
+    });
+
+    setShowGameOverOverlay(true);
   };
 
   const handleRestartGame = () => {
@@ -101,11 +133,11 @@ export default function GameScreen({ onOpenStore }) {
       <div className="game-hud">
         <div className="hud-item">
           <span className="hud-label">Score:</span>
-          <span className="hud-value" id="hud-score">{displayScore.toLocaleString()}</span>
+          <span className="hud-value" id="hud-score">{score.toLocaleString()}</span>
         </div>
         <div className="hud-item">
           <span className="hud-label">Time:</span>
-          <span className="hud-value" id="hud-timer">{displayTimer}s</span>
+          <span className="hud-value" id="hud-timer">{timer}s</span>
         </div>
         <div className="hud-item">
           <span className="hud-label">Best:</span>
@@ -185,9 +217,9 @@ export default function GameScreen({ onOpenStore }) {
             <div className="score-results">
               <div className="result-row">
                 <span>Score:</span>
-                <span id="final-score" className="purple-highlight">{displayScore.toLocaleString()}</span>
+                <span id="final-score" className="purple-highlight">{score.toLocaleString()}</span>
               </div>
-              {displayScore > bestScore && (
+              {score > bestScore && (
                 <div className="result-row" id="high-score-row">
                   <span className="gold-text">🏆 New High Score!</span>
                 </div>
@@ -203,8 +235,12 @@ export default function GameScreen({ onOpenStore }) {
           </div>
         )}
 
-        {/* Canvas for Arcade Game */}
-        <canvas ref={canvasRef} id="game-canvas" width="350" height="480"></canvas>
+        {/* Canvas / Arcade Game Engine */}
+        {playing ? (
+          <CanvasGame onGameEnd={handleGameEnd} />
+        ) : (
+          <canvas id="game-canvas" width="350" height="480" style={{ display: 'block', background: '#0b0f19', width: '100%', height: '100%' }}></canvas>
+        )}
       </div>
     </div>
   );
