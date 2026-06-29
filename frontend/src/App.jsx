@@ -73,7 +73,7 @@ function MainAppContent() {
         <TickerMarquee />
 
         {/* Content Screens */}
-        <div className="app-screen-container">
+        <div className={`app-screen-container tab-${currentTab}`}>
           {renderScreen()}
         </div>
 
