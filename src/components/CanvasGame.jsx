@@ -45,6 +45,19 @@ export default function CanvasGame({ onGameEnd }) {
     };
   }, []);
 
+  // Flash board red on bomb hits
+  const flashBoardRed = () => {
+    const container = document.querySelector('.game-board-container');
+    if (!container) return;
+    container.style.boxShadow = 'inset 0 10px 30px rgba(0,0,0,0.15), 0 0 20px rgba(239, 68, 68, 0.8)';
+    container.style.borderColor = '#ef4444';
+    
+    setTimeout(() => {
+      container.style.boxShadow = 'inset 0 10px 30px rgba(0,0,0,0.3), 0 10px 25px rgba(0,0,0,0.4)';
+      container.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+    }, 250);
+  };
+
   // Spawn falling items
   const spawnItem = (canvasWidth) => {
     const types = ['celo', 'celo', 'celo', 'bomb'];
@@ -258,7 +271,6 @@ export default function CanvasGame({ onGameEnd }) {
             ctx.textBaseline = 'middle';
             ctx.fillText('🍀', 0, 1);
           } else {
-            // Default Celo coin with rings
             ctx.shadowColor = 'rgba(251, 204, 39, 0.5)';
             ctx.shadowBlur = 8;
             ctx.beginPath();
@@ -269,7 +281,6 @@ export default function CanvasGame({ onGameEnd }) {
             ctx.strokeStyle = '#ffffff';
             ctx.stroke();
 
-            // Interlocking rings
             ctx.lineWidth = 2.4;
             ctx.beginPath();
             ctx.arc(-item.size * 0.18, 0, item.size * 0.32, 0, Math.PI * 2);
@@ -300,13 +311,11 @@ export default function CanvasGame({ onGameEnd }) {
           ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
           ctx.shadowBlur = 6;
 
-          // Fuse spark
           ctx.beginPath();
           ctx.arc(8, -12, 2.5, 0, Math.PI * 2);
           ctx.fillStyle = '#fbcc27';
           ctx.fill();
 
-          // Fuse line
           ctx.beginPath();
           ctx.moveTo(0, -10);
           ctx.quadraticCurveTo(6, -8, 8, -12);
@@ -314,7 +323,6 @@ export default function CanvasGame({ onGameEnd }) {
           ctx.lineWidth = 2.5;
           ctx.stroke();
 
-          // Bomb core
           ctx.beginPath();
           ctx.arc(0, 0, item.size, 0, Math.PI * 2);
           ctx.fillStyle = '#06100c';
@@ -323,7 +331,6 @@ export default function CanvasGame({ onGameEnd }) {
           ctx.strokeStyle = '#ffffff';
           ctx.stroke();
 
-          // Red pulse center
           const pulseColor = (Math.floor(Date.now() / 150) % 2 === 0) ? '#ef4444' : '#06100c';
           ctx.beginPath();
           ctx.arc(0, 0, item.size * 0.4, 0, Math.PI * 2);
@@ -331,6 +338,37 @@ export default function CanvasGame({ onGameEnd }) {
           ctx.fill();
         }
         ctx.restore();
+
+        // Collision Check
+        const dx = item.x - player.x;
+        const dy = item.y - player.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        if (distance < player.radius + item.size) {
+          if (item.type === 'celo') {
+            const addVal = difficulty.includes('hard') ? 200 : 100;
+            setScore((prev) => prev + addVal);
+            createParticles(particlesRef.current, item.x, item.y, '#fcff52', 10);
+            playSound('collect-celo', soundEnabled);
+          } else if (item.type === 'green') {
+            setScore((prev) => prev + 300);
+            createParticles(particlesRef.current, item.x, item.y, '#35d07f', 12);
+            playSound('collect-green', soundEnabled);
+          } else if (item.type === 'bomb') {
+            if (activePowerups.shield) {
+              setActivePowerups((prev) => ({ ...prev, shield: false }));
+              playSound('shield-break', soundEnabled);
+              createParticles(particlesRef.current, item.x, item.y, '#fbcc27', 15);
+            } else {
+              setScore((prev) => Math.max(0, prev - 500));
+              createParticles(particlesRef.current, item.x, item.y, '#ef4444', 20);
+              playSound('explosion', soundEnabled);
+              flashBoardRed();
+            }
+          }
+          items.splice(i, 1);
+          continue;
+        }
 
         // Clear offscreen items
         if (item.y > canvas.height + item.size) {
@@ -350,7 +388,7 @@ export default function CanvasGame({ onGameEnd }) {
       if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
       if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
     };
-  }, [playing, difficulty, activePowerups, character]);
+  }, [playing, difficulty, activePowerups, character, soundEnabled]);
 
   const handlePointerMove = (e) => {
     if (!playing) return;
