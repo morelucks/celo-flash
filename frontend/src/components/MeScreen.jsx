@@ -1,6 +1,7 @@
 import React from 'react';
 import { useGameState } from '../context/GameStateContext';
 import { playSound } from '../utils/audio';
+import avatarUrl from '../assets/avatar.png';
 
 export default function MeScreen() {
   const { cash, points, gamesPlayed, setCurrentTab, soundEnabled } = useGameState();
@@ -30,7 +31,7 @@ export default function MeScreen() {
       <div className="profile-card">
         <div className="profile-header">
           <div className="profile-avatar-container">
-            <img src="/avatar.png" alt="luckify Avatar" className="profile-avatar" id="me-avatar-img" />
+            <img src={avatarUrl} alt="luckify Avatar" className="profile-avatar" id="me-avatar-img" />
           </div>
           <div className="profile-meta">
             <h3 className="profile-handle">@luckify</h3>
