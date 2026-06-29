@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useGameState } from '../context/GameStateContext';
 import { playSound } from '../utils/audio';
 import CanvasGame from './CanvasGame';
+import logoUrl from '../assets/celoflashlogo.png';
 
 export default function GameScreen({ onOpenShop }) {
   const {
@@ -152,7 +153,7 @@ export default function GameScreen({ onOpenShop }) {
         {/* Game Start Overlay */}
         {showStartOverlay && (
           <div className="game-overlay" id="game-start-overlay">
-            <h2 className="game-main-title">flash CELO</h2>
+            <img src={logoUrl} alt="Celo Flash Logo" className="game-start-logo" />
             <p className="game-rules">Collect CELOs <span className="celo-dot"></span> • Avoid bombs 💣</p>
             
             <div className="difficulty-wrapper">

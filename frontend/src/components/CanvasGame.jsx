@@ -2,6 +2,7 @@ import React, { useRef, useEffect } from 'react';
 import { useGameState } from '../context/GameStateContext';
 import { playSound } from '../utils/audio';
 import { createParticles, updateAndDrawParticles } from '../utils/particles';
+import avatarUrl from '../assets/avatar.png';
 
 export default function CanvasGame({ onGameEnd }) {
   const {
@@ -39,7 +40,7 @@ export default function CanvasGame({ onGameEnd }) {
   // Load avatar image on mount or skin change
   useEffect(() => {
     const player = playerRef.current;
-    player.avatarImg.src = '/avatar.png';
+    player.avatarImg.src = avatarUrl;
     player.avatarImg.onload = () => {
       player.avatarLoaded = true;
     };
