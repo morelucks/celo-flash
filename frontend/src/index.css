@@ -1921,7 +1921,20 @@ body::after {
     padding: 8px 12px;
   }
   .app-footer-nav {
-    height: 52px;
+    height: 58px;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .nav-item {
+    padding: 2px 0;
+    gap: 2px;
+    line-height: 1.1;
+  }
+  .nav-icon {
+    width: 20px;
+    height: 20px;
+  }
+  .nav-label {
+    font-size: 0.62rem;
   }
   
   /* Game specific layout adjustments */
