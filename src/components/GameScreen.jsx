@@ -177,10 +177,10 @@ export default function GameScreen({ onOpenShop }) {
             <div className="powerups-section">
               <h3 className="section-title">Power Ups</h3>
               <div className="powerups-row">
-                {['magnet', 'shield', 'clock'].map((type) => {
+                {['shield'].map((type) => {
                   const hasStock = (powerups[type] || 0) > 0;
                   const isActive = activePowerups[type];
-                  const icon = type === 'magnet' ? '🧲' : type === 'shield' ? '🛡️' : '⏰';
+                  const icon = '🛡️';
                   const title = type.toUpperCase() + (hasStock ? ` (Owned: ${powerups[type]})` : ' (LOCKED - Buy in Shop)');
 
                   return (
