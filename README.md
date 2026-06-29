@@ -1,4 +1,5 @@
-# Celo Flash ⚡
+ 
+# Celo Flash 
 
 ## Speed into the Celo economy.
 
@@ -12,9 +13,13 @@ It is a **gamified onboarding and engagement layer for the Celo economy**.
 
 ---
 
-## 🎮 Overview
+ 
 
+##  Overview
+
+ 
 The game combines:
+
 * Fast arcade gameplay
 * Celo-themed collectibles
 * Virtual CELO rewards
@@ -27,6 +32,7 @@ The game combines:
 * Local state persistence
 
 The goal is simple:
+
 > Make Celo discovery feel like play, not a lecture.
 
 ---
@@ -36,6 +42,7 @@ The goal is simple:
 Celo is built around mobile-first access, real-world payments, stable-value assets, and inclusive financial tools.
 
 Celo Flash supports that vision by creating a fun entry point for new users. Players do not need to understand wallets, stablecoins, swaps, or on-chain rewards before participating. They can start with a simple arcade loop:
+
 1. Play a quick round
 2. Collect CELO
 3. Complete tasks
@@ -48,7 +55,7 @@ This turns casual attention into active ecosystem participation.
 
 ---
 
-## ⚡ Core Features
+##  Core Features
 
 * **Mobile-first arcade gameplay**
 * **CELO-themed rewards**
@@ -58,18 +65,19 @@ This turns casual attention into active ecosystem participation.
 * **Power-ups and score boosters**
 * **Leaderboard and ranking progression**
 * **Virtual wager mode**
-* **Persistent local player progress**
+* **Persistent local player progress** 
 
 ---
+ 
+##  Interface Structure
 
-## 📱 Interface Structure
-
-Celo Flash uses a mobile-first layout inspired by mini-app, Mini-Pay, and social frame experiences.
+Celo Flash uses a mobile-first layout inspired by mini-app, Mini-Pay and social frame experiences.
 
 On desktop, the game appears inside a polished mobile-style container.
 On mobile, it expands naturally into a full-screen app-like experience.
 
 The interface is designed to be:
+
 * Simple
 * Fast
 * Touch-friendly
@@ -77,9 +85,15 @@ The interface is designed to be:
 * Easy to understand
 * Easy to replay
 
-### 🎮 Game Tab
+---
+ 
+
+### 🎮 Game
+
 The main gameplay screen where users play arcade rounds and earn points.
+
 Features include:
+
 * Arcade canvas board
 * Easy mode
 * Hard mode
@@ -89,12 +103,31 @@ Features include:
 * Game-over summary
 * Responsive player movement
 
-### 📋 Tasks Tab
+---
+
+###  Tasks
+
 The task hub allows users to earn bonus rewards by completing daily and ecosystem-related actions.
+
+Task examples include:
+
+* Daily check-ins
+* Social engagement
+* Community participation
+* Partner discovery
+* Ecosystem campaign tasks
+* Mini-app actions
+
 Task states are saved locally so users can track progress across sessions.
 
-### 🏆 Tournaments Tab
-The tournament section introduces competitive gameplay. Users can:
+---
+
+### Tournaments
+
+The tournament section introduces competitive gameplay.
+
+Users can:
+
 * Join tournaments
 * Pay USDm entry fees
 * Compete for Celo/USDm prize pools
@@ -104,20 +137,30 @@ The tournament section introduces competitive gameplay. Users can:
 
 This creates a repeatable engagement loop around competition, rewards, and social sharing.
 
-### 🛍️ Store Tab
-The store allows users to unlock upgrades, boosts, and branded ecosystem items:
+---
+
+### Store
+
+The store allows users to unlock upgrades, boosts, and branded ecosystem items.
+
+Store items may include:
+
 * Daily renewals
 * Score multipliers
 * Power-up boosts
-* Valora-themed spawners (drops hearts 💚)
-* Mento-themed spawners (drops clovers 🍀)
+* Valora-themed spawners
+* Mento-themed spawners
 * Future partner skins
 
 ---
+ 
+  
+## Partner Integrations
 
-## 🤝 Partner Integrations
+Celo Flash can serve as a playful distribution channel for Celo ecosystem partners.
 
-Celo Flash can serve as a playful distribution channel for Celo ecosystem partners. Partner integrations can appear as:
+Partner integrations can appear as:
+
 * Branded collectibles
 * Sponsored tasks
 * Partner tournaments
@@ -128,18 +171,28 @@ Celo Flash can serve as a playful distribution channel for Celo ecosystem partne
 
 Instead of sending users to static links, partners can become part of the gameplay experience.
 
-### 💚 Valora Skin
-A custom spawner skin that drops Valora-themed heart collectibles.
-
-### 🍀 Mento Skin
-A custom spawner skin that drops Mento-themed clover collectibles.
-
 ---
 
-## 📈 Monetization & Growth
+##  Example Partner Skins
 
-Celo Flash sits at the intersection of gaming, consumer crypto, stablecoin adoption, ecosystem marketing, and social quests. Monetization channels include:
-* Tournament entry fees (USDm)
+### Valora Skin
+
+A custom spawner skin that drops Valora-themed heart collectibles.
+
+### Mento Skin
+
+A custom spawner skin that drops Mento-themed clover collectibles.
+
+Future partner skins can be added for other Celo ecosystem projects.
+
+---
+ 
+ 
+Celo Flash creates multiple monetization and growth opportunities.
+
+Possible revenue channels include:
+
+* Tournament entry fees
 * Sponsored ecosystem tasks
 * Partner-branded skins
 * Premium power-ups
@@ -149,59 +202,44 @@ Celo Flash sits at the intersection of gaming, consumer crypto, stablecoin adopt
 * Token-gated challenges
 * Partner activation packages
 
----
+Celo Flash sits at the intersection of:
 
-## 🛠️ Developer Technical Details
-
-### Game Architecture
-
-Celo Flash is built as a lightweight, zero-dependency Single Page Application (SPA).
-
-```mermaid
-graph TD
-    A[index.html - Warpcast Wrapper] --> B[Header & Balance Bar]
-    A --> C[Screen Container]
-    A --> D[Bottom Nav Menu]
-    
-    C --> E[Game Canvas Screen]
-    C --> F[Tasks Screen]
-    C --> G[Tourneys Screen]
-    C --> H[Store Screen]
-    C --> I[Me Profile Screen]
-    
-    J[app.js - State Manager] -->|Persists State| K[(localStorage - celo_flash_state)]
-    J -->|Audio Context| L[Web Audio Synthesizer]
-    J -->|Render Loop| E
-```
-
-### Technical Stack
-* **Core**: Pure HTML5 and vanilla JavaScript (ES6+).
-* **Styling**: CSS Custom Properties (`index.css`) defining the dark green-gold color scheme, frosted glassmorphism overlays, and keyframe-based glow animations:
-  ```css
-  :root {
-    --primary-purple: #fbcc27; /* Celo Gold */
-    --accent-blue: #35d07f;    /* Celo Green */
-    --bg-dark: #06100c;        /* Emerald Black */
-    --game-bg: #143d2f;        /* Deep Canvas Forest */
-  }
-  ```
-* **Web Audio API Synthesizer**: Generates retro synth sound waves for clicks, collections, power-ups, explosions, victories, and game-overs without loading external audio assets.
-* **State Persistence**: Uses `localStorage` under the key `celo_flash_state` to store wagers, points, high scores, task verifications, and custom skins.
+* Gaming
+* Consumer crypto
+* Stablecoin adoption
+* Ecosystem marketing
+* Social quests
+* Web3 onboarding
 
 ---
 
-## 🚀 Local Deployment
+##  Summary
 
-To run Celo Flash locally, launch any static file server from the root of the project directory.
+Celo Flash is a mobile-first arcade game that turns Celo ecosystem onboarding into a fun and repeatable experience.
 
-### Using Python:
-```bash
-python3 -m http.server 8080
+It gives users a reason to:
+
+* Play
+* Learn
+* Earn
+* Compete
+* Discover products
+* Return daily
+ 
+---
+
+## Our Tagline
+
+```txt
+Celo Flash — Speed into the Celo economy.
 ```
 
-### Using Node.js (http-server):
-```bash
-npx http-server -p 8080
-```
+---
 
-Open **`http://localhost:8080`** in your browser to play!
+## Summary
+
+Celo Flash makes Celo onboarding simple, social, and entertaining.
+
+By combining arcade gameplay with CELO-inspired rewards, USDm-powered tournaments, ecosystem tasks, and partner activations, Celo Flash creates a powerful entry point for the next wave of Celo users.
+
+**Celo Flash ⚡ — Speed into the Celo economy.** 
