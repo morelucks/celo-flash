@@ -156,6 +156,7 @@ export default function GameScreen({ onOpenStore }) {
             <p className="game-rules">Collect CELOs <span className="celo-dot"></span> • Avoid bombs 💣</p>
             
             <div className="difficulty-wrapper">
+              <label htmlFor="difficulty-select" className="difficulty-label">Select Mode:</label>
               <select 
                 id="difficulty-select" 
                 className="custom-select"
