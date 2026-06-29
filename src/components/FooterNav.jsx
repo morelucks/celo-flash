@@ -59,7 +59,7 @@ export default function FooterNav() {
           <path d="M5 17V9H19V17"></path>
           <path d="M3 9l2-4h14l2 4"></path>
         </svg>
-        <span className="nav-label">Store</span>
+        <span className="nav-label">Shop</span>
       </button>
 
       <button 

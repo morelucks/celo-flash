@@ -30,7 +30,7 @@ function MainAppContent() {
   const renderScreen = () => {
     switch (currentTab) {
       case 'game':
-        return <GameScreen onOpenStore={() => setCurrentTab('store')} />;
+        return <GameScreen onOpenShop={() => setCurrentTab('store')} />;
       case 'tasks':
         return <TasksScreen onOpenSwap={() => setSwapOpen(true)} />;
       case 'tourneys':
@@ -45,7 +45,7 @@ function MainAppContent() {
       case 'me':
         return <MeScreen />;
       default:
-        return <GameScreen onOpenStore={() => setCurrentTab('store')} />;
+        return <GameScreen onOpenShop={() => setCurrentTab('store')} />;
     }
   };
 

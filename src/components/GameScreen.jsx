@@ -3,7 +3,7 @@ import { useGameState } from '../context/GameStateContext';
 import { playSound } from '../utils/audio';
 import CanvasGame from './CanvasGame';
 
-export default function GameScreen({ onOpenStore }) {
+export default function GameScreen({ onOpenShop }) {
   const {
     score,
     setScore,
@@ -100,7 +100,7 @@ export default function GameScreen({ onOpenStore }) {
     if (playing) return; // Cannot toggle during active gameplay
     if ((powerups[type] || 0) <= 0) {
       playSound('click', soundEnabled);
-      alert(`You do not own any ${type} power-ups! Buy some from the Store.`);
+      alert(`You do not own any ${type} power-ups! Buy some from the Shop.`);
       return;
     }
 
@@ -181,7 +181,7 @@ export default function GameScreen({ onOpenStore }) {
                   const hasStock = (powerups[type] || 0) > 0;
                   const isActive = activePowerups[type];
                   const icon = type === 'magnet' ? '🧲' : type === 'shield' ? '🛡️' : '⏰';
-                  const title = type.toUpperCase() + (hasStock ? ` (Owned: ${powerups[type]})` : ' (LOCKED - Buy in Store)');
+                  const title = type.toUpperCase() + (hasStock ? ` (Owned: ${powerups[type]})` : ' (LOCKED - Buy in Shop)');
 
                   return (
                     <div 
@@ -198,8 +198,8 @@ export default function GameScreen({ onOpenStore }) {
                   );
                 })}
               </div>
-              <button className="store-redirect-btn" id="btn-get-powerups" onClick={() => { playSound('click', soundEnabled); onOpenStore(); }}>
-                🛍️ Get from Store
+              <button className="store-redirect-btn" id="btn-get-powerups" onClick={() => { playSound('click', soundEnabled); onOpenShop(); }}>
+                🛍️ Get from Shop
               </button>
             </div>
 
