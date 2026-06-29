@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Celo Flash - Speed into the Celo economy.</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="index.css">
+</head>
+<body>
+  <div class="warpcast-desktop-bg">
+    <!-- Warpcast Search & Frame Simulator for Desktop -->
+    <div class="warpcast-top-nav">
+      <div class="search-container">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input type="text" placeholder="Search casts, channels and users" disabled>
+        <span class="search-kbd">Ctrl+K</span>
+      </div>
+    </div>
+
+    <!-- Phone Viewport Container -->
+    <div class="phone-container">
+      <!-- Mini-App Header -->
+      <div class="app-header">
+        <div class="app-info">
+          <div class="app-logo">
+            <svg class="celo-logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="celo-gold-grad" x1="0%" y1="100%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#E5BB38" />
+                  <stop offset="100%" stop-color="#FCFF52" />
+                </linearGradient>
+                <linearGradient id="celo-green-grad" x1="0%" y1="100%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#105B37" />
+                  <stop offset="100%" stop-color="#35D07F" />
+                </linearGradient>
+              </defs>
+              <circle cx="38" cy="50" r="22" fill="none" stroke="url(#celo-gold-grad)" stroke-width="8" />
+              <circle cx="62" cy="50" r="22" fill="none" stroke="url(#celo-green-grad)" stroke-width="8" />
+            </svg>
+          </div>
+          <div class="app-title-group">
+            <h1 class="app-title">Celo Flash</h1>
+            <span class="app-subtitle">by luckify</span>
+          </div>
+        </div>
+        <div class="app-actions">
+          <button class="action-btn" id="sound-toggle" aria-label="Toggle Sound">
+            <svg id="sound-on-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+              <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+            </svg>
+            <svg id="sound-off-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+              <line x1="23" y1="9" x2="17" y2="15"></line>
+              <line x1="17" y1="9" x2="23" y2="15"></line>
+            </svg>
+          </button>
+          <button class="action-btn" id="options-btn" aria-label="Options">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="5" r="1"></circle>
+              <circle cx="12" cy="12" r="1"></circle>
+              <circle cx="12" cy="19" r="1"></circle>
+            </svg>
+          </button>
+          <button class="action-btn" id="minimize-btn" aria-label="Minimize">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
+          <button class="action-btn close-btn" id="close-btn" aria-label="Close">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Token / Balance Info Bar -->
+      <div class="balance-bar">
+        <button class="balance-action buy-celo-btn">
+          <span class="plus-icon">+</span> BUY $CELO
+        </button>
+        <span class="balance-pill fee-pill">🟢 FREE</span>
+        <span class="balance-pill points-pill">✨ <span id="header-points">0</span></span>
+        <span class="balance-pill wallet-pill">💵 $<span id="header-cash">0.00</span></span>
+      </div>
+
+      <!-- Ticker Marquee -->
+      <div class="ticker-marquee">
+        <div class="marquee-content">
+          <span>1H: <span class="green-text">0.00%</span></span>
+          <span>$CELO</span>
+          <span class="glow-link">CLICK TO BUY</span>
+          <span>LIQUIDITY: $15.4k</span>
+          <span>PRICE: $0.624</span>
+          <span>1H: <span class="green-text">0.00%</span></span>
+          <span>$CELO</span>
+          <span class="glow-link">CLICK TO BUY</span>
+          <span>LIQUIDITY: $15.4k</span>
+          <span>PRICE: $0.624</span>
+        </div>
+      </div>
+
+      <!-- App Screens Window -->
+      <div class="app-screen-container">
+
+        <!-- 1. GAME SCREEN -->
+        <div class="screen active" id="screen-game">
+          <!-- Game HUD -->
+          <div class="game-hud">
+            <div class="hud-item">
+              <span class="hud-label">Score:</span>
+              <span class="hud-value" id="hud-score">0</span>
+            </div>
+            <div class="hud-item">
+              <span class="hud-label">Time:</span>
+              <span class="hud-value" id="hud-timer">30s</span>
+            </div>
+            <div class="hud-item">
+              <span class="hud-label">Best:</span>
+              <span class="hud-value" id="hud-best">18,705</span>
+            </div>
+          </div>
+
+          <!-- Main Gameplay Area (Green Rounded Board) -->
+          <div class="game-board-container">
+            <div class="notch-cutout"></div>
+            
+            <!-- Game Start Overlay -->
+            <div class="game-overlay" id="game-start-overlay">
+              <h2 class="game-main-title">flash CELO</h2>
+              <p class="game-rules">Collect CELOs <span class="celo-dot"></span> • Avoid bombs 💣</p>
+              
+              <div class="difficulty-wrapper">
+                <select id="difficulty-select" class="custom-select">
+                  <option value="easy">Free • Easy</option>
+                  <option value="hard">Free • Hard</option>
+                  <option value="wager-easy">Wager 10 $CELO • Easy</option>
+                  <option value="wager-hard">Wager 10 $CELO • Hard</option>
+                </select>
+              </div>
+
+              <button class="start-btn" id="btn-start-game">click to Start</button>
+
+              <div class="powerups-section">
+                <h3 class="section-title">Power Ups</h3>
+                <div class="powerups-row">
+                  <div class="powerup-slot" id="powerup-magnet" data-type="magnet" title="Magnet - Pulls items in">
+                    <span class="powerup-badge">🧲</span>
+                    <span class="lock-indicator">🔒</span>
+                    <span class="count-badge" style="display:none;">0</span>
+                  </div>
+                  <div class="powerup-slot" id="powerup-shield" data-type="shield" title="Shield - Absorb 1 Bomb">
+                    <span class="powerup-badge">🛡️</span>
+                    <span class="lock-indicator">🔒</span>
+                    <span class="count-badge" style="display:none;">0</span>
+                  </div>
+                  <div class="powerup-slot" id="powerup-clock" data-type="clock" title="Clock - Slow down time">
+                    <span class="powerup-badge">⏰</span>
+                    <span class="lock-indicator">🔒</span>
+                    <span class="count-badge" style="display:none;">0</span>
+                  </div>
+                </div>
+                <button class="store-redirect-btn" id="btn-get-powerups">
+                  🛍️ Get from Store
+                </button>
+              </div>
+
+              <!-- Flashino Badge -->
+              <div class="flashino-badge">
+                <div class="flashino-icon">⚡</div>
+                <span>CELOFLASH</span>
+              </div>
+            </div>
+
+            <!-- Game Over Overlay (Hidden initially) -->
+            <div class="game-overlay hidden" id="game-over-overlay">
+              <h2 class="game-main-title">Game Over</h2>
+              <div class="score-results">
+                <div class="result-row">
+                  <span>Score:</span>
+                  <span id="final-score" class="purple-highlight">0</span>
+                </div>
+                <div class="result-row" id="high-score-row" style="display:none;">
+                  <span class="gold-text">🏆 New High Score!</span>
+                </div>
+                <div class="result-row">
+                  <span>Earned:</span>
+                  <span><span id="earned-points" class="gold-text">+0</span> Points</span>
+                </div>
+              </div>
+              <button class="start-btn" id="btn-restart-game">Play Again</button>
+            </div>
+
+            <!-- Canvas for Arcade Game -->
+            <canvas id="game-canvas" width="350" height="480"></canvas>
+          </div>
+        </div>
+
+        <!-- 2. TASKS SCREEN -->
+        <div class="screen" id="screen-tasks">
+          <h2 class="screen-title">Featured Tasks</h2>
+          <div class="tasks-list">
+            <!-- Task 1 -->
+            <div class="task-card" id="task-tg">
+              <div class="task-info">
+                <h3 class="task-name">Subscribe to CELO FLASH ON TG</h3>
+                <p class="task-desc">Don't miss any tournaments</p>
+                <span class="task-reward">+1 Points</span>
+              </div>
+              <div class="task-actions">
+                <a href="https://t.me/celoflash" target="_blank" class="task-btn go-btn">Go</a>
+                <button class="task-btn verify-btn" data-task="tg">Verify</button>
+              </div>
+            </div>
+
+            <!-- Task 2 -->
+            <div class="task-card" id="task-buy">
+              <div class="task-info">
+                <h3 class="task-name">Buy $CELO Tokens</h3>
+                <p class="task-desc">Buy and hold at least 100 $CELO tokens.</p>
+                <span class="task-reward">+1,000,000 Points</span>
+              </div>
+              <div class="task-actions">
+                <button class="task-btn go-btn buy-celo-btn">Buy</button>
+                <button class="task-btn verify-btn" data-task="buy">Verify</button>
+              </div>
+            </div>
+
+            <!-- Tabs Section inside tasks for Daily -->
+            <div class="tasks-sub-tabs">
+              <button class="sub-tab active" data-sub="daily">Daily</button>
+              <button class="sub-tab" data-sub="default">Default <span class="red-dot"></span></button>
+            </div>
+
+            <div class="sub-task-content" id="tasks-daily-content">
+              <!-- Task 3 -->
+              <div class="task-card" id="task-affirmation">
+                <div class="task-info">
+                  <h3 class="task-name">Claim Daily Affirmation</h3>
+                  <p class="task-desc">Start your day with intention. Mint your Daily Affirmation to manifest positivity!</p>
+                  <span class="task-reward">+10 Points</span>
+                </div>
+                <div class="task-actions">
+                  <a href="#" class="task-btn go-btn">Go</a>
+                  <button class="task-btn verify-btn" data-task="affirmation">Verify</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. TOURNEYS SCREEN -->
+        <div class="screen" id="screen-tourneys">
+          <div class="tourney-header">
+            <div>
+              <h2 class="screen-title">Tournaments</h2>
+              <p class="tourney-subtitle">Compete for USDm prize pools.</p>
+            </div>
+            <button class="create-tourney-btn" id="btn-create-tourney-modal">
+              <span class="plus-icon">+</span> Create
+            </button>
+          </div>
+
+          <div class="tourney-section-title">🔥 Trending Tournaments</div>
+          
+          <!-- Horizontal Tourney Cards Scroll -->
+          <div class="tourney-scroll-row" id="trending-tourneys-container">
+            <!-- Rendered dynamically, but fallback static items first -->
+            <div class="tourney-card-horizontal gradient-border">
+              <div class="tourney-card-header">
+                <div class="tourney-avatar bg-avatar-green">🦖</div>
+                <span class="tourney-tag-ends">Ends in 7h 52m</span>
+              </div>
+              <h3 class="tourney-card-title">UNDERDOGS WILL RISE 🔥</h3>
+              <p class="tourney-card-meta">24 Hour Tournament</p>
+              <div class="tourney-card-footer">
+                <div class="tourney-pricing">
+                  <span class="entry-price">$0.3 entry</span>
+                  <span class="pool-size">$30 TOTAL POT</span>
+                </div>
+                <button class="join-tourney-arrow-btn" data-id="tourney-underdogs">→</button>
+              </div>
+            </div>
+
+            <div class="tourney-card-horizontal">
+              <div class="tourney-card-header">
+                <div class="tourney-avatar bg-avatar-blue">🧙‍♂️</div>
+                <span class="tourney-tag-ends red-bg">Ends in 1h 15m</span>
+              </div>
+              <h3 class="tourney-card-title">Daily Free Cup</h3>
+              <p class="tourney-card-meta">22 Hour Tournament</p>
+              <div class="tourney-card-footer">
+                <div class="tourney-pricing">
+                  <span class="entry-price">Free entry</span>
+                  <span class="pool-size">$5 TOTAL POT</span>
+                </div>
+                <button class="join-tourney-arrow-btn" data-id="tourney-free">→</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tourney Filter Tabs -->
+          <div class="tourney-filters">
+            <button class="filter-pill active" data-filter="upcoming">Upcoming</button>
+            <button class="filter-pill" data-filter="live">Live</button>
+            <button class="filter-pill" data-filter="mine">Mine</button>
+            <button class="filter-pill" data-filter="past">Past</button>
+            <button class="filter-pill" data-filter="earner">💰 Earner</button>
+          </div>
+
+          <!-- Filtered List Content -->
+          <div class="tourney-list-container" id="filtered-tourneys-list">
+            <div class="empty-state">
+              <p>No tournaments scheduled in this category. Create one — it goes live at least 2h after creation.</p>
+              <span class="help-circle">?</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. STORE SCREEN -->
+        <div class="screen" id="screen-store">
+          <div class="store-section">
+            <div class="store-section-header">
+              <h2 class="store-title">🚨 EMERGENCY TOP-UPS</h2>
+            </div>
+            
+            <div class="topups-grid">
+              <!-- Topup 1 -->
+              <div class="topup-card">
+                <div class="topup-icon">⚡</div>
+                <h3 class="topup-name">Score Multiplier</h3>
+                <p class="topup-desc">+1 charge • 2x-5x your run</p>
+                <div class="quantity-control">
+                  <button class="qty-btn qty-minus" data-target="multiplier">-</button>
+                  <span class="qty-val" id="qty-multiplier">1</span>
+                  <button class="qty-btn qty-plus" data-target="multiplier">+</button>
+                </div>
+                <button class="buy-item-btn" id="btn-buy-multiplier">Buy • $0.04</button>
+              </div>
+
+              <!-- Topup 2 -->
+              <div class="topup-card">
+                <div class="topup-icon">🎮</div>
+                <h3 class="topup-name">Daily Renewal</h3>
+                <p class="topup-desc">+10 min playtime each</p>
+                <div class="quantity-control">
+                  <button class="qty-btn qty-minus" data-target="renewal">-</button>
+                  <span class="qty-val" id="qty-renewal">1</span>
+                  <button class="qty-btn qty-plus" data-target="renewal">+</button>
+                </div>
+                <button class="buy-item-btn" id="btn-buy-renewal">Buy • $0.10</button>
+              </div>
+            </div>
+
+            <div class="store-action-banner">
+              <div class="buy-all-desc">
+                <h4>Buy All Power-ups</h4>
+                <p>Activate Magnet, Shield, and Clock at once!</p>
+              </div>
+              <button class="buy-all-btn" id="btn-buy-all-powerups">$0.2 BUY ALL</button>
+            </div>
+          </div>
+
+          <!-- Feature Items Section -->
+          <div class="store-section mt-4">
+            <h3 class="store-section-title">Special Spawners</h3>
+            <div class="spawners-list">
+              <div class="spawner-card">
+                <div class="spawner-avatar">💚</div>
+                <div class="spawner-info">
+                  <h4>Valora Coin</h4>
+                  <p>Spawns Valora hearts. Lasts 24h once bought.</p>
+                </div>
+                <button class="buy-spawner-btn" data-spawner="valora">Buy • $0.05</button>
+              </div>
+
+              <div class="spawner-card">
+                <div class="spawner-avatar">🍀</div>
+                <div class="spawner-info">
+                  <h4>Mento Token</h4>
+                  <p>Spawns Mento leaves. Lasts 24h once bought.</p>
+                </div>
+                <button class="buy-spawner-btn" data-spawner="mento">Buy • $0.05</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5. ME SCREEN -->
+        <div class="screen" id="screen-me">
+          <div class="profile-card">
+            <div class="profile-header">
+              <div class="profile-avatar-container">
+                <img src="avatar.png" alt="luckify Avatar" class="profile-avatar" id="me-avatar-img">
+              </div>
+              <div class="profile-meta">
+                <h3 class="profile-handle">@luckify</h3>
+                <span class="profile-fid">fid 1104338</span>
+              </div>
+              <button class="share-btn">
+                <svg class="share-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
+                  <polyline points="16 6 12 2 8 6"></polyline>
+                  <line x1="12" y1="2" x2="12" y2="15"></line>
+                </svg>
+                Share
+              </button>
+            </div>
+
+            <!-- Tier Status Info -->
+            <div class="tier-status">
+              <div class="tier-header">
+                <span class="tier-dot"></span>
+                <span class="tier-name">Tier 5</span>
+                <span class="tier-sub">0 wins • global rank #109</span>
+              </div>
+              <div class="tier-progress-bg">
+                <div class="tier-progress-bar" style="width: 20%;"></div>
+              </div>
+              <div class="tier-footer">
+                <span>Tier 5</span>
+                <span>1 to Tier 4</span>
+              </div>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+              <div class="stat-box">
+                <span class="stat-value" id="stats-usdm">$0.00</span>
+                <span class="stat-label">USDm WON</span>
+              </div>
+              <div class="stat-box">
+                <span class="stat-value" id="stats-celo">0</span>
+                <span class="stat-label">CELO</span>
+              </div>
+              <div class="stat-box">
+                <span class="stat-value" id="stats-played">0</span>
+                <span class="stat-label">PLAYED</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Actions -->
+          <div class="profile-actions">
+            <button class="profile-action-row" id="btn-profile-find-tourney">
+              <span>Find a tournament to join</span>
+              <span class="arrow-right">→</span>
+            </button>
+          </div>
+
+          <!-- Subscription status -->
+          <div class="subscription-card">
+            <div class="sub-info">
+              <h4>Subscription</h4>
+              <p>Free (10 minutes Compete daily)</p>
+            </div>
+            <button class="upgrade-btn">Upgrade</button>
+          </div>
+
+          <!-- Browser Notification Warning -->
+          <div class="notification-warning">
+            <div class="warning-icon">🔇</div>
+            <div class="warning-text">
+              <h4>Notifications blocked</h4>
+              <p>Enable them in your browser settings to keep track of tournaments.</p>
+            </div>
+          </div>
+        </div>
+
+      </div> <!-- End App Screens Window -->
+
+      <!-- Footer Navigation Menu -->
+      <div class="app-footer-nav">
+        <button class="nav-item active" data-tab="game">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="6" width="20" height="12" rx="2"></rect>
+            <path d="M6 12h4m-2-2v4m7-2h.01M18 12h.01"></path>
+          </svg>
+          <span class="nav-label">Game</span>
+        </button>
+
+        <button class="nav-item" data-tab="tasks">
+          <div class="nav-icon-container">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 11l3 3L22 4"></path>
+              <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+            </svg>
+            <span class="red-badge-dot"></span>
+          </div>
+          <span class="nav-label">Tasks</span>
+        </button>
+
+        <button class="nav-item" data-tab="tourneys">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
+            <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path>
+            <path d="M4 22h16"></path>
+            <path d="M10 14.66V17c0 .55-.45 1-1 1H4v2h16v-2h-5c-.55 0-1-.45-1-1v-2.34"></path>
+            <path d="M12 2a4 4 0 0 1 4 4v7a4 4 0 0 1-4 4 4 4 0 0 1-4-4V6a4 4 0 0 1 4-4z"></path>
+          </svg>
+          <span class="nav-label">Tourneys</span>
+        </button>
+
+        <button class="nav-item" data-tab="store">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <path d="M16 10a4 4 0 0 1-8 0"></path>
+          </svg>
+          <span class="nav-label">Store</span>
+        </button>
+
+        <button class="nav-item" data-tab="me">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          <span class="nav-label">Me</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create Tournament Modal -->
+  <div class="modal-overlay hidden" id="create-tourney-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Create Tournament</h3>
+        <button class="close-modal-btn" id="btn-close-tourney-modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="tourney-name">Tournament Name</label>
+          <input type="text" id="tourney-name" placeholder="e.g. Degen Clash 🚀">
+        </div>
+        <div class="form-group">
+          <label for="tourney-entry">Entry Fee ($)</label>
+          <input type="number" id="tourney-entry" step="0.1" value="0.5">
+        </div>
+        <div class="form-group">
+          <label for="tourney-pool">Prize Pool ($)</label>
+          <input type="number" id="tourney-pool" step="1" value="50">
+        </div>
+        <div class="form-group">
+          <label for="tourney-duration">Duration (hours)</label>
+          <select id="tourney-duration">
+            <option value="2">2 Hours</option>
+            <option value="12">12 Hours</option>
+            <option value="24" selected>24 Hours</option>
+            <option value="48">48 Hours</option>
+          </select>
+        </div>
+        <button class="modal-submit-btn" id="btn-submit-tourney">Create Tournament</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Play Tournament Match Dialog -->
+  <div class="modal-overlay hidden" id="play-tourney-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="play-tourney-title">Join Tournament</h3>
+        <button class="close-modal-btn" id="btn-close-play-modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-text">Wager <span id="play-tourney-fee" class="purple-highlight">$0.00</span> to submit your next game score to this tournament.</p>
+        <div class="tourney-prize-summary">
+          <div>
+            <span>Prize Pool:</span>
+            <strong id="play-tourney-prize">$0.00</strong>
+          </div>
+          <div>
+            <span>Current High Score:</span>
+            <strong id="play-tourney-highscore">0</strong>
+          </div>
+        </div>
+        <button class="modal-submit-btn" id="btn-confirm-play-tourney">Pay & Play Game</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
