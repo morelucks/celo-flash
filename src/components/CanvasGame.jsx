@@ -122,12 +122,71 @@ export default function CanvasGame({ onGameEnd }) {
       player.x += (player.targetX - player.x) * 0.22;
       player.y += (player.targetY - player.y) * 0.22;
 
-      // Draw player avatar (temporary circle placeholder for now)
+      // Draw Player Avatar
       ctx.save();
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
+      ctx.shadowBlur = 12;
+      ctx.shadowOffsetY = 6;
+
+      // Draw Shield Indicator
+      if (activePowerups.shield) {
+        ctx.beginPath();
+        ctx.arc(player.x, player.y, player.radius + 8, 0, Math.PI * 2);
+        ctx.strokeStyle = '#fbcc27';
+        ctx.lineWidth = 3;
+        ctx.shadowColor = '#fbcc27';
+        ctx.shadowBlur = 15;
+        ctx.stroke();
+        ctx.fillStyle = 'rgba(251, 204, 39, 0.08)';
+        ctx.fill();
+      }
+
+      // Base circular clipping container
       ctx.beginPath();
       ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
       ctx.fillStyle = '#fff';
       ctx.fill();
+      ctx.lineWidth = 2.5;
+      ctx.strokeStyle = '#fff';
+      ctx.stroke();
+      ctx.clip();
+
+      // Draw Avatar image / Theme shapes
+      if (character === 'default' && player.avatarLoaded) {
+        ctx.drawImage(
+          player.avatarImg,
+          player.x - player.radius,
+          player.y - player.radius,
+          player.radius * 2,
+          player.radius * 2
+        );
+      } else if (character === 'valora') {
+        ctx.fillStyle = '#35d07f';
+        ctx.fillRect(player.x - player.radius, player.y - player.radius, player.radius * 2, player.radius * 2);
+        ctx.fillStyle = '#fff';
+        ctx.font = '22px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('💚', player.x, player.y + 1);
+      } else if (character === 'mento') {
+        ctx.fillStyle = '#fbcc27';
+        ctx.fillRect(player.x - player.radius, player.y - player.radius, player.radius * 2, player.radius * 2);
+        ctx.fillStyle = '#fff';
+        ctx.font = '22px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('🍀', player.x, player.y + 1);
+      } else {
+        ctx.fillStyle = '#143d2f';
+        ctx.beginPath();
+        ctx.arc(player.x, player.y, player.radius - 2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 12px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('@luckify', player.x, player.y);
+      }
       ctx.restore();
 
       // Spawn manager
@@ -160,12 +219,117 @@ export default function CanvasGame({ onGameEnd }) {
           }
         }
 
-        // Draw item (placeholder colored circles)
+        // Draw item
         ctx.save();
-        ctx.beginPath();
-        ctx.arc(item.x, item.y, item.size, 0, Math.PI * 2);
-        ctx.fillStyle = item.type === 'bomb' ? '#ef4444' : item.type === 'green' ? '#35d07f' : '#fbcc27';
-        ctx.fill();
+        ctx.translate(item.x, item.y);
+        ctx.rotate(item.angle);
+
+        if (item.type === 'celo') {
+          if (character === 'valora') {
+            ctx.shadowColor = 'rgba(53, 208, 127, 0.5)';
+            ctx.shadowBlur = 8;
+            ctx.beginPath();
+            ctx.arc(0, 0, item.size, 0, Math.PI * 2);
+            ctx.fillStyle = '#35d07f';
+            ctx.fill();
+            ctx.lineWidth = 2.2;
+            ctx.strokeStyle = '#ffffff';
+            ctx.stroke();
+
+            ctx.fillStyle = '#ffffff';
+            ctx.font = `${item.size * 1.1}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('💚', 0, 1);
+          } else if (character === 'mento') {
+            ctx.shadowColor = 'rgba(251, 204, 39, 0.5)';
+            ctx.shadowBlur = 8;
+            ctx.beginPath();
+            ctx.arc(0, 0, item.size, 0, Math.PI * 2);
+            ctx.fillStyle = '#fbcc27';
+            ctx.fill();
+            ctx.lineWidth = 2.2;
+            ctx.strokeStyle = '#ffffff';
+            ctx.stroke();
+
+            ctx.fillStyle = '#ffffff';
+            ctx.font = `${item.size * 1.1}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('🍀', 0, 1);
+          } else {
+            // Default Celo coin with rings
+            ctx.shadowColor = 'rgba(251, 204, 39, 0.5)';
+            ctx.shadowBlur = 8;
+            ctx.beginPath();
+            ctx.arc(0, 0, item.size, 0, Math.PI * 2);
+            ctx.fillStyle = '#fbcc27';
+            ctx.fill();
+            ctx.lineWidth = 2.2;
+            ctx.strokeStyle = '#ffffff';
+            ctx.stroke();
+
+            // Interlocking rings
+            ctx.lineWidth = 2.4;
+            ctx.beginPath();
+            ctx.arc(-item.size * 0.18, 0, item.size * 0.32, 0, Math.PI * 2);
+            ctx.strokeStyle = '#fcff52';
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(item.size * 0.18, 0, item.size * 0.32, 0, Math.PI * 2);
+            ctx.strokeStyle = '#06100c';
+            ctx.stroke();
+          }
+        } else if (item.type === 'green') {
+          ctx.shadowColor = 'rgba(53, 208, 127, 0.4)';
+          ctx.shadowBlur = 8;
+          ctx.beginPath();
+          ctx.arc(0, 0, item.size, 0, Math.PI * 2);
+          ctx.fillStyle = '#35d07f';
+          ctx.fill();
+
+          ctx.beginPath();
+          ctx.moveTo(-6, 4);
+          ctx.lineTo(0, -6);
+          ctx.lineTo(6, 4);
+          ctx.strokeStyle = '#06100c';
+          ctx.lineWidth = 3.5;
+          ctx.stroke();
+        } else if (item.type === 'bomb') {
+          ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+          ctx.shadowBlur = 6;
+
+          // Fuse spark
+          ctx.beginPath();
+          ctx.arc(8, -12, 2.5, 0, Math.PI * 2);
+          ctx.fillStyle = '#fbcc27';
+          ctx.fill();
+
+          // Fuse line
+          ctx.beginPath();
+          ctx.moveTo(0, -10);
+          ctx.quadraticCurveTo(6, -8, 8, -12);
+          ctx.strokeStyle = '#a1a1aa';
+          ctx.lineWidth = 2.5;
+          ctx.stroke();
+
+          // Bomb core
+          ctx.beginPath();
+          ctx.arc(0, 0, item.size, 0, Math.PI * 2);
+          ctx.fillStyle = '#06100c';
+          ctx.fill();
+          ctx.lineWidth = 2.5;
+          ctx.strokeStyle = '#ffffff';
+          ctx.stroke();
+
+          // Red pulse center
+          const pulseColor = (Math.floor(Date.now() / 150) % 2 === 0) ? '#ef4444' : '#06100c';
+          ctx.beginPath();
+          ctx.arc(0, 0, item.size * 0.4, 0, Math.PI * 2);
+          ctx.fillStyle = pulseColor;
+          ctx.fill();
+        }
         ctx.restore();
 
         // Clear offscreen items
@@ -186,7 +350,7 @@ export default function CanvasGame({ onGameEnd }) {
       if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
       if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
     };
-  }, [playing, difficulty, activePowerups]);
+  }, [playing, difficulty, activePowerups, character]);
 
   const handlePointerMove = (e) => {
     if (!playing) return;
