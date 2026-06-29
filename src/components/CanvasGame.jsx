@@ -103,7 +103,9 @@ export default function CanvasGame({ onGameEnd }) {
       setTimer((prev) => {
         if (prev <= 1) {
           clearInterval(timerIntervalRef.current);
-          onGameEnd();
+          setTimeout(() => {
+            onGameEnd();
+          }, 0);
           return 0;
         }
         return prev - 1;
