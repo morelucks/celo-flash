@@ -12,7 +12,7 @@ import {Pausable} from "@openzeppelin/contracts/utils/Pausable.sol";
  * @author CeloFlash Team
  * @notice Handles on-chain purchases for power-ups, spawner skins,
  *         and daily renewals in the Celo Flash arcade game.
- *         All purchases use stablecoin (cUSD on Celo).
+ *         All purchases use stablecoin (USDm on Celo).
  *
  * @dev Security features:
  *   - ReentrancyGuard on all purchase functions
@@ -58,7 +58,7 @@ contract CeloFlashStore is ReentrancyGuard, Ownable, Pausable {
     //  State
     // ─────────────────────────────────────────────
 
-    /// @notice The stablecoin used for payments (cUSD)
+    /// @notice The stablecoin used for payments (USDm)
     IERC20 public immutable stablecoin;
 
     /// @notice Revenue recipient
@@ -112,7 +112,7 @@ contract CeloFlashStore is ReentrancyGuard, Ownable, Pausable {
     // ─────────────────────────────────────────────
 
     /**
-     * @param _stablecoin      Address of the cUSD token
+     * @param _stablecoin      Address of the USDm token
      * @param _revenueRecipient Address receiving store revenue
      */
     constructor(
@@ -125,7 +125,7 @@ contract CeloFlashStore is ReentrancyGuard, Ownable, Pausable {
         stablecoin = IERC20(_stablecoin);
         revenueRecipient = _revenueRecipient;
 
-        // Initialize default item prices (cUSD, 18 decimals)
+        // Initialize default item prices (USDm, 18 decimals)
         // Power-ups
         _setItem(ItemType.PowerupMagnet,      0.08e18,  true, 10);
         _setItem(ItemType.PowerupShield,       0.08e18,  true, 10);

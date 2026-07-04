@@ -3,7 +3,7 @@ const { ethers } = require("hardhat");
 
 describe("CeloFlashStore", function () {
   let store;
-  let mockCUSD;
+  let mockUSDm;
   let owner, revenue, player1, player2;
 
   const INITIAL_BALANCE = ethers.parseEther("1000");
@@ -12,19 +12,19 @@ describe("CeloFlashStore", function () {
     [owner, revenue, player1, player2] = await ethers.getSigners();
 
     const MockToken = await ethers.getContractFactory("MockERC20");
-    mockCUSD = await MockToken.deploy("Mock cUSD", "cUSD", 18);
-    await mockCUSD.waitForDeployment();
+    mockUSDm = await MockToken.deploy("Mock USDm", "USDm", 18);
+    await mockUSDm.waitForDeployment();
 
     const Store = await ethers.getContractFactory("CeloFlashStore");
     store = await Store.deploy(
-      await mockCUSD.getAddress(),
+      await mockUSDm.getAddress(),
       revenue.address
     );
     await store.waitForDeployment();
 
     for (const player of [player1, player2]) {
-      await mockCUSD.mint(player.address, INITIAL_BALANCE);
-      await mockCUSD
+      await mockUSDm.mint(player.address, INITIAL_BALANCE);
+      await mockUSDm
         .connect(player)
         .approve(await store.getAddress(), ethers.MaxUint256);
     }
@@ -32,7 +32,7 @@ describe("CeloFlashStore", function () {
 
   describe("Deployment", function () {
     it("should set correct initial values", async function () {
-      expect(await store.stablecoin()).to.equal(await mockCUSD.getAddress());
+      expect(await store.stablecoin()).to.equal(await mockUSDm.getAddress());
       expect(await store.revenueRecipient()).to.equal(revenue.address);
     });
 
@@ -47,9 +47,9 @@ describe("CeloFlashStore", function () {
 
   describe("Purchase Items", function () {
     it("should allow purchasing a single power-up", async function () {
-      const balBefore = await mockCUSD.balanceOf(player1.address);
+      const balBefore = await mockUSDm.balanceOf(player1.address);
       await store.connect(player1).purchaseItem(1, 1); // Shield x1
-      const balAfter = await mockCUSD.balanceOf(player1.address);
+      const balAfter = await mockUSDm.balanceOf(player1.address);
 
       expect(balBefore - balAfter).to.equal(ethers.parseEther("0.08"));
       expect(await store.getPlayerPurchaseCount(player1.address, 1)).to.equal(1);
@@ -101,9 +101,9 @@ describe("CeloFlashStore", function () {
 
     it("should withdraw revenue", async function () {
       await store.connect(player1).purchaseItem(3, 1);
-      const balBefore = await mockCUSD.balanceOf(revenue.address);
+      const balBefore = await mockUSDm.balanceOf(revenue.address);
       await store.withdrawRevenue();
-      const balAfter = await mockCUSD.balanceOf(revenue.address);
+      const balAfter = await mockUSDm.balanceOf(revenue.address);
       expect(balAfter).to.be.gt(balBefore);
     });
 

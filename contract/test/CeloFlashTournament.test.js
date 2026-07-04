@@ -4,11 +4,11 @@ const { time } = require("@nomicfoundation/hardhat-toolbox/network-helpers");
 
 describe("CeloFlashTournament", function () {
   let tournament;
-  let mockCUSD;
+  let mockUSDm;
   let owner, verifier, feeRecipient, player1, player2, player3, player4;
 
-  const ENTRY_FEE = ethers.parseEther("0.30"); // 0.30 cUSD
-  const SEED_AMOUNT = ethers.parseEther("10"); // 10 cUSD seed
+  const ENTRY_FEE = ethers.parseEther("0.30"); // 0.30 USDm or CELO
+  const SEED_AMOUNT = ethers.parseEther("10"); // 10 USDm or CELO seed
   const DURATION = 24 * 60 * 60; // 24 hours
   const INITIAL_BALANCE = ethers.parseEther("1000");
 
@@ -25,15 +25,15 @@ describe("CeloFlashTournament", function () {
     [owner, verifier, feeRecipient, player1, player2, player3, player4] =
       await ethers.getSigners();
 
-    // Deploy mock cUSD token
+    // Deploy mock USDm token
     const MockToken = await ethers.getContractFactory("MockERC20");
-    mockCUSD = await MockToken.deploy("Mock cUSD", "cUSD", 18);
-    await mockCUSD.waitForDeployment();
+    mockUSDm = await MockToken.deploy("Mock USDm", "USDm", 18);
+    await mockUSDm.waitForDeployment();
 
     // Deploy tournament contract
     const Tournament = await ethers.getContractFactory("CeloFlashTournament");
     tournament = await Tournament.deploy(
-      await mockCUSD.getAddress(),
+      await mockUSDm.getAddress(),
       verifier.address,
       feeRecipient.address
     );
@@ -41,8 +41,8 @@ describe("CeloFlashTournament", function () {
 
     // Distribute tokens and set approvals
     for (const player of [owner, player1, player2, player3, player4]) {
-      await mockCUSD.mint(player.address, INITIAL_BALANCE);
-      await mockCUSD
+      await mockUSDm.mint(player.address, INITIAL_BALANCE);
+      await mockUSDm
         .connect(player)
         .approve(await tournament.getAddress(), ethers.MaxUint256);
     }
@@ -51,7 +51,7 @@ describe("CeloFlashTournament", function () {
   describe("Deployment", function () {
     it("should set correct initial values", async function () {
       expect(await tournament.stablecoin()).to.equal(
-        await mockCUSD.getAddress()
+        await mockUSDm.getAddress()
       );
       expect(await tournament.scoreVerifier()).to.equal(verifier.address);
       expect(await tournament.feeRecipient()).to.equal(feeRecipient.address);
@@ -65,11 +65,11 @@ describe("CeloFlashTournament", function () {
       ).to.be.revertedWithCustomError(tournament, "InvalidAddress");
 
       await expect(
-        Tournament.deploy(await mockCUSD.getAddress(), ethers.ZeroAddress, feeRecipient.address)
+        Tournament.deploy(await mockUSDm.getAddress(), ethers.ZeroAddress, feeRecipient.address)
       ).to.be.revertedWithCustomError(tournament, "InvalidAddress");
 
       await expect(
-        Tournament.deploy(await mockCUSD.getAddress(), verifier.address, ethers.ZeroAddress)
+        Tournament.deploy(await mockUSDm.getAddress(), verifier.address, ethers.ZeroAddress)
       ).to.be.revertedWithCustomError(tournament, "InvalidAddress");
     });
   });
@@ -80,7 +80,8 @@ describe("CeloFlashTournament", function () {
         "UNDERDOGS WILL RISE 🔥",
         ENTRY_FEE,
         SEED_AMOUNT,
-        DURATION
+        DURATION,
+        false
       );
 
       const receipt = await tx.wait();
@@ -91,55 +92,56 @@ describe("CeloFlashTournament", function () {
       expect(t.entryFee).to.equal(ENTRY_FEE);
       expect(t.seedAmount).to.equal(SEED_AMOUNT);
       expect(t.prizePool).to.equal(SEED_AMOUNT);
+      expect(t.isNative).to.be.false;
       expect(t.status).to.equal(0); // Active
     });
 
     it("should create a free tournament (no entry fee, no seed)", async function () {
-      await tournament.createTournament("Daily Free Cup", 0, 0, DURATION);
+      await tournament.createTournament("Daily Free Cup", 0, 0, DURATION, false);
       const t = await tournament.getTournament(0);
       expect(t.entryFee).to.equal(0);
       expect(t.prizePool).to.equal(0);
     });
 
     it("should transfer seed amount from creator", async function () {
-      const balBefore = await mockCUSD.balanceOf(owner.address);
-      await tournament.createTournament("Test", ENTRY_FEE, SEED_AMOUNT, DURATION);
-      const balAfter = await mockCUSD.balanceOf(owner.address);
+      const balBefore = await mockUSDm.balanceOf(owner.address);
+      await tournament.createTournament("Test", ENTRY_FEE, SEED_AMOUNT, DURATION, false);
+      const balAfter = await mockUSDm.balanceOf(owner.address);
       expect(balBefore - balAfter).to.equal(SEED_AMOUNT);
     });
 
     it("should revert on empty name", async function () {
       await expect(
-        tournament.createTournament("", ENTRY_FEE, 0, DURATION)
+        tournament.createTournament("", ENTRY_FEE, 0, DURATION, false)
       ).to.be.revertedWithCustomError(tournament, "EmptyName");
     });
 
     it("should revert on excessive entry fee", async function () {
       await expect(
-        tournament.createTournament("Test", ethers.parseEther("101"), 0, DURATION)
+        tournament.createTournament("Test", ethers.parseEther("101"), 0, DURATION, false)
       ).to.be.revertedWithCustomError(tournament, "InvalidEntryFee");
     });
 
     it("should revert on invalid duration", async function () {
       await expect(
-        tournament.createTournament("Test", ENTRY_FEE, 0, 60) // 1 minute
+        tournament.createTournament("Test", ENTRY_FEE, 0, 60, false) // 1 minute
       ).to.be.revertedWithCustomError(tournament, "InvalidDuration");
 
       await expect(
-        tournament.createTournament("Test", ENTRY_FEE, 0, 8 * 24 * 60 * 60) // 8 days
+        tournament.createTournament("Test", ENTRY_FEE, 0, 8 * 24 * 60 * 60, false) // 8 days
       ).to.be.revertedWithCustomError(tournament, "InvalidDuration");
     });
 
     it("should emit TournamentCreated event", async function () {
       await expect(
-        tournament.createTournament("Test Cup", ENTRY_FEE, SEED_AMOUNT, DURATION)
+        tournament.createTournament("Test Cup", ENTRY_FEE, SEED_AMOUNT, DURATION, false)
       ).to.emit(tournament, "TournamentCreated");
     });
   });
 
   describe("Join Tournament", function () {
     beforeEach(async function () {
-      await tournament.createTournament("Test Cup", ENTRY_FEE, SEED_AMOUNT, DURATION);
+      await tournament.createTournament("Test Cup", ENTRY_FEE, SEED_AMOUNT, DURATION, false);
     });
 
     it("should allow a player to join", async function () {
@@ -151,9 +153,9 @@ describe("CeloFlashTournament", function () {
     });
 
     it("should deduct entry fee and add to prize pool (minus protocol fee)", async function () {
-      const balBefore = await mockCUSD.balanceOf(player1.address);
+      const balBefore = await mockUSDm.balanceOf(player1.address);
       await tournament.connect(player1).joinTournament(0);
-      const balAfter = await mockCUSD.balanceOf(player1.address);
+      const balAfter = await mockUSDm.balanceOf(player1.address);
 
       expect(balBefore - balAfter).to.equal(ENTRY_FEE);
 
@@ -181,17 +183,17 @@ describe("CeloFlashTournament", function () {
     });
 
     it("should allow joining free tournaments", async function () {
-      await tournament.createTournament("Free Cup", 0, 0, DURATION);
-      const balBefore = await mockCUSD.balanceOf(player1.address);
+      await tournament.createTournament("Free Cup", 0, 0, DURATION, false);
+      const balBefore = await mockUSDm.balanceOf(player1.address);
       await tournament.connect(player1).joinTournament(1);
-      const balAfter = await mockCUSD.balanceOf(player1.address);
+      const balAfter = await mockUSDm.balanceOf(player1.address);
       expect(balAfter).to.equal(balBefore); // No tokens taken
     });
   });
 
   describe("Submit Score", function () {
     beforeEach(async function () {
-      await tournament.createTournament("Test Cup", ENTRY_FEE, SEED_AMOUNT, DURATION);
+      await tournament.createTournament("Test Cup", ENTRY_FEE, SEED_AMOUNT, DURATION, false);
       await tournament.connect(player1).joinTournament(0);
       await tournament.connect(player2).joinTournament(0);
     });
@@ -236,7 +238,6 @@ describe("CeloFlashTournament", function () {
 
     it("should revert on invalid signature", async function () {
       const nonce = ethers.id("nonce-bad");
-      // Sign with wrong signer
       const badSig = await signScore(player2, 0, player1.address, 5000, nonce);
 
       await expect(
@@ -265,19 +266,17 @@ describe("CeloFlashTournament", function () {
     });
 
     it("should sort leaderboard correctly", async function () {
-      // Player1 scores 12000
       const n1 = ethers.id("n1");
       const s1 = await signScore(verifier, 0, player1.address, 12000, n1);
       await tournament.connect(player1).submitScore(0, 12000, n1, s1);
 
-      // Player2 scores 15000
       const n2 = ethers.id("n2");
       const s2 = await signScore(verifier, 0, player2.address, 15000, n2);
       await tournament.connect(player2).submitScore(0, 15000, n2, s2);
 
       const lb = await tournament.getLeaderboard(0);
       expect(lb.length).to.equal(2);
-      expect(lb[0].player).to.equal(player2.address); // Higher score first
+      expect(lb[0].player).to.equal(player2.address);
       expect(lb[0].score).to.equal(15000);
       expect(lb[1].player).to.equal(player1.address);
       expect(lb[1].score).to.equal(12000);
@@ -286,12 +285,11 @@ describe("CeloFlashTournament", function () {
 
   describe("Finalize Tournament", function () {
     beforeEach(async function () {
-      await tournament.createTournament("Test Cup", ENTRY_FEE, SEED_AMOUNT, DURATION);
+      await tournament.createTournament("Test Cup", ENTRY_FEE, SEED_AMOUNT, DURATION, false);
       await tournament.connect(player1).joinTournament(0);
       await tournament.connect(player2).joinTournament(0);
       await tournament.connect(player3).joinTournament(0);
 
-      // Submit scores
       const n1 = ethers.id("f-n1");
       const s1 = await signScore(verifier, 0, player1.address, 15000, n1);
       await tournament.connect(player1).submitScore(0, 15000, n1, s1);
@@ -316,12 +314,11 @@ describe("CeloFlashTournament", function () {
       await tournament.finalizeTournament(0);
 
       const t = await tournament.getTournament(0);
-      expect(t.status).to.equal(1); // Finalized
+      expect(t.status).to.equal(1);
       expect(t.winner).to.equal(player1.address);
       expect(t.winningScore).to.equal(15000);
 
       const pool = t.prizePool;
-      // 1st: 60%, 2nd: 25%, 3rd: 15%
       const first = (pool * 6000n) / 10000n;
       const second = (pool * 2500n) / 10000n;
       const third = (pool * 1500n) / 10000n;
@@ -351,7 +348,7 @@ describe("CeloFlashTournament", function () {
 
   describe("Claim Prize", function () {
     beforeEach(async function () {
-      await tournament.createTournament("Test Cup", ENTRY_FEE, SEED_AMOUNT, DURATION);
+      await tournament.createTournament("Test Cup", ENTRY_FEE, SEED_AMOUNT, DURATION, false);
       await tournament.connect(player1).joinTournament(0);
 
       const n1 = ethers.id("claim-n1");
@@ -363,12 +360,12 @@ describe("CeloFlashTournament", function () {
     });
 
     it("should allow winner to claim prize", async function () {
-      const balBefore = await mockCUSD.balanceOf(player1.address);
+      const balBefore = await mockUSDm.balanceOf(player1.address);
       const claimable = await tournament.claimablePrize(0, player1.address);
 
       await tournament.connect(player1).claimPrize(0);
 
-      const balAfter = await mockCUSD.balanceOf(player1.address);
+      const balAfter = await mockUSDm.balanceOf(player1.address);
       expect(balAfter - balBefore).to.equal(claimable);
       expect(await tournament.claimablePrize(0, player1.address)).to.equal(0);
     });
@@ -389,38 +386,37 @@ describe("CeloFlashTournament", function () {
 
   describe("Cancel Tournament", function () {
     beforeEach(async function () {
-      await tournament.createTournament("Cancel Test", ENTRY_FEE, SEED_AMOUNT, DURATION);
+      await tournament.createTournament("Cancel Test", ENTRY_FEE, SEED_AMOUNT, DURATION, false);
       await tournament.connect(player1).joinTournament(0);
     });
 
     it("should allow creator to cancel", async function () {
       await tournament.cancelTournament(0);
       const t = await tournament.getTournament(0);
-      expect(t.status).to.equal(2); // Cancelled
+      expect(t.status).to.equal(2);
     });
 
     it("should allow owner to cancel", async function () {
-      // Create from player1
       await tournament
         .connect(player1)
-        .createTournament("P1 Tournament", 0, 0, DURATION);
-      await tournament.cancelTournament(1); // owner cancels
+        .createTournament("P1 Tournament", 0, 0, DURATION, false);
+      await tournament.cancelTournament(1);
       const t = await tournament.getTournament(1);
       expect(t.status).to.equal(2);
     });
 
     it("should refund seed to creator", async function () {
-      const balBefore = await mockCUSD.balanceOf(owner.address);
+      const balBefore = await mockUSDm.balanceOf(owner.address);
       await tournament.cancelTournament(0);
-      const balAfter = await mockCUSD.balanceOf(owner.address);
+      const balAfter = await mockUSDm.balanceOf(owner.address);
       expect(balAfter - balBefore).to.equal(SEED_AMOUNT);
     });
 
     it("should allow players to claim refund after cancellation", async function () {
       await tournament.cancelTournament(0);
-      const balBefore = await mockCUSD.balanceOf(player1.address);
+      const balBefore = await mockUSDm.balanceOf(player1.address);
       await tournament.connect(player1).claimPrize(0);
-      const balAfter = await mockCUSD.balanceOf(player1.address);
+      const balAfter = await mockUSDm.balanceOf(player1.address);
       expect(balAfter - balBefore).to.equal(ENTRY_FEE);
     });
 
@@ -443,26 +439,126 @@ describe("CeloFlashTournament", function () {
     });
 
     it("should withdraw accumulated fees", async function () {
-      await tournament.createTournament("Fee Test", ENTRY_FEE, 0, DURATION);
+      await tournament.createTournament("Fee Test", ENTRY_FEE, 0, DURATION, false);
       await tournament.connect(player1).joinTournament(0);
 
       const fees = await tournament.accumulatedFees();
       expect(fees).to.be.gt(0);
 
-      const balBefore = await mockCUSD.balanceOf(feeRecipient.address);
+      const balBefore = await mockUSDm.balanceOf(feeRecipient.address);
       await tournament.withdrawFees();
-      const balAfter = await mockCUSD.balanceOf(feeRecipient.address);
+      const balAfter = await mockUSDm.balanceOf(feeRecipient.address);
       expect(balAfter - balBefore).to.equal(fees);
     });
 
     it("should pause and unpause", async function () {
       await tournament.pause();
       await expect(
-        tournament.createTournament("Paused", 0, 0, DURATION)
+        tournament.createTournament("Paused", 0, 0, DURATION, false)
       ).to.be.revertedWithCustomError(tournament, "EnforcedPause");
 
       await tournament.unpause();
-      await tournament.createTournament("Unpaused", 0, 0, DURATION);
+      await tournament.createTournament("Unpaused", 0, 0, DURATION, false);
+    });
+  });
+
+  describe("Native CELO Tournaments", function () {
+    it("should create a native tournament with msg.value seed", async function () {
+      const tx = await tournament.createTournament(
+        "CELO Cup",
+        ENTRY_FEE,
+        SEED_AMOUNT,
+        DURATION,
+        true,
+        { value: SEED_AMOUNT }
+      );
+
+      const t = await tournament.getTournament(0);
+      expect(t.isNative).to.be.true;
+      expect(t.prizePool).to.equal(SEED_AMOUNT);
+    });
+
+    it("should revert if creator sends wrong msg.value", async function () {
+      await expect(
+        tournament.createTournament(
+          "Bad CELO Cup",
+          ENTRY_FEE,
+          SEED_AMOUNT,
+          DURATION,
+          true,
+          { value: 0 }
+        )
+      ).to.be.revertedWithCustomError(tournament, "InvalidValueSent");
+    });
+
+    it("should allow players to join paying CELO via msg.value", async function () {
+      await tournament.createTournament(
+        "CELO Cup",
+        ENTRY_FEE,
+        SEED_AMOUNT,
+        DURATION,
+        true,
+        { value: SEED_AMOUNT }
+      );
+
+      const balBefore = await ethers.provider.getBalance(player1.address);
+      const tx = await tournament.connect(player1).joinTournament(0, { value: ENTRY_FEE });
+      const receipt = await tx.wait();
+      const gasUsed = receipt.gasUsed * receipt.gasPrice;
+
+      const balAfter = await ethers.provider.getBalance(player1.address);
+      expect(balBefore - balAfter - gasUsed).to.equal(ENTRY_FEE);
+
+      const t = await tournament.getTournament(0);
+      expect(t.participantCount).to.equal(1);
+    });
+
+    it("should cancel native tournament and refund native CELO seed", async function () {
+      await tournament.createTournament(
+        "CELO Cup",
+        ENTRY_FEE,
+        SEED_AMOUNT,
+        DURATION,
+        true,
+        { value: SEED_AMOUNT }
+      );
+
+      const balBefore = await ethers.provider.getBalance(owner.address);
+      const tx = await tournament.cancelTournament(0);
+      const receipt = await tx.wait();
+      const gasUsed = receipt.gasUsed * receipt.gasPrice;
+
+      const balAfter = await ethers.provider.getBalance(owner.address);
+      expect(balAfter - balBefore + gasUsed).to.equal(SEED_AMOUNT);
+    });
+
+    it("should allow claiming native prizes and refunds", async function () {
+      await tournament.createTournament(
+        "CELO Cup",
+        ENTRY_FEE,
+        SEED_AMOUNT,
+        DURATION,
+        true,
+        { value: SEED_AMOUNT }
+      );
+      await tournament.connect(player1).joinTournament(0, { value: ENTRY_FEE });
+
+      const n1 = ethers.id("native-n1");
+      const s1 = await signScore(verifier, 0, player1.address, 10000, n1);
+      await tournament.connect(player1).submitScore(0, 10000, n1, s1);
+
+      await time.increase(DURATION + 1);
+      await tournament.finalizeTournament(0);
+
+      const claimable = await tournament.claimablePrize(0, player1.address);
+
+      const balBefore = await ethers.provider.getBalance(player1.address);
+      const tx = await tournament.connect(player1).claimPrize(0);
+      const receipt = await tx.wait();
+      const gasUsed = receipt.gasUsed * receipt.gasPrice;
+
+      const balAfter = await ethers.provider.getBalance(player1.address);
+      expect(balAfter - balBefore + gasUsed).to.equal(claimable);
     });
   });
 });

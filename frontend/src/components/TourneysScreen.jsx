@@ -38,7 +38,7 @@ export default function TourneysScreen({ onOpenPlayModal, onOpenCreateModal }) {
       <div className="tourney-header">
         <div>
           <h2 className="screen-title">Tournaments</h2>
-          <p className="tourney-subtitle">Compete for USDm prize pools.</p>
+          <p className="tourney-subtitle">Compete for USDm or CELO prize pools.</p>
         </div>
         <button 
           className="create-tourney-btn" 
@@ -66,9 +66,9 @@ export default function TourneysScreen({ onOpenPlayModal, onOpenCreateModal }) {
             <div className="tourney-card-footer">
               <div className="tourney-pricing">
                 <span className="entry-price">
-                  {t.entry === 0 ? 'Free entry' : `$${t.entry.toFixed(2)} entry`}
+                  {t.entry === 0 ? 'Free entry' : t.assetType === 'CELO' ? `${t.entry.toFixed(2)} CELO entry` : `$${t.entry.toFixed(2)} entry`}
                 </span>
-                <span className="pool-size">${t.pot.toFixed(2)} TOTAL POT</span>
+                <span className="pool-size">{t.assetType === 'CELO' ? `${t.pot.toFixed(2)} CELO` : `$${t.pot.toFixed(2)}`} TOTAL POT</span>
               </div>
               <button 
                 className="join-tourney-arrow-btn" 
@@ -116,9 +116,9 @@ export default function TourneysScreen({ onOpenPlayModal, onOpenCreateModal }) {
                 <div className="tourney-info-vertical">
                   <h4>{t.title}</h4>
                   <div className="tourney-row-details">
-                    <span>Pool: ${t.pot.toFixed(2)}</span>
+                    <span>Pool: {t.assetType === 'CELO' ? `${t.pot.toFixed(2)} CELO` : `$${t.pot.toFixed(2)}`}</span>
                     <span>•</span>
-                    <span>Entry: {t.entry === 0 ? 'Free' : `$${t.entry.toFixed(2)}`}</span>
+                    <span>Entry: {t.entry === 0 ? 'Free' : t.assetType === 'CELO' ? `${t.entry.toFixed(2)} CELO` : `$${t.entry.toFixed(2)}`}</span>
                   </div>
                 </div>
                 <div className="tourney-status-vertical">

@@ -15,6 +15,25 @@ It is a **gamified onboarding and engagement layer for the Celo economy**.
 
  
 
+## 🔗 Deployed Smart Contracts (Celo Mainnet)
+
+The Celo Flash game is powered by a secure, audited suite of smart contracts deployed on Celo Mainnet:
+
+*   **CeloFlashTournament**
+    *   **Address:** [`0xe176d352Fab71c0FE992d41Ae512eDC1830d3494`](https://celoscan.io/address/0xe176d352Fab71c0FE992d41Ae512eDC1830d3494)
+    *   **Verification:** Verified on [Sourcify](https://repo.sourcify.dev/contracts/full_match/42220/0xe176d352Fab71c0FE992d41Ae512eDC1830d3494/)
+    *   **Description:** Manages multi-asset tournaments (native CELO or USDm stablecoin). Supports pull-pattern prize claims and verifier-signed score submissions.
+*   **CeloFlashStore**
+    *   **Address:** [`0xBfAD9eE3378a8266DF49A74909b9262808A8a4cC`](https://celoscan.io/address/0xBfAD9eE3378a8266DF49A74909b9262808A8a4cC)
+    *   **Verification:** Verified on [Sourcify](https://repo.sourcify.dev/contracts/full_match/42220/0xBfAD9eE3378a8266DF49A74909b9262808A8a4cC/)
+    *   **Description:** Enables store purchases using USDm stablecoin for in-game characters and powerup upgrades.
+*   **CeloFlashWager**
+    *   **Address:** [`0xEA3c413F43ac6Aa71cD01cB54479EACC89BcA171`](https://celoscan.io/address/0xEA3c413F43ac6Aa71cD01cB54479EACC89BcA171)
+    *   **Verification:** Verified on [Sourcify](https://repo.sourcify.dev/contracts/full_match/42220/0xEA3c413F43ac6Aa71cD01cB54479EACC89BcA171/)
+    *   **Description:** Facilitates native CELO peer-to-contract score wagers with automated payout rules and score verification.
+
+---
+
 ##  Overview
 
  

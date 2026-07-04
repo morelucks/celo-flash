@@ -1,4 +1,4 @@
-const { ethers } = require("hardhat");
+const { ethers, network } = require("hardhat");
 
 async function main() {
   const [deployer] = await ethers.getSigners();
@@ -9,9 +9,12 @@ async function main() {
   // Configuration — update these for your deployment
   // ─────────────────────────────────────────────
 
-  // cUSD on Celo Mainnet: 0x765DE816845861e75A25fCA122bb6898B8B1282a
-  // cUSD on Alfajores:    0x874069Fa1Eb16D44d622F2e0Ca25eeA172369bC1
-  const CUSD_ADDRESS = process.env.CUSD_ADDRESS || "0x765DE816845861e75A25fCA122bb6898B8B1282a";
+  // USDM (Mountain Protocol) on Celo Mainnet: 0x59D9356E565Ab3A36dD77763Fc0d87fEaf85508C
+  let defaultUSDM = "0x59D9356E565Ab3A36dD77763Fc0d87fEaf85508C";
+  if (network.name === "alfajores") {
+    defaultUSDM = "0x874069Fa1Eb16D44d622F2e0Ca25eeA172369bC1"; // Alfajores testnet token
+  }
+  const USDM_ADDRESS = process.env.USDM_ADDRESS || defaultUSDM;
   
   // Score verifier: the backend address that signs score attestations
   const SCORE_VERIFIER = process.env.SCORE_VERIFIER || deployer.address;
@@ -26,7 +29,7 @@ async function main() {
   const SCORE_THRESHOLD = process.env.SCORE_THRESHOLD || 5000;
 
   console.log("\n─── Configuration ───");
-  console.log("cUSD Address:     ", CUSD_ADDRESS);
+  console.log("USDm Address:     ", USDM_ADDRESS);
   console.log("Score Verifier:   ", SCORE_VERIFIER);
   console.log("Fee Recipient:    ", FEE_RECIPIENT);
   console.log("Treasury:         ", TREASURY);
@@ -39,7 +42,7 @@ async function main() {
   console.log("1/3 Deploying CeloFlashTournament...");
   const Tournament = await ethers.getContractFactory("CeloFlashTournament");
   const tournament = await Tournament.deploy(
-    CUSD_ADDRESS,
+    USDM_ADDRESS,
     SCORE_VERIFIER,
     FEE_RECIPIENT
   );
@@ -53,7 +56,7 @@ async function main() {
   console.log("2/3 Deploying CeloFlashStore...");
   const Store = await ethers.getContractFactory("CeloFlashStore");
   const store = await Store.deploy(
-    CUSD_ADDRESS,
+    USDM_ADDRESS,
     FEE_RECIPIENT
   );
   await store.waitForDeployment();
