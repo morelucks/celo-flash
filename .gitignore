@@ -1,3 +1,11 @@
+# Hardhat / Contract
+contract/artifacts/
+contract/cache/
+contract/node_modules/
+contract/typechain-types/
+.env
+.env.local
+
 # Logs
 logs
 *.log
