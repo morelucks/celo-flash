@@ -145,7 +145,7 @@ export const GameStateProvider = ({ children }) => {
     return true;
   };
 
-  const createTournament = (name, entryFee, prizePool, durationHours) => {
+  const createTournament = (name, entryFee, prizePool, durationHours, assetType = 'USDm') => {
     const newTourney = {
       id: `tourney-${Date.now()}`,
       title: name,
@@ -153,10 +153,11 @@ export const GameStateProvider = ({ children }) => {
       entry: Number(entryFee),
       pot: Number(prizePool),
       ends: `${durationHours}h`,
-      emoji: '🏆',
-      avatarClass: 'bg-avatar-gold',
+      emoji: assetType === 'CELO' ? '🍀' : '🏆',
+      avatarClass: assetType === 'CELO' ? 'bg-avatar-blue' : 'bg-avatar-gold',
       highScore: 0,
-      isUserCreated: true
+      isUserCreated: true,
+      assetType: assetType
     };
     setTournaments(prev => [newTourney, ...prev]);
   };

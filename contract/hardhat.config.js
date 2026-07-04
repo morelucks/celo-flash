@@ -31,10 +31,13 @@ module.exports = {
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
     },
   },
+  sourcify: {
+    enabled: true
+  },
   etherscan: {
     apiKey: {
-      celo: process.env.CELOSCAN_API_KEY || "",
-      alfajores: process.env.CELOSCAN_API_KEY || "",
+      celo: process.env.CELOSCAN_API_KEY || "CELOSCAN_API_KEY",
+      alfajores: process.env.CELOSCAN_API_KEY || "CELOSCAN_API_KEY",
     },
     customChains: [
       {

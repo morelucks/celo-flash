@@ -1,4 +1,4 @@
-const { ethers } = require("hardhat");
+const { ethers, network } = require("hardhat");
 
 async function main() {
   const [deployer] = await ethers.getSigners();
@@ -9,9 +9,12 @@ async function main() {
   // Configuration — update these for your deployment
   // ─────────────────────────────────────────────
 
-  // USDm (Mento / USDm) on Celo Mainnet: 0x765DE816845861e75A25fCA122bb6898B8B1282a
-  // USDm (Mento / USDm) on Alfajores:    0x874069Fa1Eb16D44d622F2e0Ca25eeA172369bC1
-  const USDM_ADDRESS = process.env.USDM_ADDRESS || process.env.USDM_ADDRESS || "0x765DE816845861e75A25fCA122bb6898B8B1282a";
+  // USDM (Mountain Protocol) on Celo Mainnet: 0x59D9356E565Ab3A36dD77763Fc0d87fEaf85508C
+  let defaultUSDM = "0x59D9356E565Ab3A36dD77763Fc0d87fEaf85508C";
+  if (network.name === "alfajores") {
+    defaultUSDM = "0x874069Fa1Eb16D44d622F2e0Ca25eeA172369bC1"; // Alfajores testnet token
+  }
+  const USDM_ADDRESS = process.env.USDM_ADDRESS || defaultUSDM;
   
   // Score verifier: the backend address that signs score attestations
   const SCORE_VERIFIER = process.env.SCORE_VERIFIER || deployer.address;

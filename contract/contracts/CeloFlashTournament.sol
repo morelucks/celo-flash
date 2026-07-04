@@ -12,10 +12,9 @@ import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/Messa
 /**
  * @title CeloFlashTournament
  * @author CeloFlash Team
- * @notice Manages USDm (USDm) -powered tournaments for the Celo Flash arcade game.
+ * @notice Manages USDm and native CELO -powered tournaments for the Celo Flash arcade game.
  *         Players pay entry fees, submit server-attested scores, and winners
- *         claim prize pool shares. All monetary values use an ERC-20 stablecoin
- *         (e.g. USDm on Celo).
+ *         claim prize pool shares.
  *
  * @dev Security features:
  *   - ReentrancyGuard on all external state-mutating functions
@@ -67,12 +66,13 @@ contract CeloFlashTournament is ReentrancyGuard, Ownable, Pausable {
         uint256 id;
         address creator;
         string name;
-        uint256 entryFee;       // in stablecoin (18 decimals)
+        uint256 entryFee;       // in stablecoin or CELO (18 decimals)
         uint256 prizePool;      // total pot including seed + entries
         uint256 seedAmount;     // initial prize seed from creator
         uint256 startTime;
         uint256 endTime;
         uint256 participantCount;
+        bool isNative;          // true = CELO, false = USDm
         TournamentStatus status;
         address winner;
         uint256 winningScore;
@@ -97,8 +97,11 @@ contract CeloFlashTournament is ReentrancyGuard, Ownable, Pausable {
     /// @notice Protocol fee recipient
     address public feeRecipient;
 
-    /// @notice Accumulated protocol fees available for withdrawal
+    /// @notice Accumulated protocol fees available for withdrawal (USDm)
     uint256 public accumulatedFees;
+
+    /// @notice Accumulated protocol fees available for withdrawal (Native CELO)
+    uint256 public accumulatedNativeFees;
 
     /// @notice Incrementing tournament ID
     uint256 public nextTournamentId;
@@ -132,7 +135,8 @@ contract CeloFlashTournament is ReentrancyGuard, Ownable, Pausable {
         uint256 entryFee,
         uint256 seedAmount,
         uint256 startTime,
-        uint256 endTime
+        uint256 endTime,
+        bool isNative
     );
 
     event TournamentJoined(
@@ -162,7 +166,7 @@ contract CeloFlashTournament is ReentrancyGuard, Ownable, Pausable {
         uint256 amount
     );
 
-    event FeesWithdrawn(address indexed recipient, uint256 amount);
+    event FeesWithdrawn(address indexed recipient, uint256 amount, bool isNative);
 
     event ScoreVerifierUpdated(address indexed oldVerifier, address indexed newVerifier);
 
@@ -187,6 +191,7 @@ contract CeloFlashTournament is ReentrancyGuard, Ownable, Pausable {
     error NoPrizeToClaim();
     error NoFeesToWithdraw();
     error EmptyName();
+    error InvalidValueSent();
 
     // ─────────────────────────────────────────────
     //  Constructor
@@ -218,24 +223,31 @@ contract CeloFlashTournament is ReentrancyGuard, Ownable, Pausable {
     /**
      * @notice Create a new tournament with an optional prize seed.
      * @param _name         Human-readable tournament name
-     * @param _entryFee     Entry fee per player (in stablecoin, 18 dec)
+     * @param _entryFee     Entry fee per player
      * @param _seedAmount   Initial prize pool seed from creator
      * @param _durationSecs Tournament duration in seconds
+     * @param _isNative     True if tournament is CELO based, false if USDm
      * @return tournamentId The ID of the newly created tournament
      */
     function createTournament(
         string calldata _name,
         uint256 _entryFee,
         uint256 _seedAmount,
-        uint256 _durationSecs
-    ) external nonReentrant whenNotPaused returns (uint256 tournamentId) {
+        uint256 _durationSecs,
+        bool _isNative
+    ) external payable nonReentrant whenNotPaused returns (uint256 tournamentId) {
         if (bytes(_name).length == 0) revert EmptyName();
         if (_entryFee > MAX_ENTRY_FEE) revert InvalidEntryFee();
         if (_durationSecs < MIN_DURATION || _durationSecs > MAX_DURATION) revert InvalidDuration();
 
-        // Transfer seed amount from creator
-        if (_seedAmount > 0) {
-            stablecoin.safeTransferFrom(msg.sender, address(this), _seedAmount);
+        // Handle seed funding
+        if (_isNative) {
+            if (msg.value != _seedAmount) revert InvalidValueSent();
+        } else {
+            if (msg.value != 0) revert InvalidValueSent();
+            if (_seedAmount > 0) {
+                stablecoin.safeTransferFrom(msg.sender, address(this), _seedAmount);
+            }
         }
 
         tournamentId = nextTournamentId++;
@@ -253,6 +265,7 @@ contract CeloFlashTournament is ReentrancyGuard, Ownable, Pausable {
             startTime: startTime,
             endTime: endTime,
             participantCount: 0,
+            isNative: _isNative,
             status: TournamentStatus.Active,
             winner: address(0),
             winningScore: 0
@@ -265,7 +278,8 @@ contract CeloFlashTournament is ReentrancyGuard, Ownable, Pausable {
             _entryFee,
             _seedAmount,
             startTime,
-            endTime
+            endTime,
+            _isNative
         );
     }
 
@@ -275,6 +289,7 @@ contract CeloFlashTournament is ReentrancyGuard, Ownable, Pausable {
      */
     function joinTournament(uint256 _tournamentId)
         external
+        payable
         nonReentrant
         whenNotPaused
     {
@@ -292,10 +307,18 @@ contract CeloFlashTournament is ReentrancyGuard, Ownable, Pausable {
             uint256 protocolFee = (t.entryFee * PROTOCOL_FEE_BPS) / BPS_DENOMINATOR;
             uint256 prizeContribution = t.entryFee - protocolFee;
 
-            stablecoin.safeTransferFrom(msg.sender, address(this), t.entryFee);
-
-            t.prizePool += prizeContribution;
-            accumulatedFees += protocolFee;
+            if (t.isNative) {
+                if (msg.value != t.entryFee) revert InvalidValueSent();
+                t.prizePool += prizeContribution;
+                accumulatedNativeFees += protocolFee;
+            } else {
+                if (msg.value != 0) revert InvalidValueSent();
+                stablecoin.safeTransferFrom(msg.sender, address(this), t.entryFee);
+                t.prizePool += prizeContribution;
+                accumulatedFees += protocolFee;
+            }
+        } else {
+            if (msg.value != 0) revert InvalidValueSent();
         }
 
         emit TournamentJoined(_tournamentId, msg.sender, t.entryFee);
@@ -303,8 +326,6 @@ contract CeloFlashTournament is ReentrancyGuard, Ownable, Pausable {
 
     /**
      * @notice Submit a game score with server-signed attestation.
-     * @dev The score verifier backend signs (tournamentId, player, score, nonce)
-     *      to prevent frontrunning and cheating.
      * @param _tournamentId  Tournament ID
      * @param _score         The game score
      * @param _nonce         Unique nonce for replay protection
@@ -343,8 +364,6 @@ contract CeloFlashTournament is ReentrancyGuard, Ownable, Pausable {
 
     /**
      * @notice Finalize a tournament after it has ended.
-     *         Distributes prizes: 60% to 1st, 25% to 2nd, 15% to 3rd.
-     *         Anyone can call this after the tournament ends.
      * @param _tournamentId The tournament to finalize
      */
     function finalizeTournament(uint256 _tournamentId)
@@ -412,7 +431,6 @@ contract CeloFlashTournament is ReentrancyGuard, Ownable, Pausable {
 
     /**
      * @notice Cancel a tournament (only creator or owner, only before finalization).
-     *         Refunds all entry fees to participants.
      * @param _tournamentId The tournament to cancel
      */
     function cancelTournament(uint256 _tournamentId)
@@ -427,19 +445,26 @@ contract CeloFlashTournament is ReentrancyGuard, Ownable, Pausable {
 
         // Refund seed to creator
         if (t.seedAmount > 0) {
-            stablecoin.safeTransfer(t.creator, t.seedAmount);
+            if (t.isNative) {
+                (bool success, ) = t.creator.call{value: t.seedAmount}("");
+                require(success, "NativeTransferFailed");
+            } else {
+                stablecoin.safeTransfer(t.creator, t.seedAmount);
+            }
         }
 
         // Return protocol fees from cancelled tournament entries
         uint256 protocolFeesFromEntries = (t.entryFee * t.participantCount * PROTOCOL_FEE_BPS) / BPS_DENOMINATOR;
 
-        if (protocolFeesFromEntries <= accumulatedFees) {
-            accumulatedFees -= protocolFeesFromEntries;
+        if (t.isNative) {
+            if (protocolFeesFromEntries <= accumulatedNativeFees) {
+                accumulatedNativeFees -= protocolFeesFromEntries;
+            }
+        } else {
+            if (protocolFeesFromEntries <= accumulatedFees) {
+                accumulatedFees -= protocolFeesFromEntries;
+            }
         }
-
-        // Note: Individual refunds use pull pattern via claimRefund
-        // We set each participant's claimable to their entry fee
-        // This is handled by claimRefund reading cancelled status
 
         emit TournamentCancelled(_tournamentId);
     }
@@ -471,7 +496,12 @@ contract CeloFlashTournament is ReentrancyGuard, Ownable, Pausable {
         }
 
         if (amount > 0) {
-            stablecoin.safeTransfer(msg.sender, amount);
+            if (t.isNative) {
+                (bool success, ) = msg.sender.call{value: amount}("");
+                require(success, "NativeTransferFailed");
+            } else {
+                stablecoin.safeTransfer(msg.sender, amount);
+            }
         }
 
         emit PrizeClaimed(_tournamentId, msg.sender, amount);
@@ -549,10 +579,22 @@ contract CeloFlashTournament is ReentrancyGuard, Ownable, Pausable {
      */
     function withdrawFees() external nonReentrant {
         uint256 amount = accumulatedFees;
-        if (amount == 0) revert NoFeesToWithdraw();
-        accumulatedFees = 0;
-        stablecoin.safeTransfer(feeRecipient, amount);
-        emit FeesWithdrawn(feeRecipient, amount);
+        uint256 nativeAmount = accumulatedNativeFees;
+
+        if (amount == 0 && nativeAmount == 0) revert NoFeesToWithdraw();
+
+        if (amount > 0) {
+            accumulatedFees = 0;
+            stablecoin.safeTransfer(feeRecipient, amount);
+            emit FeesWithdrawn(feeRecipient, amount, false);
+        }
+
+        if (nativeAmount > 0) {
+            accumulatedNativeFees = 0;
+            (bool success, ) = feeRecipient.call{value: nativeAmount}("");
+            require(success, "NativeTransferFailed");
+            emit FeesWithdrawn(feeRecipient, nativeAmount, true);
+        }
     }
 
     /**
@@ -630,5 +672,10 @@ contract CeloFlashTournament is ReentrancyGuard, Ownable, Pausable {
                 lb[j] = key;
             }
         }
+    }
+
+    // Fallback and Receive
+    receive() external payable {
+        revert("Use joinTournament or createTournament to send native CELO");
     }
 }
