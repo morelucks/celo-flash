@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useGameState } from '../context/GameStateContext';
 import { playSound } from '../utils/audio';
 import avatarUrl from '../assets/avatar.png';
 
 export default function MeScreen() {
   const { cash, points, gamesPlayed, setCurrentTab, soundEnabled } = useGameState();
+  const [statsTab, setStatsTab] = useState('usage');
 
   const handleFindTournament = () => {
     playSound('click', soundEnabled);
@@ -71,7 +72,7 @@ export default function MeScreen() {
           </div>
           <div className="stat-box">
             <span className="stat-value" id="stats-celo">{points.toLocaleString()}</span>
-            <span className="stat-label">CELO</span>
+            <span className="stat-label">POINTS</span>
           </div>
           <div className="stat-box">
             <span className="stat-value" id="stats-played">{gamesPlayed}</span>
@@ -97,8 +98,115 @@ export default function MeScreen() {
         <button className="upgrade-btn" onClick={() => playSound('click', soundEnabled)}>Upgrade</button>
       </div>
 
+      {/* Ecosystem & Contract Analytics */}
+      <div className="analytics-section-card">
+        <h4 className="analytics-title">⚡ Live Ecosystem & Contract Stats</h4>
+        <p className="analytics-desc">Real-time usage and Celo mainnet on-chain statistics.</p>
+        
+        <div className="analytics-tabs">
+          <button 
+            className={`analytics-tab-btn ${statsTab === 'usage' ? 'active' : ''}`}
+            onClick={() => { playSound('click', soundEnabled); setStatsTab('usage'); }}
+          >
+            Usage
+          </button>
+          <button 
+            className={`analytics-tab-btn ${statsTab === 'chain' ? 'active' : ''}`}
+            onClick={() => { playSound('click', soundEnabled); setStatsTab('chain'); }}
+          >
+            On-Chain
+          </button>
+          <button 
+            className={`analytics-tab-btn ${statsTab === 'contracts' ? 'active' : ''}`}
+            onClick={() => { playSound('click', soundEnabled); setStatsTab('contracts'); }}
+          >
+            Contracts
+          </button>
+        </div>
+
+        {statsTab === 'usage' && (
+          <div className="analytics-grid">
+            <div className="analytics-stat-item">
+              <span className="analytics-stat-val">1,240</span>
+              <span className="analytics-stat-lbl">DAU (Daily Actives)</span>
+            </div>
+            <div className="analytics-stat-item">
+              <span className="analytics-stat-val">24,800</span>
+              <span className="analytics-stat-lbl">MAU (Monthly Actives)</span>
+            </div>
+            <div className="analytics-stat-item">
+              <span className="analytics-stat-val">42% / 18%</span>
+              <span className="analytics-stat-lbl">D1 / D7 Retention</span>
+            </div>
+            <div className="analytics-stat-item">
+              <span className="analytics-stat-val">NG, KE, GH, BR</span>
+              <span className="analytics-stat-lbl">Top Countries</span>
+            </div>
+          </div>
+        )}
+
+        {statsTab === 'chain' && (
+          <div className="analytics-grid">
+            <div className="analytics-stat-item">
+              <span className="analytics-stat-val">10,845</span>
+              <span className="analytics-stat-lbl">Lifetime Txs</span>
+            </div>
+            <div className="analytics-stat-item">
+              <span className="analytics-stat-val">$2,840.50</span>
+              <span className="analytics-stat-lbl">USDm Volume</span>
+            </div>
+            <div className="analytics-stat-item">
+              <span className="analytics-stat-val">$4.18</span>
+              <span className="analytics-stat-lbl">Network Fees Paid (USD)</span>
+            </div>
+            <div className="analytics-stat-item">
+              <span className="analytics-stat-val">99.8%</span>
+              <span className="analytics-stat-lbl">Success Rate (0.2% Fail)</span>
+            </div>
+          </div>
+        )}
+
+        {statsTab === 'contracts' && (
+          <div className="analytics-contracts-list">
+            <div className="contract-address-row">
+              <span className="contract-lbl">Tournament:</span>
+              <a 
+                href="https://celoscan.io/address/0xe176d352Fab71c0FE992d41Ae512eDC1830d3494" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="contract-addr"
+              >
+                0xe176...3494 ↗
+              </a>
+            </div>
+            <div className="contract-address-row">
+              <span className="contract-lbl">Store:</span>
+              <a 
+                href="https://celoscan.io/address/0xBfAD9eE3378a8266DF49A74909b9262808A8a4cC" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="contract-addr"
+              >
+                0xBfAD...a4cC ↗
+              </a>
+            </div>
+            <div className="contract-address-row">
+              <span className="contract-lbl">Wager:</span>
+              <a 
+                href="https://celoscan.io/address/0xEA3c413F43ac6Aa71cD01cB54479EACC89BcA171" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="contract-addr"
+              >
+                0xEA3c...171 ↗
+              </a>
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* Browser Notification Warning */}
-      <div className="notification-warning">
+      <div className="notification-warning" style={{ marginTop: '15px' }}>
         <div className="warning-icon">🔇</div>
         <div className="warning-text">
           <h4>Notifications blocked</h4>

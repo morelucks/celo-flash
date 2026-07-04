@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useGameState } from '../context/GameStateContext';
 import { playSound } from '../utils/audio';
+import { isMiniPay, redirectToDeposit } from '../utils/minipay';
 
 export default function SwapModal({ isOpen, onClose }) {
   const { cash, setCash, points, setPoints, soundEnabled } = useGameState();
@@ -22,10 +23,14 @@ export default function SwapModal({ isOpen, onClose }) {
       setCash(prev => Number((prev - val).toFixed(2)));
       setPoints(prev => prev + expectedCelo);
       playSound('victory', soundEnabled);
-      alert(`Successfully swapped $${val.toFixed(2)} USDm for ${expectedCelo} $CELO!`);
+      alert(`Successfully swapped $${val.toFixed(2)} USDm for ${expectedCelo} Points!`);
       onClose();
     } else {
-      alert("Insufficient USDm balance!");
+      if (isMiniPay()) {
+        redirectToDeposit();
+      } else {
+        alert("Insufficient USDm balance!");
+      }
     }
   };
 
@@ -33,7 +38,7 @@ export default function SwapModal({ isOpen, onClose }) {
     <div className="modal-overlay">
       <div className="modal-card">
         <div className="modal-header">
-          <h3>Swap USDm to $CELO</h3>
+          <h3>Swap USDm to Points</h3>
           <button className="close-modal-btn" onClick={() => { playSound('click', soundEnabled); onClose(); }}>&times;</button>
         </div>
         <div className="modal-body">
@@ -55,7 +60,7 @@ export default function SwapModal({ isOpen, onClose }) {
             </div>
             <div>
               <span>You Receive:</span>
-              <strong className="gold-text">✨ {expectedCelo} $CELO</strong>
+              <strong className="gold-text">✨ {expectedCelo} Points</strong>
             </div>
           </div>
           <button className="modal-submit-btn" onClick={handleSwap} style={{ marginTop: '20px' }}>
@@ -66,3 +71,4 @@ export default function SwapModal({ isOpen, onClose }) {
     </div>
   );
 }
+

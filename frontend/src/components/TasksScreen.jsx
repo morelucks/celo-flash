@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useGameState } from '../context/GameStateContext';
 import { playSound } from '../utils/audio';
+import { isMiniPay, redirectToDeposit } from '../utils/minipay';
 
 export default function TasksScreen({ onOpenSwap }) {
   const { tasks, verifyTask, soundEnabled } = useGameState();
@@ -77,19 +78,26 @@ export default function TasksScreen({ onOpenSwap }) {
               </div>
             </div>
 
-            {/* Task 2: Buy $CELO */}
+            {/* Task 2: Hold Stablecoin USDm */}
             <div className="task-card" id="task-buy">
               <div className="task-info">
-                <h3 className="task-name">Buy $CELO Tokens</h3>
-                <p className="task-desc">Buy and hold at least 100 $CELO tokens.</p>
+                <h3 className="task-name">Hold Stablecoin USDm</h3>
+                <p className="task-desc">Deposit and hold at least 10 USDm in your wallet.</p>
                 <span className="task-reward">+100 Points</span>
               </div>
               <div className="task-actions">
                 <button 
                   className="task-btn go-btn" 
-                  onClick={() => { playSound('click', soundEnabled); onOpenSwap(); }}
+                  onClick={() => { 
+                    playSound('click', soundEnabled); 
+                    if (isMiniPay()) {
+                      redirectToDeposit();
+                    } else {
+                      onOpenSwap(); 
+                    }
+                  }}
                 >
-                  Buy
+                  Deposit
                 </button>
                 <button 
                   className={`task-btn verify-btn ${tasks.buy ? 'verified' : ''} ${loadingTask.buy ? 'loading' : ''}`}

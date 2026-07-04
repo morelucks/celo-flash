@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useGameState } from '../context/GameStateContext';
 import { playSound } from '../utils/audio';
+import { isMiniPay, redirectToDeposit } from '../utils/minipay';
 
 export default function StoreScreen() {
   const { 
@@ -34,7 +35,11 @@ export default function StoreScreen() {
       playSound('collect-green', soundEnabled);
       alert(`Purchased ${qtyMultiplier} Score Multipliers!`);
     } else {
-      alert("Insufficient funds! Buy more $CELO.");
+      if (isMiniPay()) {
+        redirectToDeposit();
+      } else {
+        alert("Insufficient USDm balance! Swap or deposit funds.");
+      }
     }
   };
 
@@ -46,7 +51,11 @@ export default function StoreScreen() {
       playSound('collect-green', soundEnabled);
       alert(`Daily Renewal activated! Playtime renewed.`);
     } else {
-      alert("Insufficient funds!");
+      if (isMiniPay()) {
+        redirectToDeposit();
+      } else {
+        alert("Insufficient USDm balance! Swap or deposit funds.");
+      }
     }
   };
 
@@ -63,7 +72,11 @@ export default function StoreScreen() {
       playSound('collect-green', soundEnabled);
       alert("Success! Purchased Magnet, Shield, and Clock powerups.");
     } else {
-      alert("Insufficient funds!");
+      if (isMiniPay()) {
+        redirectToDeposit();
+      } else {
+        alert("Insufficient USDm balance! Swap or deposit funds.");
+      }
     }
   };
 
@@ -75,9 +88,14 @@ export default function StoreScreen() {
       playSound('victory', soundEnabled);
       alert(`Theme successfully unlocked! Avatar changed to ${spawnerType}.`);
     } else {
-      alert("Insufficient funds!");
+      if (isMiniPay()) {
+        redirectToDeposit();
+      } else {
+        alert("Insufficient USDm balance! Swap or deposit funds.");
+      }
     }
   };
+
 
   return (
     <div className="screen active" id="screen-store">

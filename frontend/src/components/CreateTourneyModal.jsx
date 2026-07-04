@@ -5,7 +5,7 @@ import { playSound } from '../utils/audio';
 export default function CreateTourneyModal({ isOpen, onClose }) {
   const { createTournament, soundEnabled } = useGameState();
   const [name, setName] = useState('');
-  const [assetType, setAssetType] = useState('USDm'); // 'USDm' or 'CELO'
+  const [assetType, setAssetType] = useState('USDm'); // 'USDm' or 'USDT'
   const [entry, setEntry] = useState('0.5');
   const [pool, setPool] = useState('50');
   const [duration, setDuration] = useState('24');
@@ -52,11 +52,11 @@ export default function CreateTourneyModal({ isOpen, onClose }) {
               onChange={(e) => setAssetType(e.target.value)}
             >
               <option value="USDm">USDm (Stablecoin)</option>
-              <option value="CELO">CELO (Native Token)</option>
+              <option value="USDT">USDT (Stablecoin)</option>
             </select>
           </div>
           <div className="form-group">
-            <label htmlFor="tourney-entry">Entry Fee ({assetType === 'CELO' ? 'CELO' : '$'})</label>
+            <label htmlFor="tourney-entry">Entry Fee ({assetType === 'USDT' ? 'USDT' : '$'})</label>
             <input 
               type="number" 
               id="tourney-entry" 
@@ -67,7 +67,7 @@ export default function CreateTourneyModal({ isOpen, onClose }) {
             />
           </div>
           <div className="form-group">
-            <label htmlFor="tourney-pool">Prize Pool ({assetType === 'CELO' ? 'CELO' : '$'})</label>
+            <label htmlFor="tourney-pool">Prize Pool ({assetType === 'USDT' ? 'USDT' : '$'})</label>
             <input 
               type="number" 
               id="tourney-pool" 

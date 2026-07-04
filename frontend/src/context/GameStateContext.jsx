@@ -134,7 +134,6 @@ export const GameStateProvider = ({ children }) => {
     }));
     return true;
   };
-
   const buySpawner = (spawnerType, cost) => {
     if (cash < cost) {
       alert("Insufficient USDm cash balance!");
@@ -153,8 +152,8 @@ export const GameStateProvider = ({ children }) => {
       entry: Number(entryFee),
       pot: Number(prizePool),
       ends: `${durationHours}h`,
-      emoji: assetType === 'CELO' ? '🍀' : '🏆',
-      avatarClass: assetType === 'CELO' ? 'bg-avatar-blue' : 'bg-avatar-gold',
+      emoji: assetType === 'USDT' ? '🍀' : '🏆',
+      avatarClass: assetType === 'USDT' ? 'bg-avatar-blue' : 'bg-avatar-gold',
       highScore: 0,
       isUserCreated: true,
       assetType: assetType
