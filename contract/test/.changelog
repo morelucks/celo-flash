@@ -41,3 +41,4 @@
 ## Step 40: test: confirm second finalizeTournament call reverts
 ## Step 41: test: add before-endTime check assertion
 ## Step 42: test: clean up revert guard test indentation
+## Step 43: test: add inline jsdoc to signScore helper
