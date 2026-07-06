@@ -103,3 +103,4 @@
 ## Step 102: test: 0-scores case - iteration 32 confirm no winner set
 ## Step 103: test: 0-scores case - iteration 33 confirm no score set
 ## Step 104: test: 0-scores case - iteration 34 check prizePool integrity
+## Step 105: test: 0-scores case - iteration 35 check accumulatedFees unaffected
