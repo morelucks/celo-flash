@@ -14,3 +14,4 @@
 ## Step 13: test: declare shared fixture variables
 ## Step 14: test: add beforeEach deploy MockERC20 step
 ## Step 15: test: add beforeEach deploy CeloFlashTournament step
+## Step 16: test: mint tokens to all players in beforeEach
