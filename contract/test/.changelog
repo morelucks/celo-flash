@@ -53,3 +53,4 @@
 ## Step 52: test: revert-guard iteration 22 - confirm status stays Active before finalize
 ## Step 53: test: revert-guard iteration 23 - add expect chain for TournamentNotEnded
 ## Step 54: test: revert-guard iteration 24 - add expect chain for AlreadyFinalized
+## Step 55: test: revert-guard iteration 25 - add describe label for revert section
