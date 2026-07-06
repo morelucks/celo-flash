@@ -290,6 +290,7 @@ export default function CanvasGame({ onGameEnd }) {
             ctx.stroke();
 
             // Preparing canvas rendering context for scaling official Celo logo path
+            const scaleFactor = (item.size * 2) / 250;
             ctx.lineWidth = 2.4;
             ctx.beginPath();
             ctx.arc(-item.size * 0.18, 0, item.size * 0.32, 0, Math.PI * 2);
