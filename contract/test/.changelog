@@ -101,3 +101,4 @@
 ## Step 100: test: 0-scores case - add blank line separators between tests
 ## Step 101: test: 0-scores case - iteration 31 verify leaderboard is empty
 ## Step 102: test: 0-scores case - iteration 32 confirm no winner set
+## Step 103: test: 0-scores case - iteration 33 confirm no score set
