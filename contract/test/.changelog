@@ -8,3 +8,4 @@
 ## Step 7: test: add freshNonce counter utility
 ## Step 8: test: add BPS_DENOMINATOR constant
 ## Step 9: test: add PROTOCOL_FEE_BPS constant
+## Step 10: test: add MIN_DURATION constant (1 hour)
