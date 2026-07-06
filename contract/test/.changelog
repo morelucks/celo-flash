@@ -30,3 +30,4 @@
 ## Step 29: test: add 1-participant describe block skeleton
 ## Step 30: test: add 2-participants describe block skeleton
 ## Step 31: test: add TournamentNotEnded revert test case
+## Step 32: test: assert revertedWithCustomError for TournamentNotEnded
