@@ -21,3 +21,4 @@
 ## Step 20: test: add entryFee default param to createTournament helper
 ## Step 21: test: add durationSecs param to createTournament helper
 ## Step 22: test: add seedAmount param to createTournament helper
+## Step 23: test: add creator param to createTournament helper
