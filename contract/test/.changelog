@@ -18,3 +18,4 @@
 ## Step 17: test: approve max allowance for all players in beforeEach
 ## Step 18: test: approve owner allowance and mint tokens in beforeEach
 ## Step 19: test: implement createTournament helper function
+## Step 20: test: add entryFee default param to createTournament helper
