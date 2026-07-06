@@ -44,3 +44,4 @@
 ## Step 43: test: add inline jsdoc to signScore helper
 ## Step 44: test: add inline jsdoc to createTournament helper
 ## Step 45: test: add inline jsdoc to joinAndScore helper
+## Step 46: test: add inline jsdoc to endAndFinalize helper
