@@ -40,7 +40,7 @@ export default function GameScreen({ onOpenShop }) {
     // Deduct wager if applicable
     if (difficulty.includes('wager')) {
       if (points < 10) {
-        alert("Insufficient $CELO Points balance! Wager costs 10 $CELO.");
+        alert("Insufficient Points balance! Wager costs 10 Points.");
         return;
       }
       setPoints(prev => prev - 10);
@@ -154,7 +154,7 @@ export default function GameScreen({ onOpenShop }) {
         {showStartOverlay && (
           <div className="game-overlay" id="game-start-overlay">
             <img src={logoUrl} alt="Celo Flash Logo" className="game-start-logo" />
-            <p className="game-rules">Collect CELOs <span className="celo-dot"></span> • Avoid bombs 💣</p>
+            <p className="game-rules">Collect Gold Coins <span className="celo-dot"></span> • Avoid bombs 💣</p>
             
             <div className="difficulty-wrapper">
               <label htmlFor="difficulty-select" className="difficulty-label">Select Mode:</label>
@@ -166,8 +166,8 @@ export default function GameScreen({ onOpenShop }) {
               >
                 <option value="easy">Free • Easy</option>
                 <option value="hard">Free • Hard</option>
-                <option value="wager-easy">Wager 10 $CELO • Easy</option>
-                <option value="wager-hard">Wager 10 $CELO • Hard</option>
+                <option value="wager-easy">Wager 10 Points • Easy</option>
+                <option value="wager-hard">Wager 10 Points • Hard</option>
               </select>
             </div>
 

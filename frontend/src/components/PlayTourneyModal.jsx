@@ -1,6 +1,7 @@
 import React from 'react';
 import { useGameState } from '../context/GameStateContext';
 import { playSound } from '../utils/audio';
+import { isMiniPay, redirectToDeposit } from '../utils/minipay';
 
 export default function PlayTourneyModal({ isOpen, onClose, onStartGame }) {
   const { 
@@ -25,9 +26,14 @@ export default function PlayTourneyModal({ isOpen, onClose, onStartGame }) {
         onStartGame(selectedTourney);
       }, 100);
     } else {
-      alert("Insufficient USDm cash balance! Add funds or top up.");
+      if (isMiniPay()) {
+        redirectToDeposit();
+      } else {
+        alert("Insufficient USDm cash balance! Add funds or top up.");
+      }
     }
   };
+
 
   return (
     <div className="modal-overlay">

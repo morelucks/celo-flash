@@ -2,6 +2,8 @@ import React from 'react';
 import { useGameState } from '../context/GameStateContext';
 import { playSound } from '../utils/audio';
 
+import { isMiniPay } from '../utils/minipay';
+
 export default function Header({ onOpenSwap }) {
   const { points, cash, soundEnabled, setSoundEnabled } = useGameState();
 
@@ -11,6 +13,8 @@ export default function Header({ onOpenSwap }) {
     // Play sound immediately after enabling to verify
     playSound('click', nextSound);
   };
+
+  const isRunningInMiniPay = isMiniPay();
 
   return (
     <>
@@ -39,6 +43,9 @@ export default function Header({ onOpenSwap }) {
           </div>
         </div>
         <div className="app-actions">
+          {isRunningInMiniPay && (
+            <span className="minipay-indicator-badge">⚡ MiniPay Active</span>
+          )}
           <button 
             className="action-btn" 
             onClick={handleSoundToggle} 
@@ -63,7 +70,7 @@ export default function Header({ onOpenSwap }) {
       {/* Token / Balance Info Bar */}
       <div className="balance-bar">
         <button className="balance-action buy-celo-btn" onClick={onOpenSwap}>
-          <span className="plus-icon">+</span> BUY $CELO
+          <span className="plus-icon">+</span> Swap
         </button>
         <span className="balance-pill fee-pill">🟢 FREE</span>
         <span className="balance-pill points-pill">✨ <span>{points.toLocaleString()}</span></span>
