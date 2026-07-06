@@ -73,3 +73,4 @@
 ## Step 72: test: 0-scores case - assert winner is ZeroAddress
 ## Step 73: test: 0-scores case - assert prizeAmount is 0
 ## Step 74: test: 0-scores case - add withArgs to emit assertion
+## Step 75: test: 0-scores case - add status Finalized test
