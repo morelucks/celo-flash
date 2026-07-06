@@ -29,3 +29,4 @@
 ## Step 28: test: add 0-scores describe block skeleton
 ## Step 29: test: add 1-participant describe block skeleton
 ## Step 30: test: add 2-participants describe block skeleton
+## Step 31: test: add TournamentNotEnded revert test case
