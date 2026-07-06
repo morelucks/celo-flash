@@ -37,3 +37,4 @@
 ## Step 36: test: add comment explaining revert guard section
 ## Step 37: test: refactor revert test to use createTournament helper
 ## Step 38: test: verify finalizeTournament is callable after endTime
+## Step 39: test: confirm first finalizeTournament call succeeds
