@@ -33,3 +33,4 @@
 ## Step 32: test: assert revertedWithCustomError for TournamentNotEnded
 ## Step 33: test: add TournamentAlreadyFinalized double-finalization test
 ## Step 34: test: fast-forward time in double-finalization test
+## Step 35: test: assert second finalize call reverts AlreadyFinalized
