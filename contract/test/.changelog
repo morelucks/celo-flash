@@ -70,3 +70,4 @@
 ## Step 69: test: revert-guard iteration 39 - code style cleanup in revert section
 ## Step 70: test: revert-guard iteration 40 - final sign-off on revert guards
 ## Step 71: test: 0-scores case - add emits event test
+## Step 72: test: 0-scores case - assert winner is ZeroAddress
