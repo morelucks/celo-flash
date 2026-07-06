@@ -98,3 +98,4 @@
 ## Step 97: test: 0-scores case - add joinTournament call to joined-no-score test
 ## Step 98: test: 0-scores case - assert no prize for player who joined but not scored
 ## Step 99: test: 0-scores case - guard tests with proper describe nesting
+## Step 100: test: 0-scores case - add blank line separators between tests
