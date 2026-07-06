@@ -16,3 +16,4 @@
 ## Step 15: test: add beforeEach deploy CeloFlashTournament step
 ## Step 16: test: mint tokens to all players in beforeEach
 ## Step 17: test: approve max allowance for all players in beforeEach
+## Step 18: test: approve owner allowance and mint tokens in beforeEach
