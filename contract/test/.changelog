@@ -58,3 +58,4 @@
 ## Step 57: test: revert-guard iteration 27 - add it label for double-finalize test
 ## Step 58: test: revert-guard iteration 28 - verify tournament id is valid in revert tests
 ## Step 59: test: revert-guard iteration 29 - add blank lines between revert tests
+## Step 60: test: revert-guard iteration 30 - final review of revert guard describe block
