@@ -77,3 +77,4 @@
 ## Step 76: test: 0-scores case - assert status equals 1n
 ## Step 77: test: 0-scores case - add winner address test
 ## Step 78: test: 0-scores case - assert winner is ZeroAddress post finalize
+## Step 79: test: 0-scores case - assert winningScore is 0 post finalize
