@@ -27,3 +27,4 @@
 ## Step 26: test: add endAndFinalize helper using time.increaseTo
 ## Step 27: test: add revert-guards describe block skeleton
 ## Step 28: test: add 0-scores describe block skeleton
+## Step 29: test: add 1-participant describe block skeleton
