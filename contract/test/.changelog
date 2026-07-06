@@ -80,3 +80,4 @@
 ## Step 79: test: 0-scores case - assert winningScore is 0 post finalize
 ## Step 80: test: 0-scores case - add comment for 0-scores section
 ## Step 81: test: 0-scores case - extract endTime from tournament struct
+## Step 82: test: 0-scores case - use time.increaseTo endTime plus 1
