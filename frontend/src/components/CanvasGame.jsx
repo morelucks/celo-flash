@@ -295,18 +295,9 @@ export default function CanvasGame({ onGameEnd }) {
             ctx.save();
             ctx.scale(scaleFactor, scaleFactor);
             ctx.translate(-125, -125);
+            ctx.fillStyle = '#000000';
+            ctx.fill(CELO_LOGO_PATH);
             ctx.restore();
-
-            ctx.lineWidth = 2.4;
-            ctx.beginPath();
-            ctx.arc(-item.size * 0.18, 0, item.size * 0.32, 0, Math.PI * 2);
-            ctx.strokeStyle = '#fcff52';
-            ctx.stroke();
-
-            ctx.beginPath();
-            ctx.arc(item.size * 0.18, 0, item.size * 0.32, 0, Math.PI * 2);
-            ctx.strokeStyle = '#06100c';
-            ctx.stroke();
           }
         } else if (item.type === 'green') {
           ctx.shadowColor = 'rgba(53, 208, 127, 0.4)';
