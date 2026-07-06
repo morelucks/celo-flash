@@ -90,3 +90,4 @@
 ## Step 89: test: 0-scores case - confirm no tokens transferred
 ## Step 90: test: 0-scores case - rename variables for clarity
 ## Step 91: test: 0-scores case - add helper variable t0 for initial state
+## Step 92: test: 0-scores case - add helper variable t1 for post-finalize state
