@@ -10,3 +10,4 @@
 ## Step 9: test: add PROTOCOL_FEE_BPS constant
 ## Step 10: test: add MIN_DURATION constant (1 hour)
 ## Step 11: test: add ONE_HOUR alias constant
+## Step 12: test: declare outer describe suite
