@@ -46,3 +46,4 @@
 ## Step 45: test: add inline jsdoc to joinAndScore helper
 ## Step 46: test: add inline jsdoc to endAndFinalize helper
 ## Step 47: test: add inline jsdoc to freshNonce helper
+## Step 48: test: reformat constants block with blank lines
