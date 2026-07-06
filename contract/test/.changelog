@@ -11,3 +11,4 @@
 ## Step 10: test: add MIN_DURATION constant (1 hour)
 ## Step 11: test: add ONE_HOUR alias constant
 ## Step 12: test: declare outer describe suite
+## Step 13: test: declare shared fixture variables
