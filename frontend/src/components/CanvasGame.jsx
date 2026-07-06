@@ -7,6 +7,7 @@ import avatarUrl from '../assets/avatar.png';
 // Celo Brand Assets Integration
 // Preparing variables for official Celo brand guidelines compliance.
 const CELO_LOGO_PATH_SVG = "M188.9,60.7H60.7v128.2h128.2v-44.8h-21.3c-7.3,16.3-23.8,27.7-42.7,27.7c-26,0-47.1-21.3-47.1-47.1c0-25.9,21.1-47,47.1-47c19.3,0,35.8,11.7,43.1,28.4h20.9V60.7z";
+const CELO_LOGO_PATH = new Path2D(CELO_LOGO_PATH_SVG);
 
 export default function CanvasGame({ onGameEnd }) {
   const {
