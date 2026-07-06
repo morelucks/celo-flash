@@ -84,3 +84,4 @@
 ## Step 83: test: 0-scores case - add expects for no leaderboard entries
 ## Step 84: test: 0-scores case - verify getLeaderboard returns empty array
 ## Step 85: test: 0-scores case - add describe label for 0 scores submitted
+## Step 86: test: 0-scores case - verify claimablePrize is 0 for all players
