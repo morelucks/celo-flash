@@ -107,3 +107,4 @@
 ## Step 106: test: 0-scores case - iteration 36 check status transition
 ## Step 107: test: 0-scores case - iteration 37 finalization with multiple joiners no score
 ## Step 108: test: 0-scores case - iteration 38 multiple joiners all have 0 claimable
+## Step 109: test: 0-scores case - iteration 39 verify event args for multi-joiner 0-score
