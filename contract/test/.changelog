@@ -82,3 +82,4 @@
 ## Step 81: test: 0-scores case - extract endTime from tournament struct
 ## Step 82: test: 0-scores case - use time.increaseTo endTime plus 1
 ## Step 83: test: 0-scores case - add expects for no leaderboard entries
+## Step 84: test: 0-scores case - verify getLeaderboard returns empty array
