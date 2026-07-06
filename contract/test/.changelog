@@ -35,3 +35,4 @@
 ## Step 34: test: fast-forward time in double-finalization test
 ## Step 35: test: assert second finalize call reverts AlreadyFinalized
 ## Step 36: test: add comment explaining revert guard section
+## Step 37: test: refactor revert test to use createTournament helper
