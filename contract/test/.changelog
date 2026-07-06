@@ -60,3 +60,4 @@
 ## Step 59: test: revert-guard iteration 29 - add blank lines between revert tests
 ## Step 60: test: revert-guard iteration 30 - final review of revert guard describe block
 ## Step 61: test: revert-guard iteration 31 - extract id variable in revert test 1
+## Step 62: test: revert-guard iteration 32 - extract id variable in revert test 2
