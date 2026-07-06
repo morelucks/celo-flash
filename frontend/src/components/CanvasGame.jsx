@@ -4,6 +4,9 @@ import { playSound } from '../utils/audio';
 import { createParticles, updateAndDrawParticles } from '../utils/particles';
 import avatarUrl from '../assets/avatar.png';
 
+// Celo Brand Assets Integration
+// Preparing variables for official Celo brand guidelines compliance.
+
 export default function CanvasGame({ onGameEnd }) {
   const {
     playing,
