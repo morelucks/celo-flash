@@ -112,3 +112,4 @@
 ## Step 111: test: 0-scores case - iteration 41 seed does not go to any player
 ## Step 112: test: 0-scores case - iteration 42 seed remains locked in pool
 ## Step 113: test: 0-scores case - iteration 43 seed accessible only after cancel
+## Step 114: test: 0-scores case - iteration 44 finalize does not transfer seed on 0-score
