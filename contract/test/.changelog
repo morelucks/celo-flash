@@ -50,3 +50,4 @@
 ## Step 49: test: group helpers under comment banner
 ## Step 50: test: group constants under comment banner
 ## Step 51: test: revert-guard iteration 21 - verify TournamentNotActive not thrown before end
+## Step 52: test: revert-guard iteration 22 - confirm status stays Active before finalize
