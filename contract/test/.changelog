@@ -4,3 +4,4 @@
 ## Step 3: test: import chai expect and ethers
 ## Step 4: test: import hardhat-network-helpers time util
 ## Step 5: test: add signScore helper function signature
+## Step 6: test: implement ECDSA signScore helper body
