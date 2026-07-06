@@ -24,3 +24,4 @@
 ## Step 23: test: add creator param to createTournament helper
 ## Step 24: test: parse TournamentCreated event in helper to extract id
 ## Step 25: test: implement joinAndScore helper function
+## Step 26: test: add endAndFinalize helper using time.increaseTo
