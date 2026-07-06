@@ -66,3 +66,4 @@
 ## Step 65: test: revert-guard iteration 35 - first finalize call assertion
 ## Step 66: test: revert-guard iteration 36 - second finalize call assertion
 ## Step 67: test: revert-guard iteration 37 - describe label alignment
+## Step 68: test: revert-guard iteration 38 - it label alignment
