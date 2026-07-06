@@ -113,3 +113,4 @@
 ## Step 112: test: 0-scores case - iteration 42 seed remains locked in pool
 ## Step 113: test: 0-scores case - iteration 43 seed accessible only after cancel
 ## Step 114: test: 0-scores case - iteration 44 finalize does not transfer seed on 0-score
+## Step 115: test: 0-scores case - iteration 45 refine describe label
