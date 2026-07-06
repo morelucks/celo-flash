@@ -65,3 +65,4 @@
 ## Step 64: test: revert-guard iteration 34 - advance time in revert test 2 beforeEach
 ## Step 65: test: revert-guard iteration 35 - first finalize call assertion
 ## Step 66: test: revert-guard iteration 36 - second finalize call assertion
+## Step 67: test: revert-guard iteration 37 - describe label alignment
