@@ -111,3 +111,4 @@
 ## Step 110: test: 0-scores case - iteration 40 add seeded tournament 0-score test
 ## Step 111: test: 0-scores case - iteration 41 seed does not go to any player
 ## Step 112: test: 0-scores case - iteration 42 seed remains locked in pool
+## Step 113: test: 0-scores case - iteration 43 seed accessible only after cancel
