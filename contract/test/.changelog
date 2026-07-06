@@ -109,3 +109,4 @@
 ## Step 108: test: 0-scores case - iteration 38 multiple joiners all have 0 claimable
 ## Step 109: test: 0-scores case - iteration 39 verify event args for multi-joiner 0-score
 ## Step 110: test: 0-scores case - iteration 40 add seeded tournament 0-score test
+## Step 111: test: 0-scores case - iteration 41 seed does not go to any player
