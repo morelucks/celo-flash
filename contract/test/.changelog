@@ -1,2 +1,3 @@
 # Test development changelog
 ## Step 1: test: initialise test directory for CeloFlashTournament
+## Step 2: test: add test file scaffold with describe block
