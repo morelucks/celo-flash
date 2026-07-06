@@ -105,3 +105,4 @@
 ## Step 104: test: 0-scores case - iteration 34 check prizePool integrity
 ## Step 105: test: 0-scores case - iteration 35 check accumulatedFees unaffected
 ## Step 106: test: 0-scores case - iteration 36 check status transition
+## Step 107: test: 0-scores case - iteration 37 finalization with multiple joiners no score
