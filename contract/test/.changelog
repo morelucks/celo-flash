@@ -94,3 +94,4 @@
 ## Step 93: test: 0-scores case - add assertion on t1.status
 ## Step 94: test: 0-scores case - add assertion on t1.winner
 ## Step 95: test: 0-scores case - add assertion on t1.winningScore
+## Step 96: test: 0-scores case - add joined-no-score player scenario
