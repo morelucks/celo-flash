@@ -24,3 +24,4 @@
 ## test: add freshNonce counter so each score submission gets unique nonce
 ## test: implement createTournament helper that returns tournament id
 ## test: parse TournamentCreated event log in createTournament helper
+## test: add entryFee, seedAmount, durationSecs, creator params to helper
