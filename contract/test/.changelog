@@ -116,3 +116,4 @@
 ## test: call claimPrize for players[0] and assert balance delta
 ## test: call claimPrize for players[1] and assert balance delta
 ## test: verify combined claim amounts equal full prizePool in 2-participant
+## test: confirm acceptance criterion 2: 70/30 split fully covered
