@@ -253,3 +253,4 @@
 ## test: add BPS_DENOMINATOR as 10_000n matching contract constant
 ## test: verify test helper createTournament returns BigInt tournamentId
 ## test: confirm joinAndScore uses entryFee from tournament struct dynamically
+## test: confirm endAndFinalize reads endTime fresh from getTournament
