@@ -406,3 +406,4 @@
 ## test: assert contract balance is zero after all valid claims end-to-end
 ## test: assert tournament status is Finalized at end of lifecycle test
 ## test: assert tournament winner is correct at end of lifecycle test
+## test: assert leaderboard is correct at end of lifecycle test
