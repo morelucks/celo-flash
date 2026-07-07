@@ -63,3 +63,4 @@
 ## test: get prizePool from tournament struct after finalize
 ## test: assert claimablePrize[id][players[0]] eq prizePool (100% rule)
 ## test: write test: tournament.winner and winningScore match leaderboard[0]
+## test: call getLeaderboard and compare lb[0] against tournament struct fields
