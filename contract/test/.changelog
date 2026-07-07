@@ -146,3 +146,4 @@
 ## test: assert NoPrizeToClaim revert for 4th non-participant
 ## test: write test: leaderboard order is correct after non-sequential submissions
 ## test: assert lb[0] is players[1] score 9500
+## test: assert lb[1] is players[2] score 7000
