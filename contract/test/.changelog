@@ -156,3 +156,4 @@
 ## test: assert only top 3 players receive non-zero prizes in 5-player scenario
 ## test: assert 4th and 5th place claimable is zero in 5-player scenario
 ## test: assert pool conservation still holds in 5-player scenario
+## test: write test: all 5 players can attempt claim but 4th and 5th revert
