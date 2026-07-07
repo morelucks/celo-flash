@@ -313,3 +313,4 @@
 ## test: compute expected fee as 2 times entryFee times 0.05
 ## test: add test: 2-participant participantCount is 2 after both join
 ## test: assert t.participantCount equals 2n in 2-participant scenario
+## test: add test: hasJoined is true for both players in 2-participant case
