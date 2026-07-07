@@ -119,3 +119,4 @@
 ## test: confirm acceptance criterion 2: 70/30 split fully covered
 ## test: add '3+ participants' describe block with shared beforeEach
 ## test: join players[0] with score 3000 in 3-participant beforeEach
+## test: join players[1] with score 9500 in 3-participant beforeEach
