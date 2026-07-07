@@ -153,3 +153,4 @@
 ## test: assert event prizeAmount equals 1st place claimable amount
 ## test: add 5-participant sub-scenario within 3+ block
 ## test: join players[3] and players[4] with mid-range scores in 5-player test
+## test: assert only top 3 players receive non-zero prizes in 5-player scenario
