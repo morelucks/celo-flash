@@ -115,3 +115,4 @@
 ## test: write test: both players can claim their respective prizes
 ## test: call claimPrize for players[0] and assert balance delta
 ## test: call claimPrize for players[1] and assert balance delta
+## test: verify combined claim amounts equal full prizePool in 2-participant
