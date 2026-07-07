@@ -54,3 +54,4 @@
 ## test: assert joined-but-no-score player has zero claimable prize
 ## test: add seeded tournament variant: pool exists but no scores submitted
 ## test: assert pool is intact (no distribution) when no leaderboard entries
+## test: confirm TournamentFinalized event prizeAmount is 0 even with seeded pool
