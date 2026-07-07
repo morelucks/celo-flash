@@ -419,3 +419,4 @@
 ## test: confirm PR closes issue #12 via closes keyword in description
 ## test: tag test suite as covering TournamentFinalized prize distribution
 ## test: tag test suite as covering exact wei amounts for 10e18 pool
+## test: tag test suite as covering revert guards for finalizeTournament
