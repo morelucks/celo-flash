@@ -358,3 +358,4 @@
 ## test: assert PrizeClaimed event emitted with player and amount on claim
 ## test: add test: claim fails when tournament is still Active status
 ## test: assert claimPrize reverts on Active tournament with TournamentNotActive
+## test: add test: claim fails when tournament is Cancelled
