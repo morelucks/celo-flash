@@ -15,3 +15,5 @@
 
 ## useWallet Hook
 
+### Methods
+
