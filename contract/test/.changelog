@@ -106,3 +106,4 @@
 ## test: verify lower scorer does not receive the 70% share
 ## test: assert players[1] did not receive (pool*7000)/BPS
 ## test: write test: leaderboard correctly orders players by score descending
+## test: assert lb[0].player is players[0] and lb[1].player is players[1]
