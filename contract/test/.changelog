@@ -421,3 +421,4 @@
 ## test: tag test suite as covering exact wei amounts for 10e18 pool
 ## test: tag test suite as covering revert guards for finalizeTournament
 ## test: tag test suite as covering 0 1 2 and 3+ participant scenarios
+## test: done — CeloFlashTournament finalization tests complete
