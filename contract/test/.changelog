@@ -164,3 +164,4 @@
 ## test: mint POOL tokens to owner before creating seeded tournament
 ## test: join all 5 players with zero entry fee in exact-wei beforeEach
 ## test: submit score 1000 for players[0] in exact-wei beforeEach
+## test: submit score 2000 for players[1] in exact-wei beforeEach
