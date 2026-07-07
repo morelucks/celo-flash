@@ -40,3 +40,4 @@
 ## test: verify first call status transition to Finalized before second call
 ## test: clean up revert guard describe block formatting
 ## test: add '0 scores submitted' describe block
+## test: write test: emits TournamentFinalized with winner=address(0) and prizeAmount=0
