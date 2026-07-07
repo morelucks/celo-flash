@@ -221,3 +221,4 @@
 ## test: call claimPrize then assert claimablePrize returns 0n
 ## test: write test: non-winner reverts with NoPrizeToClaim
 ## test: set up 3-player scenario for NoPrizeToClaim test
+## test: assert tournament.connect(players[3]).claimPrize reverts NoPrizeToClaim
