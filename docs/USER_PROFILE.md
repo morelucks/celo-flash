@@ -36,3 +36,6 @@ User data persists across sessions using browser localStorage.
 
 
 ### Context Management
+
+
+User state is managed through GameStateContext.
