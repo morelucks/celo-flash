@@ -244,3 +244,4 @@
 ## test: join players[0] and players[1] each with score 7777
 ## test: finalize tied tournament and assert p0 plus p1 eq pool
 ## test: confirm no revert on tied scores during finalize
+## test: remove temporary helper files used for commit generation
