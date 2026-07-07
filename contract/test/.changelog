@@ -30,3 +30,4 @@
 ## test: approve MaxUint256 allowance for all players in beforeEach
 ## test: approve owner allowance and top up owner balance in beforeEach
 ## test: add Revert guards describe block
+## test: write test: finalizeTournament reverts before endTime
