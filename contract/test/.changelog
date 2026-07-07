@@ -211,3 +211,4 @@
 ## test: confirm acceptance criterion: exact wei amounts verified for 10e18 pool
 ## test: add 'Prize claim flow after finalization' describe block
 ## test: write test: winner can claim and receives correct token balance delta
+## test: set up 2-player tournament with seed in claim flow test
