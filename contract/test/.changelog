@@ -291,3 +291,4 @@
 ## test: add test: 1-participant with zero entry fee still gets full seed
 ## test: assert claimablePrize equals seedAmount when entryFee is zero
 ## test: add test: protocol fee correctly deducted before adding to prizePool
+## test: compute expected prizePool as seedAmount plus entryFee * 0.95
