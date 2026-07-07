@@ -137,3 +137,4 @@
 ## test: assert tournament.winner is players[1] (score 9500)
 ## test: assert tournament.winningScore is 9500 in 3-participant test
 ## test: write test: tournament.status is Finalized after 3-participant finalize
+## test: write test: integer division dust is added to 1st place prize
