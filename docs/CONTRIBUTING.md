@@ -18,3 +18,4 @@ Keep components modular and reusable.
 
 ## Commit Messages
 
+Use conventional commit format: type(scope): message
