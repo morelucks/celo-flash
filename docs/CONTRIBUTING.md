@@ -19,3 +19,5 @@ Keep components modular and reusable.
 ## Commit Messages
 
 Use conventional commit format: type(scope): message
+
+Types: feat, fix, docs, style, refactor, test, chore
