@@ -124,3 +124,4 @@
 ## test: submit scores in non-rank order to exercise leaderboard sort
 ## test: verify sort places score 9500 at lb[0] after all submissions
 ## test: capture prizePool in 3-participant beforeEach
+## test: fast-forward and finalize in 3-participant beforeEach
