@@ -258,3 +258,4 @@
 ## test: verify no test leaks state to another through shared nonce counter
 ## test: add closing comment block summarising coverage
 ## test: final lint pass on test file whitespace and semicolons
+## test: confirm MockERC20 mint amounts cover all seeded tournament scenarios
