@@ -254,3 +254,4 @@
 ## test: verify test helper createTournament returns BigInt tournamentId
 ## test: confirm joinAndScore uses entryFee from tournament struct dynamically
 ## test: confirm endAndFinalize reads endTime fresh from getTournament
+## test: audit all assertions use eq not eql for BigInt compatibility
