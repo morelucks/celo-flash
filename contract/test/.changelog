@@ -61,3 +61,4 @@
 ## test: join players[0] and submit score 9000 in 1-participant test
 ## test: fast-forward and finalize in 1-participant test
 ## test: get prizePool from tournament struct after finalize
+## test: assert claimablePrize[id][players[0]] eq prizePool (100% rule)
