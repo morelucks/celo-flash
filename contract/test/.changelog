@@ -375,3 +375,4 @@
 ## test: add test: tournament with MAX_PARTICIPANTS players can still finalize
 ## test: add test: score submission after endTime reverts TournamentNotActive
 ## test: advance time past endTime and assert submitScore reverts
+## test: add test: joining after endTime reverts TournamentNotActive
