@@ -276,3 +276,4 @@
 ## test: confirm finalize succeeds when block.timestamp is endTime plus 1
 ## test: add test: multiple players join but none submit scores
 ## test: join players[0] through players[3] with no score submissions
+## test: finalize multi-joiner zero-score tournament and check event args
