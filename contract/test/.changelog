@@ -98,3 +98,4 @@
 ## test: compute expectedSecond as pool minus first in 2nd-place test
 ## test: assert claimablePrize[players[1]] eq expectedSecond
 ## test: write test: 1st and 2nd prizes sum to full pool with no leakage
+## test: get p0 and p1 from claimablePrize and assert p0 plus p1 eq pool
