@@ -326,3 +326,4 @@
 ## test: verify only top 3 by submission time receive prizes not 4th joiner
 ## test: add test: 3-participant leaderboard is stable across re-submissions
 ## test: have players[1] re-submit a lower score and verify rank unchanged
+## test: assert lb[0] still holds original highest score after re-submit
