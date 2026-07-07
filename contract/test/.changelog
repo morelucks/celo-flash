@@ -159,3 +159,4 @@
 ## test: write test: all 5 players can attempt claim but 4th and 5th revert
 ## test: confirm acceptance criterion 3: 60/25/15 split fully covered
 ## test: add 'Exact wei amounts' describe block for 10e18 pool with 5 players
+## test: define POOL constant as ethers.parseEther('10')
