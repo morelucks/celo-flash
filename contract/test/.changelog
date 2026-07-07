@@ -56,3 +56,4 @@
 ## test: assert pool is intact (no distribution) when no leaderboard entries
 ## test: confirm TournamentFinalized event prizeAmount is 0 even with seeded pool
 ## test: review 0-scores block for full coverage of acceptance criterion 4
+## test: add '1 participant' describe block
