@@ -96,3 +96,4 @@
 ## test: assert claimablePrize[players[0]] eq expected 70%
 ## test: write test: 2nd place receives pool minus first (remainder ~30%)
 ## test: compute expectedSecond as pool minus first in 2nd-place test
+## test: assert claimablePrize[players[1]] eq expectedSecond
