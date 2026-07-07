@@ -247,3 +247,4 @@
 ## test: remove temporary helper files used for commit generation
 ## test: verify all describe blocks are properly closed
 ## test: run full test suite locally: 37 tests passing
+## test: confirm no test relies on block order beyond time progression
