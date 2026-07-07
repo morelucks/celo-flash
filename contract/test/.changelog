@@ -352,3 +352,4 @@
 ## test: assert tournament.winningScore is 5000n matching submitted score
 ## test: add test: exact-wei tournament participantCount is 5
 ## test: assert t.participantCount equals 5n after 5 players join
+## test: add test: exact-wei leaderboard has exactly 3 entries (top 3 only)
