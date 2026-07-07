@@ -280,3 +280,4 @@
 ## test: assert all four joiners have zero claimable prize after finalize
 ## test: add test: native CELO tournament with no scores also emits address(0)
 ## test: confirm 0-scores behavior is consistent across token types
+## test: add test: prizePool from seed is locked when no scores are submitted
