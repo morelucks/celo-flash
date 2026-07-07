@@ -31,3 +31,4 @@
 ## test: approve owner allowance and top up owner balance in beforeEach
 ## test: add Revert guards describe block
 ## test: write test: finalizeTournament reverts before endTime
+## test: assert revertedWithCustomError TournamentNotEnded on early call
