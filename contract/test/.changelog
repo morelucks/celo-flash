@@ -233,3 +233,4 @@
 ## test: create 3-player tournament for leaderboard match test
 ## test: submit scores 200 800 500 to exercise sort in leaderboard test
 ## test: finalize and assert t.winner eq lb[0].player
+## test: assert t.winningScore eq lb[0].score in leaderboard match test
