@@ -224,3 +224,4 @@
 ## test: assert tournament.connect(players[3]).claimPrize reverts NoPrizeToClaim
 ## test: confirm players[3] never joined so has no entitlement
 ## test: add 'Edge cases' describe block
+## test: write test: zero prizePool with scores emits winner=address(0)
