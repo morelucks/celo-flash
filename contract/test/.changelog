@@ -364,3 +364,4 @@
 ## test: call claimPrize for players[0] then players[1] assert both succeed
 ## test: add test: claim amount is exactly what was set in claimablePrize
 ## test: read claimablePrize before claim and assert transfer equals that amount
+## test: add test: unclaimed prize stays in contract indefinitely
