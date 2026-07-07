@@ -374,3 +374,4 @@
 ## test: assert leaderboard still has 10 entries with 11th at top
 ## test: add test: tournament with MAX_PARTICIPANTS players can still finalize
 ## test: add test: score submission after endTime reverts TournamentNotActive
+## test: advance time past endTime and assert submitScore reverts
