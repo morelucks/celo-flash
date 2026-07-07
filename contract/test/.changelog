@@ -21,3 +21,4 @@
 ## test: mint 1000 USDm to each player in beforeEach
 ## test: implement signScore using solidityPackedKeccak256 and signMessage
 ## test: verify signScore produces hash matching contract expectation
+## test: add freshNonce counter so each score submission gets unique nonce
