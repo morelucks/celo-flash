@@ -409,3 +409,4 @@
 ## test: assert leaderboard is correct at end of lifecycle test
 ## test: confirm full lifecycle test covers every acceptance criterion at once
 ## test: run hardhat test one final time confirming 37 tests pass cleanly
+## test: verify test output shows no skipped or pending tests
