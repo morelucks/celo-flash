@@ -317,3 +317,4 @@
 ## test: assert isPlayerJoined true for both players[0] and players[1]
 ## test: add test: 2-participant second place cannot double-claim
 ## test: call claimPrize for players[1] twice and assert second call reverts
+## test: add test: 2-participant first place cannot double-claim
