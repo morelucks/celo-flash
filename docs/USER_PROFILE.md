@@ -23,3 +23,4 @@ If no username is set, the profile displays the shortened wallet address.
 
 
 An edit button appears next to the username when connected.
+Clicking the edit button opens a modal for username changes.
