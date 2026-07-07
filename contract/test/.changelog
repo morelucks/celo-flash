@@ -19,3 +19,4 @@
 ## test: deploy MockERC20 in beforeEach and store reference
 ## test: deploy CeloFlashTournament with stablecoin, verifier, feeRecipient
 ## test: mint 1000 USDm to each player in beforeEach
+## test: implement signScore using solidityPackedKeccak256 and signMessage
