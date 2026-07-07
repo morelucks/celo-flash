@@ -102,3 +102,4 @@
 ## test: write test: higher-scoring player is the winner
 ## test: assert tournament.winner is players[0].address (score 9000)
 ## test: assert tournament.winningScore is 9000 in 2-participant test
+## test: write test: tournament.status is Finalized after 2-participant finalize
