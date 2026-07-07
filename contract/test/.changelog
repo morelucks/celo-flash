@@ -38,3 +38,4 @@
 ## test: call finalizeTournament once successfully in double-finalize test
 ## test: assert second finalizeTournament call throws TournamentAlreadyFinalized
 ## test: verify first call status transition to Finalized before second call
+## test: clean up revert guard describe block formatting
