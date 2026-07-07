@@ -89,3 +89,4 @@
 ## test: join players[1] with score 5000 in 2-participant beforeEach
 ## test: scores in descending rank: 9000 first, 5000 second
 ## test: capture prizePool from tournament struct in 2-participant beforeEach
+## test: fast-forward past endTime in 2-participant beforeEach
