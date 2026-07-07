@@ -243,3 +243,4 @@
 ## test: write test: tied scores — both players receive non-zero prizes
 ## test: join players[0] and players[1] each with score 7777
 ## test: finalize tied tournament and assert p0 plus p1 eq pool
+## test: confirm no revert on tied scores during finalize
