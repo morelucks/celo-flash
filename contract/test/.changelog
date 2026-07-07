@@ -238,3 +238,4 @@
 ## test: join players[0] and submit initial score 5000
 ## test: join players[1] and submit score 8000 to take lead
 ## test: submit improved score 9500 for players[0] to overtake players[1]
+## test: assert only best score is kept in playerBestScore mapping
