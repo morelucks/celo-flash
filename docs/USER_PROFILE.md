@@ -30,3 +30,6 @@ Clicking the edit button opens a modal for username changes.
 
 
 User data persists across sessions using browser localStorage.
+
+
+## Technical Implementation
