@@ -245,3 +245,4 @@
 ## test: finalize tied tournament and assert p0 plus p1 eq pool
 ## test: confirm no revert on tied scores during finalize
 ## test: remove temporary helper files used for commit generation
+## test: verify all describe blocks are properly closed
