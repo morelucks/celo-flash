@@ -13,3 +13,4 @@ Create a new branch for your feature or bugfix.
 Follow React best practices and hooks conventions.
 
 Use ESLint for code quality checks.
+Keep components modular and reusable.
