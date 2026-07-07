@@ -14,3 +14,4 @@ Users can connect their Web3 wallet (MetaMask, MiniPay) to the application.
 
 ### Dynamic Username
 
+Players can set a custom username that displays on their profile.
