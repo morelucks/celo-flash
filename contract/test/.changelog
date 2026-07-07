@@ -261,3 +261,4 @@
 ## test: confirm MockERC20 mint amounts cover all seeded tournament scenarios
 ## test: verify test file imports compile without warnings under hardhat
 ## test: confirm test file top-level structure matches issue #12 sections
+## test: final sign-off — all 37 tournament finalization tests passing
