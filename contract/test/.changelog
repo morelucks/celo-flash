@@ -402,3 +402,4 @@
 ## test: confirm getBytes used to convert hash before signing in signScore
 ## test: add final test: full end-to-end 5-player tournament lifecycle
 ## test: create tournament join 5 players submit scores finalize and claim
+## test: assert all three prize winners receive correct amounts end-to-end
