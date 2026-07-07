@@ -13,3 +13,4 @@ Deploy to Vercel or Netlify.
 
 ## Contract Deployment
 
+Configure Hardhat with Celo network settings.
