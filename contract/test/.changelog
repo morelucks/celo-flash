@@ -199,3 +199,4 @@
 ## test: record balBefore for players[4] and call claimPrize
 ## test: assert balAfter minus balBefore eq 6e18 for 1st place
 ## test: write test: players[3] claims and balance increases by 2.5e18
+## test: record balBefore for players[3] and call claimPrize
