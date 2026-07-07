@@ -1,11 +1,25 @@
 import React, { useState } from 'react';
 import { useGameState } from '../context/GameStateContext';
+import { useWallet } from '../hooks/useWallet';
 import { playSound } from '../utils/audio';
 import avatarUrl from '../assets/avatar.png';
 
 export default function MeScreen() {
-  const { cash, points, gamesPlayed, setCurrentTab, soundEnabled } = useGameState();
+  const { cash, points, gamesPlayed, setCurrentTab, soundEnabled, userAddress, userName } = useGameState();
+  const { connectWallet } = useWallet();
   const [statsTab, setStatsTab] = useState('usage');
+
+  const formatAddress = (address) => {
+    if (!address) return 'Not Connected';
+    return `${address.slice(0, 6)}...${address.slice(-4)}`;
+  };
+
+  const displayName = userName || (userAddress ? formatAddress(userAddress) : 'Guest');
+
+  const handleConnectWallet = async () => {
+    playSound('click', soundEnabled);
+    await connectWallet();
+  };
 
   const handleFindTournament = () => {
     playSound('click', soundEnabled);
@@ -32,11 +46,11 @@ export default function MeScreen() {
       <div className="profile-card">
         <div className="profile-header">
           <div className="profile-avatar-container">
-            <img src={avatarUrl} alt="luckify Avatar" className="profile-avatar" id="me-avatar-img" />
+            <img src={avatarUrl} alt={`${displayName} Avatar`} className="profile-avatar" id="me-avatar-img" />
           </div>
           <div className="profile-meta">
-            <h3 className="profile-handle">@luckify</h3>
-            <span className="profile-fid">fid 1104338</span>
+            <h3 className="profile-handle">@{displayName}</h3>
+            <span className="profile-fid">{userAddress ? formatAddress(userAddress) : 'Connect Wallet'}</span>
           </div>
           <button className="share-btn" onClick={handleShare}>
             <svg className="share-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -83,6 +97,12 @@ export default function MeScreen() {
 
       {/* Quick Actions */}
       <div className="profile-actions">
+        {!userAddress && (
+          <button className="profile-action-row" onClick={handleConnectWallet}>
+            <span>Connect Wallet</span>
+            <span className="arrow-right">→</span>
+          </button>
+        )}
         <button className="profile-action-row" id="btn-profile-find-tourney" onClick={handleFindTournament}>
           <span>Find a tournament to join</span>
           <span className="arrow-right">→</span>
