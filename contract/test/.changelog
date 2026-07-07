@@ -83,3 +83,4 @@
 ## test: verify protocol fee was deducted so prizePool is 95% of entryFee
 ## test: compute net prize contribution: entryFee minus 5% protocol fee
 ## test: assert 1-participant claimable matches net 95% contribution
+## test: confirm 1-participant covers acceptance criterion 1: 100% to sole winner
