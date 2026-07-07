@@ -33,3 +33,4 @@
 ## test: write test: finalizeTournament reverts before endTime
 ## test: assert revertedWithCustomError TournamentNotEnded on early call
 ## test: confirm TournamentNotEnded is thrown not TournamentNotActive
+## test: write test: finalizeTournament reverts on second call
