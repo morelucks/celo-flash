@@ -69,3 +69,4 @@
 ## test: write test: tournament.status is Finalized after 1-participant finalize
 ## test: assert status eq 1n (Finalized enum value) in 1-participant
 ## test: write test: TournamentFinalized emitted with correct args for 1 player
+## test: capture expectedPool from t0.prizePool before finalize
