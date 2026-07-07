@@ -397,3 +397,4 @@
 ## test: assert PROTOCOL_FEE_BPS constant is 500 matching contract
 ## test: assert BPS_DENOMINATOR is 10000 matching contract constant
 ## test: verify freshNonce returns a zero-padded bytes32 value
+## test: confirm ethers.zeroPadValue used in freshNonce for correct encoding
