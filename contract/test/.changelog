@@ -332,3 +332,4 @@
 ## test: assert contract balance is zero after all 3 prizes are claimed
 ## test: add test: 3-participant participantCount equals 3
 ## test: assert t.participantCount equals 3n after 3 players join
+## test: add test: 3-participant emit event prizeAmount is 1st-place share
