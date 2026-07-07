@@ -394,3 +394,4 @@
 ## test: add comments above each describe block naming the acceptance criterion
 ## test: verify createTournament default durationSecs is MIN_DURATION plus 60
 ## test: assert MIN_DURATION constant matches contract 1 hour value
+## test: assert PROTOCOL_FEE_BPS constant is 500 matching contract
