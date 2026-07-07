@@ -398,3 +398,4 @@
 ## test: assert BPS_DENOMINATOR is 10000 matching contract constant
 ## test: verify freshNonce returns a zero-padded bytes32 value
 ## test: confirm ethers.zeroPadValue used in freshNonce for correct encoding
+## test: verify solidityPackedKeccak256 used not keccak256 in signScore
