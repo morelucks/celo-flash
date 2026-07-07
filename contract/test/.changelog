@@ -315,3 +315,4 @@
 ## test: assert t.participantCount equals 2n in 2-participant scenario
 ## test: add test: hasJoined is true for both players in 2-participant case
 ## test: assert isPlayerJoined true for both players[0] and players[1]
+## test: add test: 2-participant second place cannot double-claim
