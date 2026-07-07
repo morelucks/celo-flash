@@ -360,3 +360,4 @@
 ## test: assert claimPrize reverts on Active tournament with TournamentNotActive
 ## test: add test: claim fails when tournament is Cancelled
 ## test: cancel a tournament and assert claimPrize uses refund path not prize path
+## test: add test: 2nd place can claim after 1st place has already claimed
