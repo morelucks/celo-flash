@@ -288,3 +288,4 @@
 ## test: add test: 0-scores finalized tournament cannot be finalized again
 ## test: add test: 1-participant receives 100% even with very large pool
 ## test: seed tournament with 50e18 and join one player to verify full payout
+## test: add test: 1-participant with zero entry fee still gets full seed
