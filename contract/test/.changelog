@@ -111,3 +111,4 @@
 ## test: write test: TournamentFinalized emitted with correct winner for 2 players
 ## test: assert emit prizeAmount in event equals 1st place claimable
 ## test: write test: 3rd player (non-participant) has zero claimable
+## test: assert NoPrizeToClaim revert for player who never joined in 2-participant
