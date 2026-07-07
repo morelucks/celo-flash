@@ -369,3 +369,4 @@
 ## test: add test: player improves score multiple times only best counts
 ## test: submit three increasing scores for players[0] and verify only max kept
 ## test: assert playerBestScore equals the highest of all submitted values
+## test: add test: leaderboard evicts 10th place when 11th player scores higher
