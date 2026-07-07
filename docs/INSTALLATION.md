@@ -24,3 +24,9 @@ Navigate to the frontend directory:
 ```bash
 cd frontend
 ```
+
+
+Install dependencies:
+```bash
+npm install
+```
