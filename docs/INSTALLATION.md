@@ -20,3 +20,7 @@ cd celo-flash
 
 
 Navigate to the frontend directory:
+
+```bash
+cd frontend
+```
