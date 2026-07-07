@@ -104,3 +104,4 @@
 ## test: assert tournament.winningScore is 9000 in 2-participant test
 ## test: write test: tournament.status is Finalized after 2-participant finalize
 ## test: verify lower scorer does not receive the 70% share
+## test: assert players[1] did not receive (pool*7000)/BPS
