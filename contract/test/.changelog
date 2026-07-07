@@ -17,3 +17,4 @@
 ## test: confirm MockERC20 contract is available for USDm stand-in
 ## test: wire up signers from ethers.getSigners in outer beforeEach
 ## test: deploy MockERC20 in beforeEach and store reference
+## test: deploy CeloFlashTournament with stablecoin, verifier, feeRecipient
