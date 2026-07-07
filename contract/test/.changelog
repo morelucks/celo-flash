@@ -216,3 +216,4 @@
 ## test: finalize tournament in claim flow test
 ## test: record balBefore from mockToken.balanceOf before claim
 ## test: read claimablePrize amount before calling claimPrize
+## test: call tournament.claimPrize and assert balAfter minus balBefore eq prize
