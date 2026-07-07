@@ -50,3 +50,6 @@ It listens for account changes and updates state automatically.
 
 
 ### Username Modal
+
+
+UsernameModal component handles username input and validation.
