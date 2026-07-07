@@ -2,3 +2,5 @@
 
 ## GameStateContext
 
+### State Variables
+
