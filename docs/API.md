@@ -9,3 +9,5 @@
 - `userName`: Custom username (string)
 
 - `setUserAddress`: Function to update wallet address
+
+- `setUserName`: Function to update username
