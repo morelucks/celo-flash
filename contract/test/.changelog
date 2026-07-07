@@ -380,3 +380,4 @@
 ## test: add test: finalization with exactly 10 leaderboard entries
 ## test: fill leaderboard to cap of 10 and assert top 3 get correct shares
 ## test: add test: score of 0 submitted does not update leaderboard
+## test: submit score 0 for a player and verify they are not in leaderboard
