@@ -306,3 +306,4 @@
 ## test: add test: score submitted in reverse order still ranks correctly
 ## test: submit lower score first then higher score to verify sort
 ## test: assert lb[0] holds the higher score regardless of submission order
+## test: add test: 2-participant prizePool includes both net entry contributions
