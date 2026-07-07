@@ -1,2 +1,4 @@
 # Testing Guide
 
+## Manual Testing
+
