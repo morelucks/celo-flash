@@ -45,3 +45,4 @@
 ## test: add emit assertion with withArgs ZeroAddress 0 0 0
 ## test: confirm event matches when leaderboard is empty
 ## test: write test: status becomes Finalized even with no scores
+## test: get post-finalize tournament struct and assert status eq 1n
