@@ -205,3 +205,4 @@
 ## test: record balBefore for players[2] and call claimPrize
 ## test: assert balAfter minus balBefore eq 1.5e18 for 3rd place
 ## test: verify leaderboard rank order in 5-player scenario
+## test: assert lb[0].player eq players[4] (score 5000) in exact-wei test
