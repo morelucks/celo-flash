@@ -110,3 +110,4 @@
 ## test: verify leaderboard length is 2 in 2-participant scenario
 ## test: write test: TournamentFinalized emitted with correct winner for 2 players
 ## test: assert emit prizeAmount in event equals 1st place claimable
+## test: write test: 3rd player (non-participant) has zero claimable
