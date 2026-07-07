@@ -121,3 +121,4 @@
 ## test: join players[0] with score 3000 in 3-participant beforeEach
 ## test: join players[1] with score 9500 in 3-participant beforeEach
 ## test: join players[2] with score 7000 in 3-participant beforeEach
+## test: submit scores in non-rank order to exercise leaderboard sort
