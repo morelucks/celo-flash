@@ -86,3 +86,4 @@
 ## test: confirm 1-participant covers acceptance criterion 1: 100% to sole winner
 ## test: add '2 participants' describe block with shared beforeEach
 ## test: join players[0] with score 9000 in 2-participant beforeEach
+## test: join players[1] with score 5000 in 2-participant beforeEach
