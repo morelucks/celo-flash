@@ -169,3 +169,4 @@
 ## test: submit score 4000 for players[3] in exact-wei beforeEach
 ## test: submit score 5000 for players[4] in exact-wei beforeEach
 ## test: fast-forward and finalize in exact-wei beforeEach
+## test: write test: prizePool is exactly 10e18 after zero-fee seeded setup
