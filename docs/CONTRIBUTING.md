@@ -10,3 +10,4 @@ Create a new branch for your feature or bugfix.
 
 ## Code Style
 
+Follow React best practices and hooks conventions.
