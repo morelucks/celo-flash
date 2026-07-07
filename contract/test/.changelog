@@ -309,3 +309,4 @@
 ## test: add test: 2-participant prizePool includes both net entry contributions
 ## test: compute expected pool as 2 times entryFee times 0.95
 ## test: assert tournament prizePool matches expected after both players join
+## test: add test: protocol fee for both entries accumulates in accumulatedFees
