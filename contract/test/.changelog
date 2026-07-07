@@ -51,3 +51,4 @@
 ## test: verify claimablePrize for any address is zero in 0-scores case
 ## test: confirm getLeaderboard returns empty array before any scores
 ## test: add scenario: player joins but never submits score
+## test: assert joined-but-no-score player has zero claimable prize
