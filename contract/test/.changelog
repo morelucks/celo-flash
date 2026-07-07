@@ -8,3 +8,4 @@
 ## test: identify signScore helper is needed for ECDSA attestation
 ## test: plan freshNonce utility to avoid NonceAlreadyUsed errors
 ## test: decide to use hardhat-network-helpers time.increaseTo for end time
+## test: decide on shared beforeEach fixture approach for cleaner tests
