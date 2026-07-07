@@ -385,3 +385,4 @@
 ## test: submit same score twice for player and verify no leaderboard change
 ## test: add test: two different players with max uint256 score both handled
 ## test: submit uint256 max score for two players and verify no overflow
+## test: remove gen423.py commit helper script before final push
