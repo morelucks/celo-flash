@@ -350,3 +350,4 @@
 ## test: assert contract balance is zero after all 3 claims in exact-wei test
 ## test: add test: players[4] winningScore confirmed in exact-wei tournament
 ## test: assert tournament.winningScore is 5000n matching submitted score
+## test: add test: exact-wei tournament participantCount is 5
