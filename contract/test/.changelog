@@ -207,3 +207,4 @@
 ## test: verify leaderboard rank order in 5-player scenario
 ## test: assert lb[0].player eq players[4] (score 5000) in exact-wei test
 ## test: assert lb[1].player eq players[3] (score 4000) in exact-wei test
+## test: assert lb[2].player eq players[2] (score 3000) in exact-wei test
