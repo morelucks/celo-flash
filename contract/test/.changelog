@@ -10,3 +10,4 @@
 ## test: decide to use hardhat-network-helpers time.increaseTo for end time
 ## test: decide on shared beforeEach fixture approach for cleaner tests
 ## test: create contract/test directory
+## test: scaffold CeloFlashTournament.test.js with empty describe block
