@@ -19,3 +19,5 @@
 
 
 - `connectWallet()`: Initiates wallet connection
+
+- `disconnectWallet()`: Clears wallet connection
