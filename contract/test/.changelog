@@ -184,3 +184,4 @@
 ## test: assert claimablePrize[players[1]] eq 0n
 ## test: write test: 5th place player receives zero prize
 ## test: assert claimablePrize[players[0]] eq 0n
+## test: write test: sum of top-3 prizes equals full 10e18 pool
