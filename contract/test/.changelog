@@ -81,3 +81,4 @@
 ## test: write test: claimablePrize is zeroed after successful claim
 ## test: assert claimablePrize returns 0 after player claims in 1-participant
 ## test: verify protocol fee was deducted so prizePool is 95% of entryFee
+## test: compute net prize contribution: entryFee minus 5% protocol fee
