@@ -47,3 +47,4 @@
 ## test: write test: status becomes Finalized even with no scores
 ## test: get post-finalize tournament struct and assert status eq 1n
 ## test: write test: tournament.winner stays address(0) after 0-scores finalize
+## test: assert t.winner is ZeroAddress and winningScore is 0
