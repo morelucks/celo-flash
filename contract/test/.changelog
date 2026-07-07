@@ -240,3 +240,4 @@
 ## test: submit improved score 9500 for players[0] to overtake players[1]
 ## test: assert only best score is kept in playerBestScore mapping
 ## test: finalize and assert winner is players[0] with score 9500
+## test: write test: tied scores — both players receive non-zero prizes
