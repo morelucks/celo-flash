@@ -413,3 +413,4 @@
 ## test: verify test output shows no console warnings or errors
 ## test: confirm branch is ready for PR review by team
 ## test: final sign-off — all 37 tournament finalization tests passing
+## test: close out issue #12 — all acceptance criteria verified by test suite
