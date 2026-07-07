@@ -22,3 +22,4 @@
 ## test: implement signScore using solidityPackedKeccak256 and signMessage
 ## test: verify signScore produces hash matching contract expectation
 ## test: add freshNonce counter so each score submission gets unique nonce
+## test: implement createTournament helper that returns tournament id
