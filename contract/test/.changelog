@@ -330,3 +330,4 @@
 ## test: add test: 3-participant all claimPrize calls drain correct amounts
 ## test: call claimPrize for all 3 ranked players and verify deltas
 ## test: assert contract balance is zero after all 3 prizes are claimed
+## test: add test: 3-participant participantCount equals 3
