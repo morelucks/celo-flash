@@ -264,3 +264,4 @@
 ## test: final sign-off — all 37 tournament finalization tests passing
 ## test: review TournamentNotEnded error selector matches contract definition
 ## test: check that finalizeTournament is not gated by onlyOwner modifier
+## test: verify finalizeTournament is callable by any address after endTime
