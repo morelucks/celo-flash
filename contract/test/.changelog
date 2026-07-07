@@ -268,3 +268,4 @@
 ## test: check that paused contract blocks finalizeTournament correctly
 ## test: confirm nonReentrant guard on finalizeTournament does not interfere
 ## test: add test: cancelled tournament reverts AlreadyFinalized on finalize
+## test: set up tournament and cancel it before attempting finalize
