@@ -66,3 +66,4 @@
 ## test: call getLeaderboard and compare lb[0] against tournament struct fields
 ## test: assert t.winner eq lb[0].player in 1-participant case
 ## test: assert t.winningScore eq lb[0].score in 1-participant case
+## test: write test: tournament.status is Finalized after 1-participant finalize
