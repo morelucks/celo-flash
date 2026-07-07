@@ -44,3 +44,4 @@
 ## test: wire up time.increaseTo and finalizeTournament in 0-scores test
 ## test: add emit assertion with withArgs ZeroAddress 0 0 0
 ## test: confirm event matches when leaderboard is empty
+## test: write test: status becomes Finalized even with no scores
