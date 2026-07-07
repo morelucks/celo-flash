@@ -35,3 +35,4 @@
 ## test: confirm TournamentNotEnded is thrown not TournamentNotActive
 ## test: write test: finalizeTournament reverts on second call
 ## test: fast-forward time past endTime for double-finalization test
+## test: call finalizeTournament once successfully in double-finalize test
