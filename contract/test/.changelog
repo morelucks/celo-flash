@@ -366,3 +366,4 @@
 ## test: read claimablePrize before claim and assert transfer equals that amount
 ## test: add test: unclaimed prize stays in contract indefinitely
 ## test: finalize tournament and do not claim verify contract balance unchanged
+## test: add test: player improves score multiple times only best counts
