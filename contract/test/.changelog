@@ -68,3 +68,4 @@
 ## test: assert t.winningScore eq lb[0].score in 1-participant case
 ## test: write test: tournament.status is Finalized after 1-participant finalize
 ## test: assert status eq 1n (Finalized enum value) in 1-participant
+## test: write test: TournamentFinalized emitted with correct args for 1 player
