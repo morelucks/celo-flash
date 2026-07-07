@@ -161,3 +161,4 @@
 ## test: add 'Exact wei amounts' describe block for 10e18 pool with 5 players
 ## test: define POOL constant as ethers.parseEther('10')
 ## test: create zero-entry-fee tournament seeded with 10e18 in beforeEach
+## test: mint POOL tokens to owner before creating seeded tournament
