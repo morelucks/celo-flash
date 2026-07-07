@@ -40,3 +40,6 @@ User data persists across sessions using browser localStorage.
 
 User state is managed through GameStateContext.
 The context stores userAddress and userName state.
+
+
+### Wallet Hook
