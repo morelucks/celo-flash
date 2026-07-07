@@ -125,3 +125,4 @@
 ## test: verify sort places score 9500 at lb[0] after all submissions
 ## test: capture prizePool in 3-participant beforeEach
 ## test: fast-forward and finalize in 3-participant beforeEach
+## test: write test: 1st place receives at least (pool * 6000) / BPS
