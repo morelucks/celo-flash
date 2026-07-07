@@ -162,3 +162,4 @@
 ## test: define POOL constant as ethers.parseEther('10')
 ## test: create zero-entry-fee tournament seeded with 10e18 in beforeEach
 ## test: mint POOL tokens to owner before creating seeded tournament
+## test: join all 5 players with zero entry fee in exact-wei beforeEach
