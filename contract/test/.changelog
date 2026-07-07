@@ -274,3 +274,4 @@
 ## test: confirm finalize reverts when block.timestamp equals endTime exactly
 ## test: add test: finalize succeeds one second after endTime
 ## test: confirm finalize succeeds when block.timestamp is endTime plus 1
+## test: add test: multiple players join but none submit scores
