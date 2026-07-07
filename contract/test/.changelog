@@ -210,3 +210,4 @@
 ## test: assert lb[2].player eq players[2] (score 3000) in exact-wei test
 ## test: confirm acceptance criterion: exact wei amounts verified for 10e18 pool
 ## test: add 'Prize claim flow after finalization' describe block
+## test: write test: winner can claim and receives correct token balance delta
