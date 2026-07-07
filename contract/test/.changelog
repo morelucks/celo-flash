@@ -342,3 +342,4 @@
 ## test: assert dust still correctly accrues to 1st place in non-round pool
 ## test: add test: verify no overflow in BPS arithmetic for large pools
 ## test: use pool close to uint256 max divided by 10000 to stress arithmetic
+## test: add test: exact-wei 1st claim drains exactly 6e18 from contract
