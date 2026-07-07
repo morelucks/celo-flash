@@ -376,3 +376,4 @@
 ## test: add test: score submission after endTime reverts TournamentNotActive
 ## test: advance time past endTime and assert submitScore reverts
 ## test: add test: joining after endTime reverts TournamentNotActive
+## test: advance time past endTime and assert joinTournament reverts
