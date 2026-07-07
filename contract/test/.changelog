@@ -399,3 +399,4 @@
 ## test: verify freshNonce returns a zero-padded bytes32 value
 ## test: confirm ethers.zeroPadValue used in freshNonce for correct encoding
 ## test: verify solidityPackedKeccak256 used not keccak256 in signScore
+## test: confirm getBytes used to convert hash before signing in signScore
