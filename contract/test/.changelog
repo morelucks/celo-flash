@@ -372,3 +372,4 @@
 ## test: add test: leaderboard evicts 10th place when 11th player scores higher
 ## test: fill leaderboard with 10 players then add 11th with top score
 ## test: assert leaderboard still has 10 entries with 11th at top
+## test: add test: tournament with MAX_PARTICIPANTS players can still finalize
