@@ -294,3 +294,4 @@
 ## test: compute expected prizePool as seedAmount plus entryFee * 0.95
 ## test: assert prizePool equals computed expected after 1 player joins
 ## test: add test: 1-participant tournament emits correct winningScore
+## test: assert TournamentFinalized event winningScore matches submitted score
