@@ -150,3 +150,4 @@
 ## test: assert lb[2] is players[0] score 3000
 ## test: verify leaderboard length is 3 after 3 participants
 ## test: write test: TournamentFinalized emitted with correct args for 3 players
+## test: assert event prizeAmount equals 1st place claimable amount
