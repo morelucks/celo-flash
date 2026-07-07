@@ -71,3 +71,4 @@
 ## test: write test: TournamentFinalized emitted with correct args for 1 player
 ## test: capture expectedPool from t0.prizePool before finalize
 ## test: assert emit TournamentFinalized with player[0] score 7777 and full pool
+## test: use 2e18 entry fee to distinguish prize from entry fee in event test
