@@ -325,3 +325,4 @@
 ## test: join a 4th player with an astronomical score after 3 others
 ## test: verify only top 3 by submission time receive prizes not 4th joiner
 ## test: add test: 3-participant leaderboard is stable across re-submissions
+## test: have players[1] re-submit a lower score and verify rank unchanged
