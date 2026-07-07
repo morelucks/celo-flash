@@ -142,3 +142,4 @@
 ## test: compute dust as pool minus rawDistributed
 ## test: assert 1st place claimable equals (pool*6000/BPS) plus dust
 ## test: assert total (p1+p2+p3) still equals pool after dust allocation
+## test: write test: 4th player who did not join has zero claimable
