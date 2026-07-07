@@ -270,3 +270,4 @@
 ## test: add test: cancelled tournament reverts AlreadyFinalized on finalize
 ## test: set up tournament and cancel it before attempting finalize
 ## test: assert finalizeTournament on Cancelled status reverts AlreadyFinalized
+## test: add test: finalize immediately at endTime boundary (block.timestamp == endTime)
