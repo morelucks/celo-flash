@@ -228,3 +228,4 @@
 ## test: create zero-entry zero-seed tournament for 0-pool edge case
 ## test: join and score a player in the 0-pool tournament
 ## test: assert TournamentFinalized emitted with ZeroAddress when pool is 0
+## test: confirm contract does not revert on 0-pool finalize with scores
