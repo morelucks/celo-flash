@@ -225,3 +225,4 @@
 ## test: confirm players[3] never joined so has no entitlement
 ## test: add 'Edge cases' describe block
 ## test: write test: zero prizePool with scores emits winner=address(0)
+## test: create zero-entry zero-seed tournament for 0-pool edge case
