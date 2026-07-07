@@ -404,3 +404,4 @@
 ## test: create tournament join 5 players submit scores finalize and claim
 ## test: assert all three prize winners receive correct amounts end-to-end
 ## test: assert contract balance is zero after all valid claims end-to-end
+## test: assert tournament status is Finalized at end of lifecycle test
