@@ -59,3 +59,4 @@ UsernameModal component handles username input and validation.
 
 
 Usernames must be 3-20 characters long.
+Only alphanumeric characters and underscores are allowed.
