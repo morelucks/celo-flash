@@ -42,3 +42,4 @@
 ## test: add '0 scores submitted' describe block
 ## test: write test: emits TournamentFinalized with winner=address(0) and prizeAmount=0
 ## test: wire up time.increaseTo and finalizeTournament in 0-scores test
+## test: add emit assertion with withArgs ZeroAddress 0 0 0
