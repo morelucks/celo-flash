@@ -145,3 +145,4 @@
 ## test: write test: 4th player who did not join has zero claimable
 ## test: assert NoPrizeToClaim revert for 4th non-participant
 ## test: write test: leaderboard order is correct after non-sequential submissions
+## test: assert lb[0] is players[1] score 9500
