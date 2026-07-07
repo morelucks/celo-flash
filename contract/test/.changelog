@@ -300,3 +300,4 @@
 ## test: add test: 1-participant tournament has participantCount of 1
 ## test: assert t.participantCount equals 1n after single player joins
 ## test: add test: hasJoined mapping is true for sole participant
+## test: assert isPlayerJoined returns true for players[0] after join
