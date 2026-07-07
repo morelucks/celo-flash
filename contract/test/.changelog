@@ -151,3 +151,4 @@
 ## test: verify leaderboard length is 3 after 3 participants
 ## test: write test: TournamentFinalized emitted with correct args for 3 players
 ## test: assert event prizeAmount equals 1st place claimable amount
+## test: add 5-participant sub-scenario within 3+ block
