@@ -384,3 +384,4 @@
 ## test: add test: re-submitting same score does not change leaderboard order
 ## test: submit same score twice for player and verify no leaderboard change
 ## test: add test: two different players with max uint256 score both handled
+## test: submit uint256 max score for two players and verify no overflow
