@@ -163,3 +163,4 @@
 ## test: create zero-entry-fee tournament seeded with 10e18 in beforeEach
 ## test: mint POOL tokens to owner before creating seeded tournament
 ## test: join all 5 players with zero entry fee in exact-wei beforeEach
+## test: submit score 1000 for players[0] in exact-wei beforeEach
