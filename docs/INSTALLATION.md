@@ -14,3 +14,6 @@ git clone https://github.com/yourusername/celo-flash.git
 ```bash
 cd celo-flash
 ```
+
+
+## Frontend Setup
