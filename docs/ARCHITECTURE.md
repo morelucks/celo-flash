@@ -11,3 +11,4 @@ Custom hooks encapsulate reusable logic.
 
 ## Smart Contracts
 
+Written in Solidity for Celo blockchain.
