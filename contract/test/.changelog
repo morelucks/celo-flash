@@ -263,3 +263,4 @@
 ## test: confirm test file top-level structure matches issue #12 sections
 ## test: final sign-off — all 37 tournament finalization tests passing
 ## test: review TournamentNotEnded error selector matches contract definition
+## test: check that finalizeTournament is not gated by onlyOwner modifier
