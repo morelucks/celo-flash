@@ -227,3 +227,4 @@
 ## test: write test: zero prizePool with scores emits winner=address(0)
 ## test: create zero-entry zero-seed tournament for 0-pool edge case
 ## test: join and score a player in the 0-pool tournament
+## test: assert TournamentFinalized emitted with ZeroAddress when pool is 0
