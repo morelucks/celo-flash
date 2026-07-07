@@ -84,3 +84,4 @@
 ## test: compute net prize contribution: entryFee minus 5% protocol fee
 ## test: assert 1-participant claimable matches net 95% contribution
 ## test: confirm 1-participant covers acceptance criterion 1: 100% to sole winner
+## test: add '2 participants' describe block with shared beforeEach
