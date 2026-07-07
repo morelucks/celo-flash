@@ -277,3 +277,4 @@
 ## test: add test: multiple players join but none submit scores
 ## test: join players[0] through players[3] with no score submissions
 ## test: finalize multi-joiner zero-score tournament and check event args
+## test: assert all four joiners have zero claimable prize after finalize
