@@ -388,3 +388,4 @@
 ## test: remove gen423.py commit helper script before final push
 ## test: verify test file has no unused imports after cleanup
 ## test: confirm signScore helper returns correct bytes signature type
+## test: confirm all beforeEach blocks properly await async setup calls
