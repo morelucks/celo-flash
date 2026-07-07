@@ -192,3 +192,4 @@
 ## test: write test: status is Finalized in 5-player exact-wei scenario
 ## test: write test: no dust for 10e18 pool since 6000+2500+1500 is exact
 ## test: compute rawDistributed for POOL and assert it equals POOL
+## test: verify 10e18 * 6000 / 10000 = 6e18 (no remainder)
