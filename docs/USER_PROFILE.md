@@ -17,3 +17,6 @@ Users can connect their Web3 wallet (MetaMask, MiniPay) to the application.
 Players can set a custom username that displays on their profile.
 
 If no username is set, the profile displays the shortened wallet address.
+
+
+### Edit Username
