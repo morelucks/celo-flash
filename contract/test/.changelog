@@ -235,3 +235,4 @@
 ## test: finalize and assert t.winner eq lb[0].player
 ## test: assert t.winningScore eq lb[0].score in leaderboard match test
 ## test: write test: later higher score update is reflected in winner
+## test: join players[0] and submit initial score 5000
