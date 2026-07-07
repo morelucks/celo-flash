@@ -12,3 +12,4 @@ Click the edit button next to your username in the Me section.
 
 ## Is my data saved?
 
+Yes, user data is stored in browser localStorage.
