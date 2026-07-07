@@ -91,3 +91,4 @@
 ## test: capture prizePool from tournament struct in 2-participant beforeEach
 ## test: fast-forward past endTime in 2-participant beforeEach
 ## test: call finalizeTournament in 2-participant beforeEach
+## test: write test: 1st place receives (pool * 7000) / 10000
