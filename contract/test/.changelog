@@ -257,3 +257,4 @@
 ## test: audit all assertions use eq not eql for BigInt compatibility
 ## test: verify no test leaks state to another through shared nonce counter
 ## test: add closing comment block summarising coverage
+## test: final lint pass on test file whitespace and semicolons
