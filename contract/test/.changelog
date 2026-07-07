@@ -303,3 +303,4 @@
 ## test: assert isPlayerJoined returns true for players[0] after join
 ## test: add test: playerBestScore tracks submitted score for sole player
 ## test: assert playerBestScore mapping equals submitted score value
+## test: add test: score submitted in reverse order still ranks correctly
