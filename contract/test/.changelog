@@ -167,3 +167,4 @@
 ## test: submit score 2000 for players[1] in exact-wei beforeEach
 ## test: submit score 3000 for players[2] in exact-wei beforeEach
 ## test: submit score 4000 for players[3] in exact-wei beforeEach
+## test: submit score 5000 for players[4] in exact-wei beforeEach
