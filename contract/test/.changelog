@@ -79,3 +79,4 @@
 ## test: write test: winner can claim and token balance increases by prize
 ## test: record balBefore, call claimPrize, assert balAfter minus balBefore eq prize
 ## test: write test: claimablePrize is zeroed after successful claim
+## test: assert claimablePrize returns 0 after player claims in 1-participant
