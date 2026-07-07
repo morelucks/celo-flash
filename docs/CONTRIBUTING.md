@@ -14,3 +14,7 @@ Follow React best practices and hooks conventions.
 
 Use ESLint for code quality checks.
 Keep components modular and reusable.
+
+
+## Commit Messages
+
