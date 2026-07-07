@@ -298,3 +298,4 @@
 ## test: add test: 1-participant can call claimPrize and drain full pool
 ## test: assert contract token balance decreases by prizePool after claim
 ## test: add test: 1-participant tournament has participantCount of 1
+## test: assert t.participantCount equals 1n after single player joins
