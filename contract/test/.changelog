@@ -139,3 +139,4 @@
 ## test: write test: tournament.status is Finalized after 3-participant finalize
 ## test: write test: integer division dust is added to 1st place prize
 ## test: compute rawDistributed by summing 60+25+15 percent shares
+## test: compute dust as pool minus rawDistributed
