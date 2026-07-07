@@ -33,3 +33,6 @@ User data persists across sessions using browser localStorage.
 
 
 ## Technical Implementation
+
+
+### Context Management
