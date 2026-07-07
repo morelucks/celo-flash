@@ -338,3 +338,4 @@
 ## test: players[2] updates score from 7000 to 8000 and moves to 2nd place
 ## test: assert lb after update has players[1] first and players[2] second
 ## test: add test: exact 10e18 pool with non-divisible entry scenario
+## test: use entry fee where protocol fee leaves non-round pool contribution
