@@ -335,3 +335,4 @@
 ## test: add test: 3-participant emit event prizeAmount is 1st-place share
 ## test: confirm emitted prizeAmount matches claimablePrize for winner
 ## test: add test: 3-participant scores submitted then updated maintain sort
+## test: players[2] updates score from 7000 to 8000 and moves to 2nd place
