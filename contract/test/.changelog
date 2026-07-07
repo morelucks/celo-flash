@@ -94,3 +94,4 @@
 ## test: write test: 1st place receives (pool * 7000) / 10000
 ## test: compute expected first prize using BPS math in 2-player test
 ## test: assert claimablePrize[players[0]] eq expected 70%
+## test: write test: 2nd place receives pool minus first (remainder ~30%)
