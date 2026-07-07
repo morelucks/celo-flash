@@ -17,3 +17,5 @@
 
 ### Methods
 
+
+- `connectWallet()`: Initiates wallet connection
