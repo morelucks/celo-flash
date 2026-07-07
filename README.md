@@ -261,4 +261,13 @@ Celo Flash makes Celo onboarding simple, social, and entertaining.
 
 By combining arcade gameplay with CELO-inspired rewards, USDm-powered tournaments, ecosystem tasks, and partner activations, Celo Flash creates a powerful entry point for the next wave of Celo users.
 
+## Documentation
+
+For detailed documentation, visit the [docs](./docs) folder:
+- [Installation Guide](./docs/INSTALLATION.md)
+- [User Profile Feature](./docs/USER_PROFILE.md)
+- [API Documentation](./docs/API.md)
+- [Contributing Guide](./docs/CONTRIBUTING.md)
+- [FAQ](./docs/FAQ.md)
+
 **Celo Flash ⚡ — Speed into the Celo economy.** 
