@@ -5,3 +5,4 @@
 ## test: identify four participant scenarios to cover
 ## test: plan revert guard cases for TournamentNotEnded and AlreadyFinalized
 ## test: note that pool = 10e18 with 5 players is required acceptance criterion
+## test: identify signScore helper is needed for ECDSA attestation
