@@ -45,3 +45,9 @@ Navigate to the contract directory:
 ```bash
 cd ../contract
 ```
+
+
+Install contract dependencies:
+```bash
+npm install
+```
