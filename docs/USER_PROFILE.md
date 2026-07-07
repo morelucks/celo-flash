@@ -53,3 +53,6 @@ It listens for account changes and updates state automatically.
 
 
 UsernameModal component handles username input and validation.
+
+
+## Validation Rules
