@@ -42,3 +42,6 @@ npm run dev
 
 
 Navigate to the contract directory:
+```bash
+cd ../contract
+```
