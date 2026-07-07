@@ -39,3 +39,6 @@ npm run dev
 
 
 ## Contract Setup
+
+
+Navigate to the contract directory:
