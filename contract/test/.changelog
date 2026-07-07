@@ -344,3 +344,4 @@
 ## test: use pool close to uint256 max divided by 10000 to stress arithmetic
 ## test: add test: exact-wei 1st claim drains exactly 6e18 from contract
 ## test: assert contract balance after 1st claim is 4e18 (2.5 plus 1.5)
+## test: add test: exact-wei 2nd claim drains exactly 2.5e18 from contract
