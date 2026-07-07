@@ -242,3 +242,4 @@
 ## test: finalize and assert winner is players[0] with score 9500
 ## test: write test: tied scores — both players receive non-zero prizes
 ## test: join players[0] and players[1] each with score 7777
+## test: finalize tied tournament and assert p0 plus p1 eq pool
