@@ -182,3 +182,4 @@
 ## test: assert claimablePrize[players[2]] eq ethers.parseEther('1.5')
 ## test: write test: 4th place player receives zero prize
 ## test: assert claimablePrize[players[1]] eq 0n
+## test: write test: 5th place player receives zero prize
