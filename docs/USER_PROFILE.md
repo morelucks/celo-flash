@@ -43,3 +43,6 @@ The context stores userAddress and userName state.
 
 
 ### Wallet Hook
+
+
+The useWallet hook manages Web3 wallet connections.
