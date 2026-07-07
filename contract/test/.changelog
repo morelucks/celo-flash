@@ -108,3 +108,4 @@
 ## test: write test: leaderboard correctly orders players by score descending
 ## test: assert lb[0].player is players[0] and lb[1].player is players[1]
 ## test: verify leaderboard length is 2 in 2-participant scenario
+## test: write test: TournamentFinalized emitted with correct winner for 2 players
