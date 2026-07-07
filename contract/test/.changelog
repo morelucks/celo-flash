@@ -322,3 +322,4 @@
 ## test: add test: 2-participant contract balance drains after both claims
 ## test: assert mockToken balance of contract is zero after both claims
 ## test: add test: 4th player who joined late with highest score still excluded from top3
+## test: join a 4th player with an astronomical score after 3 others
