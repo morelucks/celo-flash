@@ -13,3 +13,4 @@
 ## test: scaffold CeloFlashTournament.test.js with empty describe block
 ## test: add chai and ethers imports to test file
 ## test: add hardhat-network-helpers time import
+## test: update package.json test script to run hardhat test
