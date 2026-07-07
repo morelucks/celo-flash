@@ -266,3 +266,4 @@
 ## test: check that finalizeTournament is not gated by onlyOwner modifier
 ## test: verify finalizeTournament is callable by any address after endTime
 ## test: check that paused contract blocks finalizeTournament correctly
+## test: confirm nonReentrant guard on finalizeTournament does not interfere
