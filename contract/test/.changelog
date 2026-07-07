@@ -371,3 +371,4 @@
 ## test: assert playerBestScore equals the highest of all submitted values
 ## test: add test: leaderboard evicts 10th place when 11th player scores higher
 ## test: fill leaderboard with 10 players then add 11th with top score
+## test: assert leaderboard still has 10 entries with 11th at top
