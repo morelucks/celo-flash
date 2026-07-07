@@ -171,3 +171,4 @@
 ## test: fast-forward and finalize in exact-wei beforeEach
 ## test: write test: prizePool is exactly 10e18 after zero-fee seeded setup
 ## test: get tournament struct and assert prizePool eq POOL
+## test: write test: 1st place prize is exactly 6e18 (60% of 10e18)
