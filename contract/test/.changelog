@@ -37,3 +37,4 @@
 ## test: fast-forward time past endTime for double-finalization test
 ## test: call finalizeTournament once successfully in double-finalize test
 ## test: assert second finalizeTournament call throws TournamentAlreadyFinalized
+## test: verify first call status transition to Finalized before second call
