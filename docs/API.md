@@ -7,3 +7,5 @@
 - `userAddress`: Connected wallet address (string | null)
 
 - `userName`: Custom username (string)
+
+- `setUserAddress`: Function to update wallet address
