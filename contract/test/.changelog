@@ -14,3 +14,4 @@
 ## test: add chai and ethers imports to test file
 ## test: add hardhat-network-helpers time import
 ## test: update package.json test script to run hardhat test
+## test: confirm MockERC20 contract is available for USDm stand-in
