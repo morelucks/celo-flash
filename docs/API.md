@@ -11,3 +11,7 @@
 - `setUserAddress`: Function to update wallet address
 
 - `setUserName`: Function to update username
+
+
+## useWallet Hook
+
