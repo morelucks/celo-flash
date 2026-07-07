@@ -331,3 +331,4 @@
 ## test: call claimPrize for all 3 ranked players and verify deltas
 ## test: assert contract balance is zero after all 3 prizes are claimed
 ## test: add test: 3-participant participantCount equals 3
+## test: assert t.participantCount equals 3n after 3 players join
