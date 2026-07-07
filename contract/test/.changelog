@@ -320,3 +320,4 @@
 ## test: add test: 2-participant first place cannot double-claim
 ## test: call claimPrize for players[0] twice and assert second call reverts
 ## test: add test: 2-participant contract balance drains after both claims
+## test: assert mockToken balance of contract is zero after both claims
