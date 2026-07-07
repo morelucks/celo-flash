@@ -59,3 +59,4 @@
 ## test: add '1 participant' describe block
 ## test: write test: sole player claimablePrize equals full prizePool
 ## test: join players[0] and submit score 9000 in 1-participant test
+## test: fast-forward and finalize in 1-participant test
