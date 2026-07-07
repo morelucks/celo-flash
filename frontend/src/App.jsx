@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { GameStateProvider, useGameState } from './context/GameStateContext';
+import { useWallet } from './hooks/useWallet';
 import Header from './components/Header';
 import TickerMarquee from './components/TickerMarquee';
 import GameScreen from './components/GameScreen';
@@ -23,6 +24,9 @@ function MainAppContent() {
     selectedTourney,
     setSelectedTourney
   } = useGameState();
+
+  // Initialize wallet connection
+  useWallet();
 
   const [swapOpen, setSwapOpen] = useState(false);
 

@@ -1423,6 +1423,31 @@ body::after {
   font-weight: 800;
 }
 
+.edit-username-btn {
+  background: rgba(251, 204, 39, 0.15);
+  border: 1px solid rgba(251, 204, 39, 0.3);
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 28px;
+}
+
+.edit-username-btn:hover {
+  background: rgba(251, 204, 39, 0.25);
+  border-color: rgba(251, 204, 39, 0.5);
+  transform: scale(1.05);
+}
+
+.edit-username-btn:active {
+  transform: scale(0.95);
+}
+
 .profile-fid {
   font-size: 0.72rem;
   color: var(--text-muted);
@@ -1796,6 +1821,22 @@ body::after {
 
 .form-group input:focus {
   border-color: var(--primary-purple);
+}
+
+.form-group input.input-error {
+  border-color: #ff4444;
+}
+
+.input-error-message {
+  font-size: 0.72rem;
+  color: #ff4444;
+  margin-top: 4px;
+}
+
+.input-helper-text {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin-top: 4px;
 }
 
 .modal-submit-btn {

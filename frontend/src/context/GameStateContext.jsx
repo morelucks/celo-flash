@@ -39,6 +39,8 @@ export const GameStateProvider = ({ children }) => {
   const [playing, setPlaying] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [character, setCharacter] = useState('default'); // 'default', 'valora', 'mento'
+  const [userAddress, setUserAddress] = useState(null);
+  const [userName, setUserName] = useState('Guest');
   const [powerups, setPowerups] = useState({
     magnet: 1,
     shield: 1,
@@ -73,6 +75,8 @@ export const GameStateProvider = ({ children }) => {
         if (parsed.tasks !== undefined) setTasks(parsed.tasks);
         if (parsed.tournaments !== undefined) setTournaments(parsed.tournaments);
         if (parsed.character !== undefined) setCharacter(parsed.character);
+        if (parsed.userAddress !== undefined) setUserAddress(parsed.userAddress);
+        if (parsed.userName !== undefined) setUserName(parsed.userName);
       } catch (e) {
         console.error("Error loading localStorage state:", e);
       }
@@ -89,9 +93,11 @@ export const GameStateProvider = ({ children }) => {
       powerups,
       tasks,
       tournaments,
-      character
+      character,
+      userAddress,
+      userName
     }));
-  }, [bestScore, points, cash, gamesPlayed, powerups, tasks, tournaments, character]);
+  }, [bestScore, points, cash, gamesPlayed, powerups, tasks, tournaments, character, userAddress, userName]);
 
   const addPoints = (amount) => setPoints(prev => prev + amount);
   const addCash = (amount) => setCash(prev => prev + amount);
@@ -208,6 +214,10 @@ export const GameStateProvider = ({ children }) => {
       setShowCreateModal,
       showPlayModal,
       setShowPlayModal,
+      userAddress,
+      setUserAddress,
+      userName,
+      setUserName,
       addPoints,
       addCash,
       spendPoints,
