@@ -252,3 +252,4 @@
 ## test: confirm signScore matches contract ECDSA verification exactly
 ## test: add BPS_DENOMINATOR as 10_000n matching contract constant
 ## test: verify test helper createTournament returns BigInt tournamentId
+## test: confirm joinAndScore uses entryFee from tournament struct dynamically
