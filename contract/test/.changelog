@@ -189,3 +189,4 @@
 ## test: write test: winner is players[4] with winning score 5000
 ## test: assert tournament.winner eq players[4].address
 ## test: assert tournament.winningScore eq 5000n
+## test: write test: status is Finalized in 5-player exact-wei scenario
