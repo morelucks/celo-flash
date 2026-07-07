@@ -392,3 +392,4 @@
 ## test: verify endAndFinalize awaits the finalizeTournament transaction
 ## test: audit test descriptions match the assertions they contain
 ## test: add comments above each describe block naming the acceptance criterion
+## test: verify createTournament default durationSecs is MIN_DURATION plus 60
