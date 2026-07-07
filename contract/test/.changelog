@@ -351,3 +351,4 @@
 ## test: add test: players[4] winningScore confirmed in exact-wei tournament
 ## test: assert tournament.winningScore is 5000n matching submitted score
 ## test: add test: exact-wei tournament participantCount is 5
+## test: assert t.participantCount equals 5n after 5 players join
