@@ -229,3 +229,4 @@
 ## test: join and score a player in the 0-pool tournament
 ## test: assert TournamentFinalized emitted with ZeroAddress when pool is 0
 ## test: confirm contract does not revert on 0-pool finalize with scores
+## test: write test: tournament.winner matches leaderboard[0] after finalize
