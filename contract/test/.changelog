@@ -193,3 +193,4 @@
 ## test: write test: no dust for 10e18 pool since 6000+2500+1500 is exact
 ## test: compute rawDistributed for POOL and assert it equals POOL
 ## test: verify 10e18 * 6000 / 10000 = 6e18 (no remainder)
+## test: verify 10e18 * 2500 / 10000 = 2.5e18 (no remainder)
