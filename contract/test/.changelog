@@ -249,3 +249,4 @@
 ## test: run full test suite locally: 37 tests passing
 ## test: confirm no test relies on block order beyond time progression
 ## test: verify freshNonce counter never collides across all test cases
+## test: confirm signScore matches contract ECDSA verification exactly
