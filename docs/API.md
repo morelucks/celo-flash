@@ -4,3 +4,4 @@
 
 ### State Variables
 
+- `userAddress`: Connected wallet address (string | null)
