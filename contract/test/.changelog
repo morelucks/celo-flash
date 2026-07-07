@@ -39,3 +39,4 @@
 ## test: assert second finalizeTournament call throws TournamentAlreadyFinalized
 ## test: verify first call status transition to Finalized before second call
 ## test: clean up revert guard describe block formatting
+## test: add '0 scores submitted' describe block
