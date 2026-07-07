@@ -177,3 +177,4 @@
 ## test: write test: 2nd place prize is exactly 2.5e18 (25% of 10e18)
 ## test: players[3] submitted score 4000, should be 2nd
 ## test: assert claimablePrize[players[3]] eq ethers.parseEther('2.5')
+## test: write test: 3rd place prize is exactly 1.5e18 (15% of 10e18)
