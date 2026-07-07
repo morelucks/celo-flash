@@ -359,3 +359,4 @@
 ## test: add test: claim fails when tournament is still Active status
 ## test: assert claimPrize reverts on Active tournament with TournamentNotActive
 ## test: add test: claim fails when tournament is Cancelled
+## test: cancel a tournament and assert claimPrize uses refund path not prize path
