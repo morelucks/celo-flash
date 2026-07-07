@@ -356,3 +356,4 @@
 ## test: assert leaderboard length is 3 after 5 participants submit scores
 ## test: add test: claim emits PrizeClaimed event with correct args
 ## test: assert PrizeClaimed event emitted with player and amount on claim
+## test: add test: claim fails when tournament is still Active status
