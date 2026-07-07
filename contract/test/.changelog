@@ -15,3 +15,4 @@
 ## test: add hardhat-network-helpers time import
 ## test: update package.json test script to run hardhat test
 ## test: confirm MockERC20 contract is available for USDm stand-in
+## test: wire up signers from ethers.getSigners in outer beforeEach
