@@ -290,3 +290,4 @@
 ## test: seed tournament with 50e18 and join one player to verify full payout
 ## test: add test: 1-participant with zero entry fee still gets full seed
 ## test: assert claimablePrize equals seedAmount when entryFee is zero
+## test: add test: protocol fee correctly deducted before adding to prizePool
