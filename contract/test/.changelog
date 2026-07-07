@@ -2,3 +2,4 @@
 ## test: read CeloFlashTournament contract before writing tests
 ## test: note prize distribution rules from finalizeTournament logic
 ## test: map out acceptance criteria from issue #12
+## test: identify four participant scenarios to cover
