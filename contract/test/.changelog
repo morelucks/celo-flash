@@ -113,3 +113,4 @@
 ## test: write test: 3rd player (non-participant) has zero claimable
 ## test: assert NoPrizeToClaim revert for player who never joined in 2-participant
 ## test: write test: both players can claim their respective prizes
+## test: call claimPrize for players[0] and assert balance delta
