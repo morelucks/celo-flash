@@ -32,3 +32,4 @@
 ## test: add Revert guards describe block
 ## test: write test: finalizeTournament reverts before endTime
 ## test: assert revertedWithCustomError TournamentNotEnded on early call
+## test: confirm TournamentNotEnded is thrown not TournamentNotActive
