@@ -46,3 +46,4 @@
 ## test: confirm event matches when leaderboard is empty
 ## test: write test: status becomes Finalized even with no scores
 ## test: get post-finalize tournament struct and assert status eq 1n
+## test: write test: tournament.winner stays address(0) after 0-scores finalize
