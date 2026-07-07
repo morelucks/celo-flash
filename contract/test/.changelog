@@ -131,3 +131,4 @@
 ## test: assert claimablePrize[players[2]] eq expected 25%
 ## test: write test: 3rd place receives exactly (pool * 1500) / BPS
 ## test: assert claimablePrize[players[0]] eq expected 15%
+## test: write test: all three prizes sum to full pool
