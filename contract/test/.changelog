@@ -133,3 +133,4 @@
 ## test: assert claimablePrize[players[0]] eq expected 15%
 ## test: write test: all three prizes sum to full pool
 ## test: compute p1 p2 p3 from claimablePrize and assert sum eq pool
+## test: write test: winner is the highest-scoring player
