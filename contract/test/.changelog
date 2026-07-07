@@ -346,3 +346,4 @@
 ## test: assert contract balance after 1st claim is 4e18 (2.5 plus 1.5)
 ## test: add test: exact-wei 2nd claim drains exactly 2.5e18 from contract
 ## test: assert contract balance after 2nd claim is 1.5e18
+## test: add test: exact-wei 3rd claim drains exactly 1.5e18 from contract
