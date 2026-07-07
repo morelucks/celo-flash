@@ -312,3 +312,4 @@
 ## test: add test: protocol fee for both entries accumulates in accumulatedFees
 ## test: compute expected fee as 2 times entryFee times 0.05
 ## test: add test: 2-participant participantCount is 2 after both join
+## test: assert t.participantCount equals 2n in 2-participant scenario
