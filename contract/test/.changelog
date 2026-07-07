@@ -278,3 +278,4 @@
 ## test: join players[0] through players[3] with no score submissions
 ## test: finalize multi-joiner zero-score tournament and check event args
 ## test: assert all four joiners have zero claimable prize after finalize
+## test: add test: native CELO tournament with no scores also emits address(0)
