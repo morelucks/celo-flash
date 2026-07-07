@@ -283,3 +283,4 @@
 ## test: add test: prizePool from seed is locked when no scores are submitted
 ## test: verify protocol fees are unaffected by 0-scores finalization
 ## test: add test: winningScore stays 0 when no scores are submitted
+## test: add test: leaderboard array is empty after 0-scores finalization
