@@ -416,3 +416,4 @@
 ## test: close out issue #12 — all acceptance criteria verified by test suite
 ## test: push branch and open PR against main for review
 ## test: confirm PR description references all acceptance criteria from issue
+## test: confirm PR closes issue #12 via closes keyword in description
