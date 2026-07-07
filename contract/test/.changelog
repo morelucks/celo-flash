@@ -52,3 +52,4 @@
 ## test: confirm getLeaderboard returns empty array before any scores
 ## test: add scenario: player joins but never submits score
 ## test: assert joined-but-no-score player has zero claimable prize
+## test: add seeded tournament variant: pool exists but no scores submitted
