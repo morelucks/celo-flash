@@ -47,3 +47,6 @@ The context stores userAddress and userName state.
 
 The useWallet hook manages Web3 wallet connections.
 It listens for account changes and updates state automatically.
+
+
+### Username Modal
