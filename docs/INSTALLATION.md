@@ -17,3 +17,6 @@ cd celo-flash
 
 
 ## Frontend Setup
+
+
+Navigate to the frontend directory:
