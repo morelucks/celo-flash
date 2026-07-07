@@ -28,3 +28,4 @@
 ## test: implement joinAndScore helper combining join and score submission
 ## test: implement endAndFinalize helper using time.increaseTo past endTime
 ## test: approve MaxUint256 allowance for all players in beforeEach
+## test: approve owner allowance and top up owner balance in beforeEach
