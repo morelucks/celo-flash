@@ -20,3 +20,6 @@ If no username is set, the profile displays the shortened wallet address.
 
 
 ### Edit Username
+
+
+An edit button appears next to the username when connected.
