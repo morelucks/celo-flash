@@ -73,3 +73,4 @@
 ## test: assert emit TournamentFinalized with player[0] score 7777 and full pool
 ## test: use 2e18 entry fee to distinguish prize from entry fee in event test
 ## test: verify no other player has claimable amount in 1-participant scenario
+## test: assert players[1] claimable is 0 in sole-winner scenario
