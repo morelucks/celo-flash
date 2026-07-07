@@ -217,3 +217,4 @@
 ## test: record balBefore from mockToken.balanceOf before claim
 ## test: read claimablePrize amount before calling claimPrize
 ## test: call tournament.claimPrize and assert balAfter minus balBefore eq prize
+## test: write test: claimablePrize resets to 0 after successful claim
