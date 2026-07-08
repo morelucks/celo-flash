@@ -1,0 +1,17 @@
+{
+  "accountAssociation": {
+    "header": "<signed after deploy>",
+    "payload": "<signed after deploy>",
+    "signature": "<signed after deploy>"
+  },
+  "miniapp": {
+    "version": "1",
+    "name": "Celo Flash",
+    "iconUrl": "https://celo-flash.vercel.app/favicon.svg",
+    "homeUrl": "https://celo-flash.vercel.app",
+    "imageUrl": "https://celo-flash.vercel.app/og-image.png",
+    "buttonTitle": "Play Now",
+    "splashImageUrl": "https://celo-flash.vercel.app/splash.png",
+    "splashBackgroundColor": "#0D0D0D"
+  }
+}
