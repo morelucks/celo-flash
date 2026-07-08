@@ -1,8 +1,8 @@
 {
   "accountAssociation": {
-    "header": "<signed after deploy>",
-    "payload": "<signed after deploy>",
-    "signature": "<signed after deploy>"
+    "header": "eyJmaWQiOjExMDQzMzgsInR5cGUiOiJjdXN0b2R5Iiwia2V5IjoiMHhBODQwMmE3ZkMxOTQ4ODU5MjhlMjNkNzNBOGViMEFBYjA5NjEzNzlFIn0",
+    "payload": "eyJkb21haW4iOiJjZWxvLWZsYXNoLnZlcmNlbC5hcHAifQ",
+    "signature": "T/hr7XY80/UeB8yJBCllSfVM/5BdmmYXhaNsDxQxIlhH77v5ctzpSuAv8Hh1Bv4i2SA1j9OmSL2abvsaW3RQuxs="
   },
   "miniapp": {
     "version": "1",
