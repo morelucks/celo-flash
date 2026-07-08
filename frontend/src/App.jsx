@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import sdk from '@farcaster/miniapp-sdk';
 import { GameStateProvider, useGameState } from './context/GameStateContext';
 import { useWallet } from './hooks/useWallet';
 import Header from './components/Header';
@@ -14,6 +15,22 @@ import CreateTourneyModal from './components/CreateTourneyModal';
 import PlayTourneyModal from './components/PlayTourneyModal';
 
 function MainAppContent() {
+  const [isSDKLoaded, setIsSDKLoaded] = useState(false);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        await sdk.actions.ready();
+        setIsSDKLoaded(true);
+      } catch (error) {
+        console.error("Failed to initialize Farcaster SDK:", error);
+      }
+    };
+    if (!isSDKLoaded) {
+      load();
+    }
+  }, [isSDKLoaded]);
+
   const {
     currentTab,
     setCurrentTab,
