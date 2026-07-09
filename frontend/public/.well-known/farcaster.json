@@ -7,11 +7,17 @@
   "miniapp": {
     "version": "1",
     "name": "Celo Flash",
-    "iconUrl": "https://celo-flash.vercel.app/favicon.svg",
+    "iconUrl": "https://celo-flash.vercel.app/app-icon.png",
     "homeUrl": "https://celo-flash.vercel.app",
     "imageUrl": "https://celo-flash.vercel.app/og-image.png",
     "buttonTitle": "Play Now",
     "splashImageUrl": "https://celo-flash.vercel.app/splash.png",
-    "splashBackgroundColor": "#0D0D0D"
+    "splashBackgroundColor": "#0D0D0D",
+    "subtitle": "Speed into the Celo economy",
+    "description": "Celo Flash is a fast-paced arcade game where you collect Celo coins, dodge obstacles, and compete in onchain tournaments. Earn points, swap tokens, and climb the leaderboard — all powered by the Celo blockchain.",
+    "primaryCategory": "games",
+    "tags": ["arcade", "celo", "blockchain", "tournaments", "play-to-earn"],
+    "heroImageUrl": "https://celo-flash.vercel.app/og-image.png",
+    "tagline": "Speed into the Celo economy"
   }
 }
