@@ -91,10 +91,7 @@ body::after {
   justify-content: center;
 }
 
-.search-container {
-  display: flex;
-  align-items: center;
-}
+
 
 .search-icon {
   width: 16px;
