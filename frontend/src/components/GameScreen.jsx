@@ -172,7 +172,7 @@ export default function GameScreen({ onOpenShop }) {
             </div>
 
             <button className="start-btn" id="btn-start-game" onClick={handleStartGame}>
-              click to Start
+              Play
             </button>
 
             <div className="powerups-section">
