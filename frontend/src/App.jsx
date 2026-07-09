@@ -74,7 +74,7 @@ function MainAppContent() {
     <div className="warpcast-desktop-bg">
       <div className="phone-container">
         
-        {/* Header Bar - top navigation */}
+        {/* Header Bar */}
         <Header onOpenSwap={() => setSwapOpen(true)} />
 
         {/* Rolling News Marquee */}
