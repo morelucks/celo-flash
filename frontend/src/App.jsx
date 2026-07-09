@@ -72,10 +72,6 @@ function MainAppContent() {
 
   return (
     <div className="warpcast-desktop-bg">
-      {/* Warpcast Search & Frame Simulator for Desktop - TO BE REMOVED */}
-      <div className="warpcast-top-nav">
-      </div>
-
       {/* Phone Viewport Container */}
       <div className="phone-container">
         
