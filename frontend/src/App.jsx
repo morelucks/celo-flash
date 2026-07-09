@@ -72,7 +72,7 @@ function MainAppContent() {
 
   return (
     <div className="warpcast-desktop-bg">
-      {/* Phone Viewport Container */}
+      {/* Phone Viewport Container - main app */}
       <div className="phone-container">
         
         {/* Header Bar */}
