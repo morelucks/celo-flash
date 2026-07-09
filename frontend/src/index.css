@@ -83,7 +83,7 @@ body::after {
   z-index: 1;
 }
 
-/* Warpcast Top Navigation Bar Mockup */
+/* Warpcast Top Navigation Bar Mockup - DEPRECATED */
 .warpcast-top-nav {
   width: 100%;
   max-width: 400px;
