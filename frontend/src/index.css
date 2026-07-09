@@ -99,7 +99,6 @@ body::after {
   border: 1px solid rgba(255, 255, 255, 0.08);
   padding: 8px 14px;
   border-radius: var(--border-radius-md);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
 }
 
 .search-icon {
