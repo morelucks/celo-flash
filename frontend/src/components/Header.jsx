@@ -22,20 +22,7 @@ export default function Header({ onOpenSwap }) {
       <div className="app-header">
         <div className="app-info">
           <div className="app-logo">
-            <svg className="celo-logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-              <defs>
-                <linearGradient id="celo-gold-grad" x1="0%" y1="100%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#E5BB38" />
-                  <stop offset="100%" stopColor="#FCFF52" />
-                </linearGradient>
-                <linearGradient id="celo-green-grad" x1="0%" y1="100%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#105B37" />
-                  <stop offset="100%" stopColor="#35D07F" />
-                </linearGradient>
-              </defs>
-              <circle cx="38" cy="50" r="22" fill="none" stroke="url(#celo-gold-grad)" strokeWidth="8" />
-              <circle cx="62" cy="50" r="22" fill="none" stroke="url(#celo-green-grad)" strokeWidth="8" />
-            </svg>
+            <img src="/favicon.svg" alt="Celo Flash" className="celo-logo-svg" />
           </div>
           <div className="app-title-group">
             <h1 className="app-title">Celo Flash</h1>
