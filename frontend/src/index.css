@@ -71,7 +71,7 @@ body::after {
   pointer-events: none;
 }
 
-/* Warpcast Simulator Page Container - for desktop frame */
+/* Desktop frame container */
 .warpcast-desktop-bg {
   display: flex;
   flex-direction: column;
