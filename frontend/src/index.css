@@ -94,7 +94,6 @@ body::after {
 .search-container {
   display: flex;
   align-items: center;
-  background-color: rgba(12, 29, 23, 0.7);
   padding: 8px 14px;
   border-radius: var(--border-radius-md);
 }
