@@ -95,12 +95,7 @@ body::after {
 
 
 
-.search-container input {
-  background: transparent;
-  border: none;
-  font-size: 0.85rem;
-  outline: none;
-}
+
 
 .search-kbd {
   font-size: 0.7rem;
