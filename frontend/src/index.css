@@ -1874,9 +1874,6 @@ body::after {
     height: 100dvh;
     justify-content: flex-start;
   }
-  .warpcast-top-nav {
-    display: none;
-  }
   .phone-container {
     width: 100vw;
     height: 100%;
