@@ -76,7 +76,6 @@ function MainAppContent() {
       <div className="warpcast-top-nav">
         <div className="search-container">
           <input type="text" placeholder="" disabled />
-          <kbd className="search-kbd"></kbd>
         </div>
       </div>
 
