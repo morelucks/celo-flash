@@ -72,7 +72,7 @@ function MainAppContent() {
 
   return (
     <div className="warpcast-desktop-bg">
-      {/* Warpcast Search & Frame Simulator for Desktop */}
+      {/* Warpcast Search & Frame Simulator for Desktop - TO BE REMOVED */}
       <div className="warpcast-top-nav">
         <div className="search-container">
           <svg className="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
