@@ -80,7 +80,7 @@ function MainAppContent() {
             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
           </svg>
           <input type="text" placeholder="Search Warpcast" disabled />
-          <kbd className="search-kbd">⌘K</kbd>
+          <kbd className="search-kbd"></kbd>
         </div>
       </div>
 
