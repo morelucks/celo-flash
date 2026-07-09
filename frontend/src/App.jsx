@@ -75,7 +75,6 @@ function MainAppContent() {
       {/* Warpcast Search & Frame Simulator for Desktop - TO BE REMOVED */}
       <div className="warpcast-top-nav">
         <div className="search-container">
-          <input type="text" placeholder="" disabled />
         </div>
       </div>
 
