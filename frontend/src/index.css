@@ -83,26 +83,7 @@ body::after {
   z-index: 1;
 }
 
-/* Warpcast Top Navigation Bar Mockup - DEPRECATED */
-.warpcast-top-nav {
-  width: 100%;
-  max-width: 400px;
-  display: flex;
-  justify-content: center;
-}
-
-
-
-
-
-
-
-.search-kbd {
-  font-size: 0.7rem;
-  color: var(--text-muted);
-  padding: 2px 6px;
-  border-radius: var(--border-radius-sm);
-}
+/* Warpcast Top Navigation Bar Mockup - REMOVED */
 
 /* Phone Container Frame */
 .phone-container {
