@@ -1884,9 +1884,6 @@ body::after {
 }
 
 @media (max-height: 850px) {
-  .warpcast-top-nav {
-    display: none;
-  }
   .warpcast-desktop-bg {
     padding: 10px;
   }
