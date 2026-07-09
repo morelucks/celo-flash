@@ -126,7 +126,6 @@ body::after {
   color: var(--text-muted);
   padding: 2px 6px;
   border-radius: var(--border-radius-sm);
-  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 /* Phone Container Frame */
