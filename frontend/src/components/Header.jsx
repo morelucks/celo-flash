@@ -39,7 +39,7 @@ export default function Header({ onOpenSwap }) {
           </div>
           <div className="app-title-group">
             <h1 className="app-title">Celo Flash</h1>
-            <span className="app-subtitle">by luckify</span>
+
           </div>
         </div>
         <div className="app-actions">
