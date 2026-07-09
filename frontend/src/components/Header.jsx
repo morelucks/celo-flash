@@ -22,7 +22,7 @@ export default function Header({ onOpenSwap }) {
       <div className="app-header">
         <div className="app-info">
           <div className="app-logo">
-            <img src="/favicon.svg" alt="Celo Flash" className="celo-logo-svg" />
+            <img src="/og-image.png" alt="Celo Flash" className="celo-logo-svg" />
           </div>
           <div className="app-title-group">
             <h1 className="app-title">Celo Flash</h1>
