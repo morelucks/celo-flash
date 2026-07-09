@@ -83,52 +83,6 @@ body::after {
   z-index: 1;
 }
 
-/* Warpcast Top Navigation Bar Mockup */
-.warpcast-top-nav {
-  width: 100%;
-  max-width: 400px;
-  margin-bottom: 15px;
-  display: flex;
-  justify-content: center;
-}
-
-.search-container {
-  display: flex;
-  align-items: center;
-  background-color: rgba(12, 29, 23, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  padding: 8px 14px;
-  border-radius: var(--border-radius-md);
-  width: 100%;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  backdrop-filter: blur(10px);
-}
-
-.search-icon {
-  width: 16px;
-  height: 16px;
-  color: var(--text-muted);
-  margin-right: 10px;
-}
-
-.search-container input {
-  background: transparent;
-  border: none;
-  color: var(--text-primary);
-  font-size: 0.85rem;
-  outline: none;
-  width: 100%;
-}
-
-.search-kbd {
-  font-size: 0.7rem;
-  background-color: var(--bg-dark);
-  color: var(--text-muted);
-  padding: 2px 6px;
-  border-radius: var(--border-radius-sm);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
 /* Phone Container Frame */
 .phone-container {
   width: 390px;
@@ -1899,9 +1853,6 @@ body::after {
     height: 100dvh;
     justify-content: flex-start;
   }
-  .warpcast-top-nav {
-    display: none;
-  }
   .phone-container {
     width: 100vw;
     height: 100%;
@@ -1912,9 +1863,6 @@ body::after {
 }
 
 @media (max-height: 850px) {
-  .warpcast-top-nav {
-    display: none;
-  }
   .warpcast-desktop-bg {
     padding: 10px;
   }
