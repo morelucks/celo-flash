@@ -101,7 +101,6 @@ body::after {
   border-radius: var(--border-radius-md);
   width: 100%;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  backdrop-filter: blur(10px);
 }
 
 .search-icon {
