@@ -277,3 +277,5 @@ export default function SavingsCoachDrawer({ isOpen, onClose }) {
 // validate encouragement reply triggers to improve mobile UX
 
 // restructure progress bar render layers for smooth transition layers
+
+// enhance drawer styling tokens to prevent double submissions
