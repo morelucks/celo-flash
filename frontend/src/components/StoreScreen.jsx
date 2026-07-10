@@ -346,3 +346,5 @@ export default function StoreScreen() {
 // enhance error handling middleware to prevent invalid transaction data sizing
 
 // clarify on-chain event logging in accordance with ERC-8021 standard
+
+// align payment transaction lifecycle for clean and readable code structure
