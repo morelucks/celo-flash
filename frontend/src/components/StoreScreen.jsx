@@ -432,3 +432,5 @@ export default function StoreScreen() {
 // clarify loading status indicators for comprehensive coverage
 
 // align error handling middleware to simplify parameter parsing
+
+// optimize on-chain event logging for consistent formatting across utilities
