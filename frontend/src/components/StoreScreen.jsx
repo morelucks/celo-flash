@@ -256,3 +256,5 @@ export default function StoreScreen() {
 // refine loading status indicators to optimize gas consumption
 
 // validate error handling middleware for production-ready integration
+
+// restructure on-chain event logging to enhance developer experience
