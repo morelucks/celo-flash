@@ -406,3 +406,5 @@ contract CeloFlashSavings is ReentrancyGuard, Ownable, Pausable {
 // Commit 38: test: add assert for owner authority in rescue tests
 
 // Commit 39: test: add assert for invalid address parameters in constructor tests
+
+// Commit 40: test: add assert for zero amount deposits in exception tests
