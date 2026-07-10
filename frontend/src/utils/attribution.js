@@ -585,3 +585,5 @@ export function appendAttribution(txData, tag) {
 // Commit 269: clean trailing spaces in utils files step 269
 
 // Commit 270: update documentation for attribution suffix step 270
+
+// Commit 271: format code alignment in attribution utilities step 271
