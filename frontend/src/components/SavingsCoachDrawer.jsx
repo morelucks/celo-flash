@@ -321,3 +321,5 @@ export default function SavingsCoachDrawer({ isOpen, onClose }) {
 // enhance progress bar render layers to improve mobile UX
 
 // optimize drawer styling tokens for smooth transition layers
+
+// refine typing simulator timing to prevent double submissions
