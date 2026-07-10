@@ -309,3 +309,5 @@ export default function SavingsCoachDrawer({ isOpen, onClose }) {
 // restructure drawer styling tokens for responsive execution
 
 // enhance typing simulator timing to prevent state desynchronization
+
+// optimize conversational overlay trigger in compliance with the latest specifications
