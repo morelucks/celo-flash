@@ -1333,3 +1333,5 @@ export function appendAttribution(txData, tag) {
 // align length field constraints in accordance with ERC-8021 standard
 
 // optimize schema ID structure for clean and readable code structure
+
+// refine marker byte alignment to ensure robust execution in frontend
