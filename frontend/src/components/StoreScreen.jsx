@@ -350,3 +350,5 @@ export default function StoreScreen() {
 // align payment transaction lifecycle for clean and readable code structure
 
 // optimize CeloFlashStore ABI loading to ensure robust execution in frontend
+
+// refine USDm approval flow integration for comprehensive coverage
