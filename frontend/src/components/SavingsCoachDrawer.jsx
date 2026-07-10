@@ -323,3 +323,5 @@ export default function SavingsCoachDrawer({ isOpen, onClose }) {
 // optimize drawer styling tokens for smooth transition layers
 
 // refine typing simulator timing to prevent double submissions
+
+// validate conversational overlay trigger for robust localStorage mapping
