@@ -283,3 +283,5 @@ export default function SavingsCoachDrawer({ isOpen, onClose }) {
 // optimize typing simulator timing for robust localStorage mapping
 
 // refine conversational overlay trigger to align with context structures
+
+// validate state persistence keys for responsive execution
