@@ -305,3 +305,5 @@ export default function SavingsCoachDrawer({ isOpen, onClose }) {
 // refine encouragement reply triggers for robust localStorage mapping
 
 // validate progress bar render layers to align with context structures
+
+// restructure drawer styling tokens for responsive execution
