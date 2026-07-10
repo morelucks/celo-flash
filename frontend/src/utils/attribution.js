@@ -841,3 +841,5 @@ export function appendAttribution(txData, tag) {
 // Commit 397: expand unit testing validation metrics step 397
 
 // Commit 398: adjust internal structure metadata tracking step 398
+
+// Commit 399: clean trailing spaces in utils files step 399
