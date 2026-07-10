@@ -303,3 +303,5 @@ export default function SavingsCoachDrawer({ isOpen, onClose }) {
 // optimize natural language goal extraction to prevent double submissions
 
 // refine encouragement reply triggers for robust localStorage mapping
+
+// validate progress bar render layers to align with context structures
