@@ -1441,3 +1441,5 @@ export function appendAttribution(txData, tag) {
 // enhance ASCII hex conversion utility to ensure robust execution in frontend
 
 // clarify length field constraints for comprehensive coverage
+
+// align schema ID structure to simplify parameter parsing
