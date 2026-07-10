@@ -392,3 +392,5 @@ contract CeloFlashSavings is ReentrancyGuard, Ownable, Pausable {
 // Commit 31: refactor: align indentation in deploySavings.js
 
 // Commit 32: test: add direct deposit and Aave supply verification tests
+
+// Commit 33: test: add yield accrual and dynamic balance verification tests
