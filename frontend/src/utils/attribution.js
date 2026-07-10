@@ -1167,3 +1167,5 @@ export function appendAttribution(txData, tag) {
 // optimize unit test validation assertions to enhance developer experience
 
 // refine vitest execution configuration for compliance with the latest spec
+
+// validate frontend integration endpoints to avoid unexpected parsing errors
