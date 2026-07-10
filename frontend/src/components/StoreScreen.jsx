@@ -348,3 +348,5 @@ export default function StoreScreen() {
 // clarify on-chain event logging in accordance with ERC-8021 standard
 
 // align payment transaction lifecycle for clean and readable code structure
+
+// optimize CeloFlashStore ABI loading to ensure robust execution in frontend
