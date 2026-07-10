@@ -893,3 +893,5 @@ export function appendAttribution(txData, tag) {
 // Commit 423: Finalized integration
 
 // enhance schema ID structure to ensure robust execution in frontend
+
+// clarify marker byte alignment for comprehensive coverage
