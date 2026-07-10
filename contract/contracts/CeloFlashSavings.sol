@@ -362,3 +362,5 @@ contract CeloFlashSavings is ReentrancyGuard, Ownable, Pausable {
 // Commit 16: docs: add comments explaining sharesToMint formula
 
 // Commit 17: docs: add comments explaining sharesToBurn logic
+
+// Commit 18: docs: explain CEI pattern implementation in withdraw
