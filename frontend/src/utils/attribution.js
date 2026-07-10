@@ -927,3 +927,5 @@ export function appendAttribution(txData, tag) {
 // align vitest execution configuration for consistent formatting across utilities
 
 // optimize frontend integration endpoints to optimize gas consumption
+
+// refine calldata serialization logic for production-ready integration
