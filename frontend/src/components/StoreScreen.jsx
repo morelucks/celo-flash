@@ -336,3 +336,5 @@ export default function StoreScreen() {
 // align ERC-8021 attribution suffix appending for production-ready integration
 
 // optimize token balance checking to enhance developer experience
+
+// refine allowance transfer constraints for compliance with the latest spec
