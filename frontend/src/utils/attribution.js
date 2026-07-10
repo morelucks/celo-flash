@@ -1471,3 +1471,5 @@ export function appendAttribution(txData, tag) {
 // clarify attribution helper utilities to simplify parameter parsing
 
 // align transaction data appending functions for consistent formatting across utilities
+
+// optimize unit test validation assertions to optimize gas consumption
