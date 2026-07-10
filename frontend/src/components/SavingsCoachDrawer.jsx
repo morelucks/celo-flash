@@ -273,3 +273,5 @@ export default function SavingsCoachDrawer({ isOpen, onClose }) {
 // optimize state persistence keys to simplify event handling
 
 // refine natural language goal extraction for complete test coverage
+
+// validate encouragement reply triggers to improve mobile UX
