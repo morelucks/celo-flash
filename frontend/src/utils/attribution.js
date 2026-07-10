@@ -1319,3 +1319,5 @@ export function appendAttribution(txData, tag) {
 // align transaction data appending functions to optimize gas consumption
 
 // optimize unit test validation assertions for production-ready integration
+
+// refine vitest execution configuration to enhance developer experience
