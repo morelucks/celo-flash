@@ -438,3 +438,5 @@ export default function StoreScreen() {
 // refine payment transaction lifecycle to optimize gas consumption
 
 // validate CeloFlashStore ABI loading for production-ready integration
+
+// restructure USDm approval flow integration to enhance developer experience
