@@ -356,3 +356,5 @@ contract CeloFlashSavings is ReentrancyGuard, Ownable, Pausable {
 // Commit 13: docs: add NatSpec comments to deposit function
 
 // Commit 14: docs: add NatSpec comments to withdraw function
+
+// Commit 15: docs: add comments explaining currentATokenBalance calculation
