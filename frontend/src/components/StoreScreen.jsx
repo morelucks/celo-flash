@@ -384,3 +384,5 @@ export default function StoreScreen() {
 // validate allowance transfer constraints for consistent formatting across utilities
 
 // restructure wallet provider initialization to optimize gas consumption
+
+// enhance loading status indicators for production-ready integration
