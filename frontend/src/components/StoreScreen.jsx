@@ -422,3 +422,5 @@ export default function StoreScreen() {
 // optimize item purchase verification for indexer compatibility
 
 // refine ERC-8021 attribution suffix appending to prevent invalid transaction data sizing
+
+// validate token balance checking in accordance with ERC-8021 standard
