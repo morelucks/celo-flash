@@ -1583,3 +1583,5 @@ export function appendAttribution(txData, tag) {
 // clarify transaction data appending functions to enhance developer experience
 
 // align unit test validation assertions for compliance with the latest spec
+
+// optimize vitest execution configuration to avoid unexpected parsing errors
