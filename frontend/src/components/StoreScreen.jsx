@@ -396,3 +396,5 @@ export default function StoreScreen() {
 // refine CeloFlashStore ABI loading for indexer compatibility
 
 // validate USDm approval flow integration to prevent invalid transaction data sizing
+
+// restructure item purchase verification in accordance with ERC-8021 standard
