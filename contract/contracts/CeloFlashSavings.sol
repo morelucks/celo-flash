@@ -7,11 +7,26 @@ import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {Pausable} from "@openzeppelin/contracts/utils/Pausable.sol";
 
+interface IPool {
+    function supply(
+        address asset,
+        uint256 amount,
+        address onBehalfOf,
+        uint16 referralCode
+    ) external;
+
+    function withdraw(
+        address asset,
+        uint256 amount,
+        address to
+    ) external returns (uint256);
+}
+
 /**
  * @title CeloFlashSavings
  * @author CeloFlash Team
  * @notice Handles on-chain savings for Celo Flash players.
- *         Allows locking USDm stablecoin and native CELO, with yield-generation routing readiness.
+ *         Allows locking USDm stablecoin and native CELO, with yield-generation routing to Aave V3.
  *
  * @dev Security features:
  *   - ReentrancyGuard on all deposit and withdrawal functions
@@ -30,17 +45,23 @@ contract CeloFlashSavings is ReentrancyGuard, Ownable, Pausable {
     /// @notice The stablecoin used for savings (USDm)
     IERC20 public immutable stablecoin;
 
+    /// @notice The Aave V3 Pool contract
+    IPool public immutable aavePool;
+
+    /// @notice The interest-bearing aToken (aUSDm)
+    IERC20 public immutable aToken;
+
     /// @notice Approved sources that can call deposit on behalf of users (e.g., CeloFlashStore)
     mapping(address => bool) public approvedSources;
 
-    /// @notice USDm savings balance per user
-    mapping(address => uint256) public usdmBalances;
+    /// @notice USDm savings shares per user
+    mapping(address => uint256) private _usdmShares;
+
+    /// @notice Total USDm shares minted
+    uint256 private _totalUSDmShares;
 
     /// @notice CELO savings balance per user
     mapping(address => uint256) public celoBalances;
-
-    /// @notice Total USDm locked in the contract
-    uint256 public totalUSDmLocked;
 
     /// @notice Total CELO locked in the contract
     uint256 public totalCELOLocked;
@@ -64,6 +85,8 @@ contract CeloFlashSavings is ReentrancyGuard, Ownable, Pausable {
     );
 
     event SourceApprovalUpdated(address indexed source, bool approved);
+
+    event TokensRescued(address indexed token, address indexed to, uint256 amount);
 
     // ─────────────────────────────────────────────
     //  Errors
@@ -90,9 +113,51 @@ contract CeloFlashSavings is ReentrancyGuard, Ownable, Pausable {
     //  Constructor
     // ─────────────────────────────────────────────
 
-    constructor(address _stablecoin) Ownable(msg.sender) {
-        if (_stablecoin == address(0)) revert InvalidAddress();
+    constructor(
+        address _stablecoin,
+        address _aavePool,
+        address _aToken
+    ) Ownable(msg.sender) {
+        if (_stablecoin == address(0) || _aavePool == address(0) || _aToken == address(0)) {
+            revert InvalidAddress();
+        }
         stablecoin = IERC20(_stablecoin);
+        aavePool = IPool(_aavePool);
+        aToken = IERC20(_aToken);
+    }
+
+    // ─────────────────────────────────────────────
+    //  External/Public View Functions
+    // ─────────────────────────────────────────────
+
+    /**
+     * @notice Get the USDm savings balance (including accrued yield) for a user.
+     * @param _user The address of the user
+     */
+    function usdmBalances(address _user) public view returns (uint256) {
+        if (_totalUSDmShares == 0) return 0;
+        return (_usdmShares[_user] * aToken.balanceOf(address(this))) / _totalUSDmShares;
+    }
+
+    /**
+     * @notice Get the total USDm locked in the savings contract (including accrued yield).
+     */
+    function totalUSDmLocked() public view returns (uint256) {
+        return aToken.balanceOf(address(this));
+    }
+
+    /**
+     * @notice Get the USDm shares of a user.
+     */
+    function usdmShares(address _user) public view returns (uint256) {
+        return _usdmShares[_user];
+    }
+
+    /**
+     * @notice Get the total USDm shares.
+     */
+    function totalUSDmShares() public view returns (uint256) {
+        return _totalUSDmShares;
     }
 
     // ─────────────────────────────────────────────
@@ -101,7 +166,7 @@ contract CeloFlashSavings is ReentrancyGuard, Ownable, Pausable {
 
     /**
      * @notice Deposit USDm into savings for a user.
-     * @dev Can be called by the user themselves or by an approved source contract (e.g., CeloFlashStore during round-up).
+     * @dev Can be called by the user themselves or by an approved source contract.
      * @param _user The player address to credit the savings to
      * @param _amount The amount of USDm to deposit
      */
@@ -114,11 +179,26 @@ contract CeloFlashSavings is ReentrancyGuard, Ownable, Pausable {
         if (_user == address(0)) revert InvalidAddress();
         if (_amount == 0) revert ZeroAmount();
 
-        // Transfer tokens from msg.sender (the caller must approve this contract first or the calling contract transfers them)
+        // Calculate shares to mint BEFORE transferring new tokens
+        uint256 sharesToMint;
+        uint256 currentATokenBalance = aToken.balanceOf(address(this));
+        if (_totalUSDmShares == 0 || currentATokenBalance == 0) {
+            sharesToMint = _amount;
+        } else {
+            sharesToMint = (_amount * _totalUSDmShares) / currentATokenBalance;
+        }
+
+        // Transfer stablecoin from msg.sender to this contract
         stablecoin.safeTransferFrom(msg.sender, address(this), _amount);
 
-        usdmBalances[_user] += _amount;
-        totalUSDmLocked += _amount;
+        // Approve Aave Pool to spend the stablecoin
+        stablecoin.approve(address(aavePool), _amount);
+
+        // Supply the stablecoin to Aave Pool
+        aavePool.supply(address(stablecoin), _amount, address(this), 0);
+
+        _usdmShares[_user] += sharesToMint;
+        _totalUSDmShares += sharesToMint;
 
         emit SavingsDeposited(_user, address(stablecoin), _amount, block.timestamp);
     }
@@ -146,20 +226,35 @@ contract CeloFlashSavings is ReentrancyGuard, Ownable, Pausable {
     }
 
     /**
-     * @notice Withdraw USDm from savings.
+     * @notice Withdraw USDm from savings (burns corresponding shares and Aave aTokens).
      * @param _amount The amount of USDm to withdraw
      */
     function withdraw(uint256 _amount) external nonReentrant {
         if (_amount == 0) revert ZeroAmount();
-        if (usdmBalances[msg.sender] < _amount) revert InsufficientBalance();
+        
+        uint256 userBalance = usdmBalances(msg.sender);
+        if (userBalance < _amount) revert InsufficientBalance();
+
+        // Calculate shares to burn
+        uint256 sharesToBurn;
+        uint256 currentATokenBalance = aToken.balanceOf(address(this));
+        if (_amount == userBalance) {
+            sharesToBurn = _usdmShares[msg.sender];
+        } else {
+            sharesToBurn = (_amount * _totalUSDmShares) / currentATokenBalance;
+        }
 
         // CEI Pattern: update state before interactions
-        usdmBalances[msg.sender] -= _amount;
-        totalUSDmLocked -= _amount;
+        _usdmShares[msg.sender] -= sharesToBurn;
+        _totalUSDmShares -= sharesToBurn;
 
-        stablecoin.safeTransfer(msg.sender, _amount);
+        // Withdraw underlying from Aave Pool
+        uint256 withdrawnAmount = aavePool.withdraw(address(stablecoin), _amount, address(this));
 
-        emit SavingsWithdrawn(msg.sender, address(stablecoin), _amount, block.timestamp);
+        // Transfer stablecoin to user
+        stablecoin.safeTransfer(msg.sender, withdrawnAmount);
+
+        emit SavingsWithdrawn(msg.sender, address(stablecoin), withdrawnAmount, block.timestamp);
     }
 
     /**
@@ -191,6 +286,31 @@ contract CeloFlashSavings is ReentrancyGuard, Ownable, Pausable {
         if (_source == address(0)) revert InvalidAddress();
         approvedSources[_source] = _approved;
         emit SourceApprovalUpdated(_source, _approved);
+    }
+
+    /**
+     * @notice Rescue stuck ERC20 tokens or native CELO from the contract.
+     * @dev Owner-only rescue function.
+     * @param _token The token to rescue (address(0) for CELO)
+     * @param _to The destination address for rescued funds
+     * @param _amount The amount to rescue
+     */
+    function rescueTokens(
+        address _token,
+        address _to,
+        uint256 _amount
+    ) external onlyOwner {
+        if (_to == address(0)) revert InvalidAddress();
+        if (_amount == 0) revert ZeroAmount();
+
+        if (_token == address(0)) {
+            (bool success, ) = payable(_to).call{value: _amount}("");
+            if (!success) revert TransferFailed();
+        } else {
+            IERC20(_token).safeTransfer(_to, _amount);
+        }
+
+        emit TokensRescued(_token, _to, _amount);
     }
 
     /**
