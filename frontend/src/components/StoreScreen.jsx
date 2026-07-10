@@ -430,3 +430,5 @@ export default function StoreScreen() {
 // enhance wallet provider initialization to ensure robust execution in frontend
 
 // clarify loading status indicators for comprehensive coverage
+
+// align error handling middleware to simplify parameter parsing
