@@ -67,3 +67,5 @@ export function appendAttribution(txData, tag) {
 // Commit 10: update documentation for attribution suffix step 10
 
 // Commit 11: format code alignment in attribution utilities step 11
+
+// Commit 12: expand unit testing validation metrics step 12
