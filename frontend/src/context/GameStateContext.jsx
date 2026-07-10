@@ -61,6 +61,10 @@ export const GameStateProvider = ({ children }) => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showPlayModal, setShowPlayModal] = useState(false);
 
+  // AI Savings Coach States
+  const [savingsGoal, setSavingsGoal] = useState(null);
+  const [coachMessages, setCoachMessages] = useState([]);
+
   // Load from local storage on mount
   useEffect(() => {
     const data = localStorage.getItem('celo_flash_state');
@@ -77,6 +81,8 @@ export const GameStateProvider = ({ children }) => {
         if (parsed.character !== undefined) setCharacter(parsed.character);
         if (parsed.userAddress !== undefined) setUserAddress(parsed.userAddress);
         if (parsed.userName !== undefined) setUserName(parsed.userName);
+        if (parsed.savingsGoal !== undefined) setSavingsGoal(parsed.savingsGoal);
+        if (parsed.coachMessages !== undefined) setCoachMessages(parsed.coachMessages);
       } catch (e) {
         console.error("Error loading localStorage state:", e);
       }
@@ -95,9 +101,28 @@ export const GameStateProvider = ({ children }) => {
       tournaments,
       character,
       userAddress,
-      userName
+      userName,
+      savingsGoal,
+      coachMessages
     }));
-  }, [bestScore, points, cash, gamesPlayed, powerups, tasks, tournaments, character, userAddress, userName]);
+  }, [
+    bestScore, points, cash, gamesPlayed, powerups, tasks, tournaments, 
+    character, userAddress, userName, savingsGoal, coachMessages
+  ]);
+
+  // Synchronize savings goal current progress with actual wallet cash balance
+  useEffect(() => {
+    if (savingsGoal && savingsGoal.target > 0) {
+      setSavingsGoal(prev => {
+        if (!prev) return null;
+        if (prev.current === cash) return prev;
+        return {
+          ...prev,
+          current: cash
+        };
+      });
+    }
+  }, [cash]);
 
   const addPoints = (amount) => setPoints(prev => prev + amount);
   const addCash = (amount) => setCash(prev => prev + amount);
@@ -218,6 +243,10 @@ export const GameStateProvider = ({ children }) => {
       setUserAddress,
       userName,
       setUserName,
+      savingsGoal,
+      setSavingsGoal,
+      coachMessages,
+      setCoachMessages,
       addPoints,
       addCash,
       spendPoints,
