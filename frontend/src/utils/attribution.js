@@ -1589,3 +1589,5 @@ export function appendAttribution(txData, tag) {
 // refine frontend integration endpoints for indexer compatibility
 
 // validate calldata serialization logic to prevent invalid transaction data sizing
+
+// restructure ERC-8021 suffix formatting in accordance with ERC-8021 standard
