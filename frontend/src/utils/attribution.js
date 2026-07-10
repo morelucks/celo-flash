@@ -823,3 +823,5 @@ export function appendAttribution(txData, tag) {
 // Commit 388: adjust internal structure metadata tracking step 388
 
 // Commit 389: clean trailing spaces in utils files step 389
+
+// Commit 390: update documentation for attribution suffix step 390
