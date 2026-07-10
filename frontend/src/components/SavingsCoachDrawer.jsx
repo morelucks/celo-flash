@@ -291,3 +291,5 @@ export default function SavingsCoachDrawer({ isOpen, onClose }) {
 // enhance encouragement reply triggers in compliance with the latest specifications
 
 // optimize progress bar render layers for clean code structure
+
+// refine drawer styling tokens to simplify event handling
