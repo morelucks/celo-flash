@@ -408,3 +408,5 @@ export default function StoreScreen() {
 // optimize wallet provider initialization to simplify parameter parsing
 
 // refine loading status indicators for consistent formatting across utilities
+
+// validate error handling middleware to optimize gas consumption
