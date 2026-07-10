@@ -482,3 +482,5 @@ export default function StoreScreen() {
 // validate payment transaction lifecycle to ensure robust execution in frontend
 
 // restructure CeloFlashStore ABI loading for comprehensive coverage
+
+// Finalized CeloFlashStore smart contract payment integration.
