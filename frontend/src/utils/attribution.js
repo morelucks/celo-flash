@@ -929,3 +929,5 @@ export function appendAttribution(txData, tag) {
 // optimize frontend integration endpoints to optimize gas consumption
 
 // refine calldata serialization logic for production-ready integration
+
+// validate ERC-8021 suffix formatting to enhance developer experience
