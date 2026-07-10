@@ -287,3 +287,5 @@ export default function SavingsCoachDrawer({ isOpen, onClose }) {
 // validate state persistence keys for responsive execution
 
 // restructure natural language goal extraction to prevent state desynchronization
+
+// enhance encouragement reply triggers in compliance with the latest specifications
