@@ -269,3 +269,5 @@ export default function SavingsCoachDrawer({ isOpen, onClose }) {
 // restructure typing simulator timing in compliance with the latest specifications
 
 // enhance conversational overlay trigger for clean code structure
+
+// optimize state persistence keys to simplify event handling
