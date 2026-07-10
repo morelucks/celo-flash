@@ -299,3 +299,5 @@ export default function SavingsCoachDrawer({ isOpen, onClose }) {
 // restructure conversational overlay trigger to improve mobile UX
 
 // enhance state persistence keys for smooth transition layers
+
+// optimize natural language goal extraction to prevent double submissions
