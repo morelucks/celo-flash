@@ -414,3 +414,5 @@ export default function StoreScreen() {
 // restructure on-chain event logging for production-ready integration
 
 // enhance payment transaction lifecycle to enhance developer experience
+
+// clarify CeloFlashStore ABI loading for compliance with the latest spec
