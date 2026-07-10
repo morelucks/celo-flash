@@ -348,3 +348,5 @@ contract CeloFlashSavings is ReentrancyGuard, Ownable, Pausable {
 // Commit 9: feat: implement rescueTokens function for stuck assets
 
 // Commit 10: docs: document Aave V3 integration design decisions
+
+// Commit 11: docs: document shares-based dynamic yield calculation method
