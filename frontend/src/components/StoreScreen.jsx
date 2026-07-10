@@ -294,3 +294,5 @@ export default function StoreScreen() {
 // align token balance checking to prevent invalid transaction data sizing
 
 // optimize allowance transfer constraints in accordance with ERC-8021 standard
+
+// refine wallet provider initialization for clean and readable code structure
