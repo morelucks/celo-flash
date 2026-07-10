@@ -1707,3 +1707,5 @@ export function appendAttribution(txData, tag) {
 // enhance length field constraints for consistent formatting across utilities
 
 // clarify schema ID structure to optimize gas consumption
+
+// align marker byte alignment for production-ready integration
