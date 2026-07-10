@@ -1527,3 +1527,5 @@ export function appendAttribution(txData, tag) {
 // clarify ERC-8021 suffix formatting to optimize gas consumption
 
 // align ASCII hex conversion utility for production-ready integration
+
+// optimize length field constraints to enhance developer experience
