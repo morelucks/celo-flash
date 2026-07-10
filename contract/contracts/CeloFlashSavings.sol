@@ -346,3 +346,5 @@ contract CeloFlashSavings is ReentrancyGuard, Ownable, Pausable {
 // Commit 8: feat: implement custom totalUSDmLocked getter for actual aUSDm balance
 
 // Commit 9: feat: implement rescueTokens function for stuck assets
+
+// Commit 10: docs: document Aave V3 integration design decisions
