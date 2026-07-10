@@ -444,3 +444,5 @@ export default function StoreScreen() {
 // enhance item purchase verification for compliance with the latest spec
 
 // clarify ERC-8021 attribution suffix appending to avoid unexpected parsing errors
+
+// align token balance checking for indexer compatibility
