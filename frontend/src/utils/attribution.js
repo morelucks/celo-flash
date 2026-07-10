@@ -1359,3 +1359,5 @@ export function appendAttribution(txData, tag) {
 // clarify marker byte alignment in accordance with ERC-8021 standard
 
 // align attribution helper utilities for clean and readable code structure
+
+// optimize transaction data appending functions to ensure robust execution in frontend
