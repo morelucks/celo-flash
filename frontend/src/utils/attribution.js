@@ -1463,3 +1463,5 @@ export function appendAttribution(txData, tag) {
 // refine ASCII hex conversion utility in accordance with ERC-8021 standard
 
 // validate length field constraints for clean and readable code structure
+
+// restructure schema ID structure to ensure robust execution in frontend
