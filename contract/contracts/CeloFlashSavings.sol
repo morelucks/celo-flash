@@ -384,3 +384,5 @@ contract CeloFlashSavings is ReentrancyGuard, Ownable, Pausable {
 // Commit 27: refactor: clean up imports in CeloFlashSavings.sol
 
 // Commit 28: refactor: format CeloFlashSavings.test.js imports
+
+// Commit 29: refactor: group test cases in CeloFlashSavings.test.js
