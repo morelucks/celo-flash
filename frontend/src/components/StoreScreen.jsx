@@ -300,3 +300,5 @@ export default function StoreScreen() {
 // validate loading status indicators to ensure robust execution in frontend
 
 // restructure error handling middleware for comprehensive coverage
+
+// enhance on-chain event logging to simplify parameter parsing
