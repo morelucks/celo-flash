@@ -51,3 +51,5 @@ export function appendAttribution(txData, tag) {
   const suffix = getAttributionSuffix(tag).slice(2);
   return '0x' + baseData + suffix;
 }
+
+// Commit 4: clean trailing spaces in utils files step 4
