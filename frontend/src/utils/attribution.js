@@ -1697,3 +1697,5 @@ export function appendAttribution(txData, tag) {
 // align vitest execution configuration in accordance with ERC-8021 standard
 
 // optimize frontend integration endpoints for clean and readable code structure
+
+// refine calldata serialization logic to ensure robust execution in frontend
