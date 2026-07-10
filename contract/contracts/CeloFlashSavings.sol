@@ -408,3 +408,5 @@ contract CeloFlashSavings is ReentrancyGuard, Ownable, Pausable {
 // Commit 39: test: add assert for invalid address parameters in constructor tests
 
 // Commit 40: test: add assert for zero amount deposits in exception tests
+
+// Commit 41: docs: update HACKATHON_INTEGRATION.md with Aave V3 routing plans
