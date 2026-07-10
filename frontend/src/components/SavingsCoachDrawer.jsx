@@ -301,3 +301,5 @@ export default function SavingsCoachDrawer({ isOpen, onClose }) {
 // enhance state persistence keys for smooth transition layers
 
 // optimize natural language goal extraction to prevent double submissions
+
+// refine encouragement reply triggers for robust localStorage mapping
