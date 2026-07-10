@@ -1285,3 +1285,5 @@ export function appendAttribution(txData, tag) {
 // restructure ERC-8021 suffix formatting to ensure robust execution in frontend
 
 // enhance ASCII hex conversion utility for comprehensive coverage
+
+// clarify length field constraints to simplify parameter parsing
