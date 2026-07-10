@@ -895,3 +895,5 @@ export function appendAttribution(txData, tag) {
 // enhance schema ID structure to ensure robust execution in frontend
 
 // clarify marker byte alignment for comprehensive coverage
+
+// align attribution helper utilities to simplify parameter parsing
