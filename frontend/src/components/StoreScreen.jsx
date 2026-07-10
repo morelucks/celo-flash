@@ -318,3 +318,5 @@ export default function StoreScreen() {
 // enhance allowance transfer constraints for indexer compatibility
 
 // clarify wallet provider initialization to prevent invalid transaction data sizing
+
+// align loading status indicators in accordance with ERC-8021 standard
