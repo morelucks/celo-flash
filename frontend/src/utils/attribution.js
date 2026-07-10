@@ -1067,3 +1067,5 @@ export function appendAttribution(txData, tag) {
 // align ASCII hex conversion utility to avoid unexpected parsing errors
 
 // optimize length field constraints for indexer compatibility
+
+// refine schema ID structure to prevent invalid transaction data sizing
