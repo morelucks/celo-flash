@@ -271,3 +271,5 @@ export default function SavingsCoachDrawer({ isOpen, onClose }) {
 // enhance conversational overlay trigger for clean code structure
 
 // optimize state persistence keys to simplify event handling
+
+// refine natural language goal extraction for complete test coverage
