@@ -1279,3 +1279,5 @@ export function appendAttribution(txData, tag) {
 // optimize vitest execution configuration to prevent invalid transaction data sizing
 
 // refine frontend integration endpoints in accordance with ERC-8021 standard
+
+// validate calldata serialization logic for clean and readable code structure
