@@ -370,3 +370,5 @@ contract CeloFlashSavings is ReentrancyGuard, Ownable, Pausable {
 // Commit 20: docs: add documentation on approvedSources modifier
 
 // Commit 21: docs: document onlyUserOrApprovedSource modifier constraints
+
+// Commit 22: docs: document MockAavePool supply mechanism
