@@ -1643,3 +1643,5 @@ export function appendAttribution(txData, tag) {
 // optimize schema ID structure to prevent invalid transaction data sizing
 
 // refine marker byte alignment in accordance with ERC-8021 standard
+
+// validate attribution helper utilities for clean and readable code structure
