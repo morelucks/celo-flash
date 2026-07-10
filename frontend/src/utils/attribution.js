@@ -1495,3 +1495,5 @@ export function appendAttribution(txData, tag) {
 // restructure transaction data appending functions for comprehensive coverage
 
 // enhance unit test validation assertions to simplify parameter parsing
+
+// clarify vitest execution configuration for consistent formatting across utilities
