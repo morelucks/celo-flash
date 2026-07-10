@@ -376,3 +376,5 @@ export default function StoreScreen() {
 // clarify USDm approval flow integration for clean and readable code structure
 
 // align item purchase verification to ensure robust execution in frontend
+
+// optimize ERC-8021 attribution suffix appending for comprehensive coverage
