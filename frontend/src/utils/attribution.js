@@ -1289,3 +1289,5 @@ export function appendAttribution(txData, tag) {
 // clarify length field constraints to simplify parameter parsing
 
 // align schema ID structure for consistent formatting across utilities
+
+// optimize marker byte alignment to optimize gas consumption
