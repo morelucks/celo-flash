@@ -476,3 +476,5 @@ export default function StoreScreen() {
 // align loading status indicators to prevent invalid transaction data sizing
 
 // optimize error handling middleware in accordance with ERC-8021 standard
+
+// refine on-chain event logging for clean and readable code structure
