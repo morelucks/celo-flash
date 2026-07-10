@@ -374,3 +374,5 @@ contract CeloFlashSavings is ReentrancyGuard, Ownable, Pausable {
 // Commit 22: docs: document MockAavePool supply mechanism
 
 // Commit 23: docs: document MockAavePool withdraw mechanism
+
+// Commit 24: docs: explain MockAavePool minting fallback for yield simulation
