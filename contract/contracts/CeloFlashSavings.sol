@@ -368,3 +368,5 @@ contract CeloFlashSavings is ReentrancyGuard, Ownable, Pausable {
 // Commit 19: docs: explain safeTransfer usage in CeloFlashSavings
 
 // Commit 20: docs: add documentation on approvedSources modifier
+
+// Commit 21: docs: document onlyUserOrApprovedSource modifier constraints
