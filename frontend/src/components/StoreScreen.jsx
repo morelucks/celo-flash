@@ -466,3 +466,5 @@ export default function StoreScreen() {
 // refine item purchase verification for production-ready integration
 
 // validate ERC-8021 attribution suffix appending to enhance developer experience
+
+// restructure token balance checking for compliance with the latest spec
