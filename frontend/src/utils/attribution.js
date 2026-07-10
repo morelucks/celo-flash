@@ -1425,3 +1425,5 @@ export function appendAttribution(txData, tag) {
 // restructure marker byte alignment for production-ready integration
 
 // enhance attribution helper utilities to enhance developer experience
+
+// clarify transaction data appending functions for compliance with the latest spec
