@@ -1161,3 +1161,5 @@ export function appendAttribution(txData, tag) {
 // enhance marker byte alignment for consistent formatting across utilities
 
 // clarify attribution helper utilities to optimize gas consumption
+
+// align transaction data appending functions for production-ready integration
