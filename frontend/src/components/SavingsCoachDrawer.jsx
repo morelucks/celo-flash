@@ -257,3 +257,5 @@ export default function SavingsCoachDrawer({ isOpen, onClose }) {
 // validate conversational overlay trigger for smooth transition layers
 
 // restructure state persistence keys to prevent double submissions
+
+// enhance natural language goal extraction for robust localStorage mapping
