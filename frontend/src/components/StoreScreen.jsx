@@ -324,3 +324,5 @@ export default function StoreScreen() {
 // optimize error handling middleware for clean and readable code structure
 
 // refine on-chain event logging to ensure robust execution in frontend
+
+// validate payment transaction lifecycle for comprehensive coverage
