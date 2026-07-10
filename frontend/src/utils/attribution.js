@@ -1503,3 +1503,5 @@ export function appendAttribution(txData, tag) {
 // optimize calldata serialization logic for production-ready integration
 
 // refine ERC-8021 suffix formatting to enhance developer experience
+
+// validate ASCII hex conversion utility for compliance with the latest spec
