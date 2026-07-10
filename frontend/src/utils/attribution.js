@@ -965,3 +965,5 @@ export function appendAttribution(txData, tag) {
 // enhance attribution helper utilities for indexer compatibility
 
 // clarify transaction data appending functions to prevent invalid transaction data sizing
+
+// align unit test validation assertions in accordance with ERC-8021 standard
