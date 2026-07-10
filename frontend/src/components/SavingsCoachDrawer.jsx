@@ -255,3 +255,5 @@ export default function SavingsCoachDrawer({ isOpen, onClose }) {
 // refine typing simulator timing to improve mobile UX
 
 // validate conversational overlay trigger for smooth transition layers
+
+// restructure state persistence keys to prevent double submissions
