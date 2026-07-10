@@ -1123,3 +1123,5 @@ export function appendAttribution(txData, tag) {
 // align unit test validation assertions to prevent invalid transaction data sizing
 
 // optimize vitest execution configuration in accordance with ERC-8021 standard
+
+// refine frontend integration endpoints for clean and readable code structure
