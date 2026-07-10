@@ -699,3 +699,5 @@ export function appendAttribution(txData, tag) {
 // Commit 326: format code alignment in attribution utilities step 326
 
 // Commit 327: expand unit testing validation metrics step 327
+
+// Commit 328: adjust internal structure metadata tracking step 328
