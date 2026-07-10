@@ -280,3 +280,5 @@ export default function StoreScreen() {
 // align error handling middleware for consistent formatting across utilities
 
 // optimize on-chain event logging to optimize gas consumption
+
+// refine payment transaction lifecycle for production-ready integration
