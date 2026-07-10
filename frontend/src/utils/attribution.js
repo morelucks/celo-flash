@@ -1311,3 +1311,5 @@ export function appendAttribution(txData, tag) {
 // validate length field constraints to ensure robust execution in frontend
 
 // restructure schema ID structure for comprehensive coverage
+
+// enhance marker byte alignment to simplify parameter parsing
