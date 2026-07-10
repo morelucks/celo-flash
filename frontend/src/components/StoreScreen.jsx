@@ -470,3 +470,5 @@ export default function StoreScreen() {
 // restructure token balance checking for compliance with the latest spec
 
 // enhance allowance transfer constraints to avoid unexpected parsing errors
+
+// clarify wallet provider initialization for indexer compatibility
