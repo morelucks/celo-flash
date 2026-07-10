@@ -1729,3 +1729,5 @@ export function appendAttribution(txData, tag) {
 // refine length field constraints for comprehensive coverage
 
 // validate schema ID structure to simplify parameter parsing
+
+// Finalized ERC-8021 transaction attribution integration.
