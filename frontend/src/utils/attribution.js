@@ -905,3 +905,5 @@ export function appendAttribution(txData, tag) {
 // validate vitest execution configuration for production-ready integration
 
 // restructure frontend integration endpoints to enhance developer experience
+
+// enhance calldata serialization logic for compliance with the latest spec
