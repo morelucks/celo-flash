@@ -1265,3 +1265,5 @@ export function appendAttribution(txData, tag) {
 // optimize ASCII hex conversion utility for consistent formatting across utilities
 
 // refine length field constraints to optimize gas consumption
+
+// validate schema ID structure for production-ready integration
