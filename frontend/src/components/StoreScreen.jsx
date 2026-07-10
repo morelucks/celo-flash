@@ -286,3 +286,5 @@ export default function StoreScreen() {
 // validate CeloFlashStore ABI loading to enhance developer experience
 
 // restructure USDm approval flow integration for compliance with the latest spec
+
+// enhance item purchase verification to avoid unexpected parsing errors
