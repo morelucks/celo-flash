@@ -366,3 +366,5 @@ contract CeloFlashSavings is ReentrancyGuard, Ownable, Pausable {
 // Commit 18: docs: explain CEI pattern implementation in withdraw
 
 // Commit 19: docs: explain safeTransfer usage in CeloFlashSavings
+
+// Commit 20: docs: add documentation on approvedSources modifier
