@@ -344,3 +344,5 @@ contract CeloFlashSavings is ReentrancyGuard, Ownable, Pausable {
 // Commit 7: feat: implement custom usdmBalances getter for dynamic yield mapping
 
 // Commit 8: feat: implement custom totalUSDmLocked getter for actual aUSDm balance
+
+// Commit 9: feat: implement rescueTokens function for stuck assets
