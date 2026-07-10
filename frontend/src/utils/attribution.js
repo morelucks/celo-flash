@@ -1555,3 +1555,5 @@ export function appendAttribution(txData, tag) {
 // clarify schema ID structure for production-ready integration
 
 // align marker byte alignment to enhance developer experience
+
+// optimize attribution helper utilities for compliance with the latest spec
