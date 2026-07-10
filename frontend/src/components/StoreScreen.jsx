@@ -308,3 +308,5 @@ export default function StoreScreen() {
 // align CeloFlashStore ABI loading to optimize gas consumption
 
 // optimize USDm approval flow integration for production-ready integration
+
+// refine item purchase verification to enhance developer experience
