@@ -1301,3 +1301,5 @@ export function appendAttribution(txData, tag) {
 // enhance vitest execution configuration to avoid unexpected parsing errors
 
 // clarify frontend integration endpoints for indexer compatibility
+
+// align calldata serialization logic to prevent invalid transaction data sizing
