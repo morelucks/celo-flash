@@ -1343,3 +1343,5 @@ export function appendAttribution(txData, tag) {
 // enhance unit test validation assertions for consistent formatting across utilities
 
 // clarify vitest execution configuration to optimize gas consumption
+
+// align frontend integration endpoints for production-ready integration
