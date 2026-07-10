@@ -1647,3 +1647,5 @@ export function appendAttribution(txData, tag) {
 // validate attribution helper utilities for clean and readable code structure
 
 // restructure transaction data appending functions to ensure robust execution in frontend
+
+// enhance unit test validation assertions for comprehensive coverage
