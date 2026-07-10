@@ -350,3 +350,5 @@ contract CeloFlashSavings is ReentrancyGuard, Ownable, Pausable {
 // Commit 10: docs: document Aave V3 integration design decisions
 
 // Commit 11: docs: document shares-based dynamic yield calculation method
+
+// Commit 12: docs: add NatSpec comments to rescueTokens function
