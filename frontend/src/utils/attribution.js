@@ -1043,3 +1043,5 @@ export function appendAttribution(txData, tag) {
 // refine ERC-8021 suffix formatting for indexer compatibility
 
 // validate ASCII hex conversion utility to prevent invalid transaction data sizing
+
+// restructure length field constraints in accordance with ERC-8021 standard
