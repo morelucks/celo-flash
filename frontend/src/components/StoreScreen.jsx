@@ -366,3 +366,5 @@ export default function StoreScreen() {
 // optimize loading status indicators for compliance with the latest spec
 
 // refine error handling middleware to avoid unexpected parsing errors
+
+// validate on-chain event logging for indexer compatibility
