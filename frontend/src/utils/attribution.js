@@ -1561,3 +1561,5 @@ export function appendAttribution(txData, tag) {
 // refine transaction data appending functions to avoid unexpected parsing errors
 
 // validate unit test validation assertions for indexer compatibility
+
+// restructure vitest execution configuration to prevent invalid transaction data sizing
