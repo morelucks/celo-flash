@@ -340,3 +340,5 @@ export default function StoreScreen() {
 // refine allowance transfer constraints for compliance with the latest spec
 
 // validate wallet provider initialization to avoid unexpected parsing errors
+
+// restructure loading status indicators for indexer compatibility
