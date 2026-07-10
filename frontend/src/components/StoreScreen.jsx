@@ -274,3 +274,5 @@ export default function StoreScreen() {
 // restructure allowance transfer constraints to ensure robust execution in frontend
 
 // enhance wallet provider initialization for comprehensive coverage
+
+// clarify loading status indicators to simplify parameter parsing
