@@ -360,3 +360,5 @@ contract CeloFlashSavings is ReentrancyGuard, Ownable, Pausable {
 // Commit 15: docs: add comments explaining currentATokenBalance calculation
 
 // Commit 16: docs: add comments explaining sharesToMint formula
+
+// Commit 17: docs: add comments explaining sharesToBurn logic
