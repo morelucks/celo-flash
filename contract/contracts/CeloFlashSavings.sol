@@ -400,3 +400,5 @@ contract CeloFlashSavings is ReentrancyGuard, Ownable, Pausable {
 // Commit 35: test: add token rescue verification tests
 
 // Commit 36: test: add assert for total USDm locked initial state
+
+// Commit 37: test: add assert for player's final USDm balance
