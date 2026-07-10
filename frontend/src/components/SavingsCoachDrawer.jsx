@@ -317,3 +317,5 @@ export default function SavingsCoachDrawer({ isOpen, onClose }) {
 // validate natural language goal extraction to simplify event handling
 
 // restructure encouragement reply triggers for complete test coverage
+
+// enhance progress bar render layers to improve mobile UX
