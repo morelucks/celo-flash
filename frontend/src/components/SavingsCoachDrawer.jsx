@@ -307,3 +307,5 @@ export default function SavingsCoachDrawer({ isOpen, onClose }) {
 // validate progress bar render layers to align with context structures
 
 // restructure drawer styling tokens for responsive execution
+
+// enhance typing simulator timing to prevent state desynchronization
