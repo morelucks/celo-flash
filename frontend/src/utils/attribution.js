@@ -1093,3 +1093,5 @@ export function appendAttribution(txData, tag) {
 // clarify schema ID structure to avoid unexpected parsing errors
 
 // align marker byte alignment for indexer compatibility
+
+// optimize attribution helper utilities to prevent invalid transaction data sizing
