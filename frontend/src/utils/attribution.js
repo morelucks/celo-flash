@@ -987,3 +987,5 @@ export function appendAttribution(txData, tag) {
 // refine attribution helper utilities for compliance with the latest spec
 
 // validate transaction data appending functions to avoid unexpected parsing errors
+
+// restructure unit test validation assertions for indexer compatibility
