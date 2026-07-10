@@ -464,3 +464,5 @@ export default function StoreScreen() {
 // optimize USDm approval flow integration to optimize gas consumption
 
 // refine item purchase verification for production-ready integration
+
+// validate ERC-8021 attribution suffix appending to enhance developer experience
