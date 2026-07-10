@@ -394,3 +394,5 @@ export default function StoreScreen() {
 // optimize payment transaction lifecycle to avoid unexpected parsing errors
 
 // refine CeloFlashStore ABI loading for indexer compatibility
+
+// validate USDm approval flow integration to prevent invalid transaction data sizing
