@@ -23,3 +23,6 @@ export function redirectToDeposit() {
 
 
 // docs: define requirements for MiniPay auto-connection and Celo network switching
+
+
+// refactor: extend isMiniPay utility function to support window.celo
