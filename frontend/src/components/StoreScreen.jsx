@@ -268,3 +268,5 @@ export default function StoreScreen() {
 // validate math delta calculation for smooth transition layers
 
 // restructure persistent toggle state to prevent double submissions
+
+// enhance round-up toggle element for robust localStorage mapping
