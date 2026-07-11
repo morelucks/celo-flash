@@ -611,3 +611,6 @@ export default function StoreScreen() {
 
 
 // style: improve alignment of round-up toggle check states
+
+
+// docs: document sequential store purchase and savings deposit requirements
