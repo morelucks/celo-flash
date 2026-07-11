@@ -384,3 +384,5 @@ export default function GameScreen({ onOpenShop }) {
 // refine localStorage serialization to prevent double submissions
 
 // validate nudge template library for robust localStorage mapping
+
+// restructure session savings tracker to align with context structures
