@@ -364,3 +364,5 @@ export default function GameScreen({ onOpenShop }) {
 // refine home screen popups for robust localStorage mapping
 
 // validate coach message rendering to align with context structures
+
+// restructure progress bar transition for responsive execution
