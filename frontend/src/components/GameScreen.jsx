@@ -310,3 +310,5 @@ export default function GameScreen({ onOpenShop }) {
 }
 
 // optimize progress bar transition for complete test coverage
+
+// refine localStorage serialization to improve mobile UX
