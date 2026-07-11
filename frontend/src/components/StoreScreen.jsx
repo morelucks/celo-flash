@@ -710,3 +710,6 @@ export default function StoreScreen() {
 
 
 // refactor: ensure loading indicators reset on transaction failure
+
+
+// style: clean up terminal logging for contract interaction errors
