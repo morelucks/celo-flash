@@ -308,3 +308,5 @@ export default function StoreScreen() {
 // validate spawner price delta wrapper for complete test coverage
 
 // restructure math delta calculation to improve mobile UX
+
+// enhance persistent toggle state for smooth transition layers
