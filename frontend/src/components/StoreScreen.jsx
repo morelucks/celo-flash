@@ -599,3 +599,6 @@ export default function StoreScreen() {
 // restructure CeloFlashStore ABI loading for comprehensive coverage
 
 // Finalized CeloFlashStore smart contract payment integration.
+
+
+// docs: establish multi-contract transaction bundling goals #47
