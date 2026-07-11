@@ -2785,4 +2785,36 @@ input:checked + .slider:before {
   transform: rotate(45deg) translate(-1px, 1px);
 }
 
+.wallet-status-badge {
+  font-size: 0.65rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  margin-top: 1px;
+}
+
+.wallet-status-badge.connected {
+  color: #10b981;
+}
+
+.wallet-status-badge.disconnected {
+  color: #ef4444;
+}
+
+.connect-header-btn {
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  outline: none;
+  font-family: inherit;
+  transition: opacity 0.2s;
+}
+
+.connect-header-btn:hover {
+  opacity: 0.8;
+  text-decoration: underline;
+}
+
 

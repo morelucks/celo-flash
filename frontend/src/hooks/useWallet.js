@@ -4,58 +4,116 @@ import { useGameState } from '../context/GameStateContext';
 export const useWallet = () => {
   const { setUserAddress, setUserName, userAddress } = useGameState();
 
-  useEffect(() => {
-    const connectWallet = async () => {
-      if (typeof window.ethereum !== 'undefined') {
+  const switchNetwork = async (ethProvider) => {
+    try {
+      await ethProvider.request({
+        method: 'wallet_switchEthereumChain',
+        params: [{ chainId: '0xa4ec' }], // Celo Mainnet Chain ID 42220
+      });
+    } catch (switchError) {
+      if (switchError.code === 4902) {
         try {
-          // Check if already connected
-          const accounts = await window.ethereum.request({ 
+          await ethProvider.request({
+            method: 'wallet_addEthereumChain',
+            params: [
+              {
+                chainId: '0xa4ec',
+                chainName: 'Celo Mainnet',
+                nativeCurrency: {
+                  name: 'CELO',
+                  symbol: 'CELO',
+                  decimals: 18,
+                },
+                rpcUrls: ['https://forno.celo.org'],
+                blockExplorerUrls: ['https://celoscan.io'],
+              },
+            ],
+          });
+        } catch (addError) {
+          console.error('Error adding Celo Mainnet chain:', addError);
+        }
+      } else {
+        console.error('Error switching network to Celo Mainnet:', switchError);
+      }
+    }
+  };
+
+  useEffect(() => {
+    const checkWalletConnection = async () => {
+      const ethProvider = window.ethereum || window.celo;
+      if (ethProvider) {
+        try {
+          // Check if already authorized (no popup)
+          const accounts = await ethProvider.request({ 
             method: 'eth_accounts' 
           });
           
           if (accounts.length > 0) {
             setUserAddress(accounts[0]);
+            
+            // Switch network only if already authorized
+            const chainId = await ethProvider.request({ method: 'eth_chainId' });
+            if (chainId !== '0xa4ec' && chainId !== '42220') {
+              await switchNetwork(ethProvider);
+            }
           }
 
           // Listen for account changes
-          window.ethereum.on('accountsChanged', (accounts) => {
-            if (accounts.length > 0) {
-              setUserAddress(accounts[0]);
-            } else {
-              setUserAddress(null);
-              setUserName('Guest');
-            }
-          });
+          if (ethProvider.on) {
+            ethProvider.on('accountsChanged', (accounts) => {
+              if (accounts.length > 0) {
+                setUserAddress(accounts[0]);
+              } else {
+                setUserAddress(null);
+                setUserName('Guest');
+              }
+            });
+
+            // Listen for chain changes
+            ethProvider.on('chainChanged', async (newChainId) => {
+              if (newChainId !== '0xa4ec' && newChainId !== '42220') {
+                await switchNetwork(ethProvider);
+              }
+            });
+          }
         } catch (error) {
-          console.error('Error connecting wallet:', error);
+          console.error('Error checking wallet connection:', error);
         }
       }
     };
 
-    connectWallet();
+    checkWalletConnection();
 
     // Cleanup
     return () => {
-      if (window.ethereum?.removeListener) {
-        window.ethereum.removeListener('accountsChanged', () => {});
+      const ethProvider = window.ethereum || window.celo;
+      if (ethProvider && ethProvider.removeListener) {
+        ethProvider.removeListener('accountsChanged', () => {});
+        ethProvider.removeListener('chainChanged', () => {});
       }
     };
   }, [setUserAddress, setUserName]);
 
   const connectWallet = async () => {
-    if (typeof window.ethereum !== 'undefined') {
+    const ethProvider = window.ethereum || window.celo;
+    if (ethProvider) {
       try {
-        const accounts = await window.ethereum.request({ 
+        const chainId = await ethProvider.request({ method: 'eth_chainId' });
+        if (chainId !== '0xa4ec' && chainId !== '42220') {
+          await switchNetwork(ethProvider);
+        }
+
+        const accounts = await ethProvider.request({ 
           method: 'eth_requestAccounts' 
         });
         setUserAddress(accounts[0]);
         return accounts[0];
       } catch (error) {
-        console.error('Error connecting wallet:', error);
+        console.error('Error manual connecting wallet:', error);
         return null;
       }
     } else {
-      alert('Please install MetaMask or use MiniPay to connect your wallet');
+      alert('Please install MetaMask or open inside MiniPay/Opera Mini browser.');
       return null;
     }
   };

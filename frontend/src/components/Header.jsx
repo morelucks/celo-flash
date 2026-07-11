@@ -1,11 +1,13 @@
 import React from 'react';
 import { useGameState } from '../context/GameStateContext';
+import { useWallet } from '../hooks/useWallet';
 import { playSound } from '../utils/audio';
 
 import { isMiniPay } from '../utils/minipay';
 
 export default function Header({ onOpenSwap }) {
-  const { points, cash, soundEnabled, setSoundEnabled } = useGameState();
+  const { points, cash, soundEnabled, setSoundEnabled, userAddress } = useGameState();
+  const { connectWallet } = useWallet();
 
   const handleSoundToggle = () => {
     const nextSound = !soundEnabled;
@@ -14,7 +16,18 @@ export default function Header({ onOpenSwap }) {
     playSound('click', nextSound);
   };
 
+  const handleConnect = async (e) => {
+    e.stopPropagation();
+    playSound('click', soundEnabled);
+    await connectWallet();
+  };
+
   const isRunningInMiniPay = isMiniPay();
+
+  const formatAddress = (address) => {
+    if (!address) return '';
+    return `${address.slice(0, 6)}...${address.slice(-4)}`;
+  };
 
   return (
     <>
@@ -26,7 +39,18 @@ export default function Header({ onOpenSwap }) {
           </div>
           <div className="app-title-group">
             <h1 className="app-title">Celo Flash</h1>
-
+            {userAddress ? (
+              <span className="wallet-status-badge connected">
+                🟢 {formatAddress(userAddress)}
+              </span>
+            ) : (
+              <button 
+                className="wallet-status-badge disconnected connect-header-btn" 
+                onClick={handleConnect}
+              >
+                🔴 Connect Wallet
+              </button>
+            )}
           </div>
         </div>
         <div className="app-actions">
