@@ -647,3 +647,6 @@ export default function StoreScreen() {
 
 
 // refactor: verify store allowance before transaction processing
+
+
+// refactor: approve store contract to transfer item cost in USDm
