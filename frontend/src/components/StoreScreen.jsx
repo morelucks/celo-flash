@@ -623,3 +623,6 @@ export default function StoreScreen() {
 
 
 // refactor: calculate item cost in BigInt unit decimals
+
+
+// refactor: compute round-up delta in BigInt units dynamically
