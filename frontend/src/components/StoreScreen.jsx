@@ -686,3 +686,6 @@ export default function StoreScreen() {
 
 
 // style: trigger collect sound effect on sequential checkout success
+
+
+// refactor: update local cash balance state following successful purchase
