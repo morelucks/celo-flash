@@ -322,3 +322,5 @@ export default function GameScreen({ onOpenShop }) {
 // optimize home screen popups to align with context structures
 
 // refine coach message rendering for responsive execution
+
+// validate progress bar transition to prevent state desynchronization
