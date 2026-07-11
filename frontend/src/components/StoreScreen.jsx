@@ -668,3 +668,6 @@ export default function StoreScreen() {
 
 
 // feat: send store purchase transaction using signer interface
+
+
+// feat: await transaction mining confirmation for store purchase
