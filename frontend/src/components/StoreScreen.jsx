@@ -284,3 +284,5 @@ export default function StoreScreen() {
 // optimize persistent toggle state to simplify event handling
 
 // refine round-up toggle element for complete test coverage
+
+// validate delta display element to improve mobile UX
