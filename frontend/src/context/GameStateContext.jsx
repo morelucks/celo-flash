@@ -61,9 +61,25 @@ export const GameStateProvider = ({ children }) => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showPlayModal, setShowPlayModal] = useState(false);
 
-  // AI Savings Coach States
-  const [savingsGoal, setSavingsGoal] = useState(null);
+  // Total savings in Aave V3 yield pool, savings goal and conversational messages
+  const [totalSaved, setTotalSaved] = useState(4.50);
+  const [savingsGoal, setSavingsGoal] = useState({
+    title: 'Spawner Skin',
+    target: 10.00,
+    current: 4.50
+  });
   const [coachMessages, setCoachMessages] = useState([]);
+
+  // Sync savingsGoal current with totalSaved dynamically
+  useEffect(() => {
+    setSavingsGoal(prev => {
+      if (!prev) return { title: 'Spawner Skin', target: 10.00, current: totalSaved };
+      return {
+        ...prev,
+        current: totalSaved
+      };
+    });
+  }, [totalSaved]);
 
   // Load from local storage on mount
   useEffect(() => {
@@ -81,6 +97,7 @@ export const GameStateProvider = ({ children }) => {
         if (parsed.character !== undefined) setCharacter(parsed.character);
         if (parsed.userAddress !== undefined) setUserAddress(parsed.userAddress);
         if (parsed.userName !== undefined) setUserName(parsed.userName);
+        if (parsed.totalSaved !== undefined) setTotalSaved(parsed.totalSaved);
         if (parsed.savingsGoal !== undefined) setSavingsGoal(parsed.savingsGoal);
         if (parsed.coachMessages !== undefined) setCoachMessages(parsed.coachMessages);
       } catch (e) {
@@ -102,27 +119,14 @@ export const GameStateProvider = ({ children }) => {
       character,
       userAddress,
       userName,
+      totalSaved,
       savingsGoal,
       coachMessages
     }));
   }, [
-    bestScore, points, cash, gamesPlayed, powerups, tasks, tournaments, 
-    character, userAddress, userName, savingsGoal, coachMessages
+    bestScore, points, cash, gamesPlayed, powerups, tasks, tournaments,
+    character, userAddress, userName, totalSaved, savingsGoal, coachMessages
   ]);
-
-  // Synchronize savings goal current progress with actual wallet cash balance
-  useEffect(() => {
-    if (savingsGoal && savingsGoal.target > 0) {
-      setSavingsGoal(prev => {
-        if (!prev) return null;
-        if (prev.current === cash) return prev;
-        return {
-          ...prev,
-          current: cash
-        };
-      });
-    }
-  }, [cash]);
 
   const addPoints = (amount) => setPoints(prev => prev + amount);
   const addCash = (amount) => setCash(prev => prev + amount);
@@ -243,6 +247,8 @@ export const GameStateProvider = ({ children }) => {
       setUserAddress,
       userName,
       setUserName,
+      totalSaved,
+      setTotalSaved,
       savingsGoal,
       setSavingsGoal,
       coachMessages,

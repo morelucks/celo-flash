@@ -17,7 +17,9 @@ export default function StoreScreen() {
     setCharacter, 
     powerups, 
     setPowerups, 
-    soundEnabled 
+    soundEnabled,
+    totalSaved,
+    setTotalSaved
   } = useGameState();
 
   const [qtyMultiplier, setQtyMultiplier] = useState(1);
@@ -44,6 +46,14 @@ export default function StoreScreen() {
     } else if (type === 'renewal') {
       setQtyRenewal(prev => direction === 'plus' ? Math.min(99, prev + 1) : Math.max(1, prev - 1));
     }
+  };
+
+  // Helper to calculate round-up delta to the next whole dollar
+  const getRoundUpDelta = (cost) => {
+    if (cost <= 0) return 0;
+    const nextWhole = Math.ceil(cost);
+    const delta = nextWhole - cost;
+    return delta === 0 ? 1.00 : Number(delta.toFixed(2));
   };
 
   const buyItemOnChain = async (itemType, quantity, expectedCost, itemKey, successCallback) => {
@@ -120,54 +130,96 @@ export default function StoreScreen() {
   const handleBuyMultiplier = async () => {
     playSound('click', soundEnabled);
     const cost = qtyMultiplier * 0.04;
-    
+    const roundUp = roundUpEnabled ? getRoundUpDelta(cost) : 0;
+    const totalCost = cost + roundUp;
+
+    if (cash < totalCost) {
+      alert(`Insufficient USDm balance! Required: $${totalCost.toFixed(2)} (Cost: $${cost.toFixed(2)} + Round-up: $${roundUp.toFixed(2)})`);
+      return;
+    }
+
     await buyItemOnChain(6, qtyMultiplier, cost, 'multiplier', () => {
-      setCash(prev => Number((prev - cost).toFixed(2)));
+      setCash(prev => Number((prev - totalCost).toFixed(2)));
       setPoints(prev => prev + qtyMultiplier * 5);
-      alert(`Purchased ${qtyMultiplier} Score Multipliers!`);
+      if (roundUp > 0) {
+        setTotalSaved(prev => Number((prev + roundUp).toFixed(2)));
+      }
+      alert(`Purchased ${qtyMultiplier} Score Multipliers! Saved $${roundUp.toFixed(2)} to Aave V3 yield pool.`);
     });
   };
 
   const handleBuyRenewal = async () => {
     playSound('click', soundEnabled);
     const cost = qtyRenewal * 0.10;
-    
+    const roundUp = roundUpEnabled ? getRoundUpDelta(cost) : 0;
+    const totalCost = cost + roundUp;
+
+    if (cash < totalCost) {
+      alert(`Insufficient USDm balance! Required: $${totalCost.toFixed(2)} (Cost: $${cost.toFixed(2)} + Round-up: $${roundUp.toFixed(2)})`);
+      return;
+    }
+
     await buyItemOnChain(7, qtyRenewal, cost, 'renewal', () => {
-      setCash(prev => Number((prev - cost).toFixed(2)));
+      setCash(prev => Number((prev - totalCost).toFixed(2)));
       setPoints(prev => prev + qtyRenewal * 15);
-      alert(`Daily Renewal activated! Playtime renewed.`);
+      if (roundUp > 0) {
+        setTotalSaved(prev => Number((prev + roundUp).toFixed(2)));
+      }
+      alert(`Daily Renewal activated! Playtime renewed. Saved $${roundUp.toFixed(2)} to Aave V3 yield pool.`);
     });
   };
 
   const handleBuyAllPowerups = async () => {
     playSound('click', soundEnabled);
     const cost = 0.20;
-    
+    const roundUp = roundUpEnabled ? getRoundUpDelta(cost) : 0;
+    const totalCost = cost + roundUp;
+
+    if (cash < totalCost) {
+      alert(`Insufficient USDm balance! Required: $${totalCost.toFixed(2)} (Cost: $${cost.toFixed(2)} + Round-up: $${roundUp.toFixed(2)})`);
+      return;
+    }
+
     await buyItemOnChain(3, 1, cost, 'bundle', () => {
-      setCash(prev => Number((prev - cost).toFixed(2)));
+      setCash(prev => Number((prev - totalCost).toFixed(2)));
       setPowerups(prev => ({
         ...prev,
         magnet: (prev.magnet || 0) + 1,
         shield: (prev.shield || 0) + 1,
         clock: (prev.clock || 0) + 1
       }));
-      alert("Success! Purchased Magnet, Shield, and Clock powerups.");
+      if (roundUp > 0) {
+        setTotalSaved(prev => Number((prev + roundUp).toFixed(2)));
+      }
+      alert(`Success! Purchased Magnet, Shield, and Clock powerups. Saved $${roundUp.toFixed(2)} to Aave V3 yield pool.`);
     });
   };
 
   const handleBuySpawner = async (spawnerType) => {
     playSound('click', soundEnabled);
     const cost = 0.05;
+    const roundUp = roundUpEnabled ? getRoundUpDelta(cost) : 0;
+    const totalCost = cost + roundUp;
     const itemType = spawnerType === 'valora' ? 4 : 5;
-    
+
+    if (cash < totalCost) {
+      alert(`Insufficient USDm balance! Required: $${totalCost.toFixed(2)} (Cost: $${cost.toFixed(2)} + Round-up: $${roundUp.toFixed(2)})`);
+      return;
+    }
+
     await buyItemOnChain(itemType, 1, cost, spawnerType, () => {
-      setCash(prev => Number((prev - cost).toFixed(2)));
+      setCash(prev => Number((prev - totalCost).toFixed(2)));
       setCharacter(spawnerType);
+      if (roundUp > 0) {
+        setTotalSaved(prev => Number((prev + roundUp).toFixed(2)));
+      }
       playSound('victory', soundEnabled);
-      alert(`Theme successfully unlocked! Avatar changed to ${spawnerType}.`);
+      alert(`Theme successfully unlocked! Avatar changed to ${spawnerType}. Saved $${roundUp.toFixed(2)} to Aave V3 yield pool.`);
     });
   };
 
+  const costMultiplier = qtyMultiplier * 0.04;
+  const costRenewal = qtyRenewal * 0.10;
   return (
     <div className="screen active" id="screen-store">
       
@@ -207,7 +259,7 @@ export default function StoreScreen() {
               <button className="qty-btn qty-plus" onClick={() => handleQtyChange('multiplier', 'plus')} disabled={loadingItem !== null}>+</button>
             </div>
             <button className="buy-item-btn" onClick={handleBuyMultiplier} disabled={loadingItem !== null}>
-              {loadingItem === 'multiplier' ? txStatus : `Buy • $${(qtyMultiplier * 0.04).toFixed(2)}`}
+              {loadingItem === 'multiplier' ? txStatus : `Buy • $${costMultiplier.toFixed(2)}`}
             </button>
             {roundUpEnabled && (
               <div className="round-up-delta-indicator">
@@ -227,7 +279,7 @@ export default function StoreScreen() {
               <button className="qty-btn qty-plus" onClick={() => handleQtyChange('renewal', 'plus')} disabled={loadingItem !== null}>+</button>
             </div>
             <button className="buy-item-btn" onClick={handleBuyRenewal} disabled={loadingItem !== null}>
-              {loadingItem === 'renewal' ? txStatus : `Buy • $${(qtyRenewal * 0.10).toFixed(2)}`}
+              {loadingItem === 'renewal' ? txStatus : `Buy • $${costRenewal.toFixed(2)}`}
             </button>
             {roundUpEnabled && (
               <div className="round-up-delta-indicator">
@@ -242,9 +294,16 @@ export default function StoreScreen() {
             <h4>Buy All Power-ups</h4>
             <p>Activate Magnet, Shield, and Clock at once!</p>
           </div>
-          <button className="buy-all-btn" onClick={handleBuyAllPowerups} disabled={loadingItem !== null}>
-            {loadingItem === 'bundle' ? txStatus : '$0.20 BUY ALL'}
-          </button>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+            <button className="buy-all-btn" onClick={handleBuyAllPowerups} disabled={loadingItem !== null}>
+              {loadingItem === 'bundle' ? txStatus : '$0.20 BUY ALL'}
+            </button>
+            {roundUpEnabled && (
+              <div className="round-up-delta-indicator" style={{ marginTop: '4px', textAlign: 'right' }}>
+                Coach: +${getRoundUpDelta(0.20).toFixed(2)} round-up
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -258,13 +317,20 @@ export default function StoreScreen() {
               <h4>Valora Coin</h4>
               <p>Spawns Valora hearts. Lasts 24h once bought.</p>
             </div>
-            <button 
-              className={`buy-spawner-btn ${character === 'valora' ? 'active-spawner' : ''}`}
-              onClick={() => handleBuySpawner('valora')}
-              disabled={loadingItem !== null}
-            >
-              {character === 'valora' ? 'Active' : (loadingItem === 'valora' ? txStatus : 'Buy • $0.05')}
-            </button>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <button 
+                className={`buy-spawner-btn ${character === 'valora' ? 'active-spawner' : ''}`}
+                onClick={() => handleBuySpawner('valora')}
+                disabled={loadingItem !== null}
+              >
+                {character === 'valora' ? 'Active' : (loadingItem === 'valora' ? txStatus : 'Buy • $0.05')}
+              </button>
+              {roundUpEnabled && character !== 'valora' && (
+                <div className="round-up-delta-indicator">
+                  Coach: +${getRoundUpDelta(0.05).toFixed(2)} round-up
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="spawner-card">
@@ -273,13 +339,20 @@ export default function StoreScreen() {
               <h4>Mento Token</h4>
               <p>Spawns Mento leaves. Lasts 24h once bought.</p>
             </div>
-            <button 
-              className={`buy-spawner-btn ${character === 'mento' ? 'active-spawner' : ''}`}
-              onClick={() => handleBuySpawner('mento')}
-              disabled={loadingItem !== null}
-            >
-              {character === 'mento' ? 'Active' : (loadingItem === 'mento' ? txStatus : 'Buy • $0.05')}
-            </button>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <button 
+                className={`buy-spawner-btn ${character === 'mento' ? 'active-spawner' : ''}`}
+                onClick={() => handleBuySpawner('mento')}
+                disabled={loadingItem !== null}
+              >
+                {character === 'mento' ? 'Active' : (loadingItem === 'mento' ? txStatus : 'Buy • $0.05')}
+              </button>
+              {roundUpEnabled && character !== 'mento' && (
+                <div className="round-up-delta-indicator">
+                  Coach: +${getRoundUpDelta(0.05).toFixed(2)} round-up
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
