@@ -286,3 +286,5 @@ export default function StoreScreen() {
 // refine round-up toggle element for complete test coverage
 
 // validate delta display element to improve mobile UX
+
+// restructure buy multiplier math layers for smooth transition layers
