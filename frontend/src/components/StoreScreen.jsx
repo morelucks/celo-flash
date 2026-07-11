@@ -620,3 +620,6 @@ export default function StoreScreen() {
 
 
 // style: standardize status messages for on-chain store checkout
+
+
+// refactor: calculate item cost in BigInt unit decimals
