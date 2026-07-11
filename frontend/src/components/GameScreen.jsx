@@ -348,3 +348,5 @@ export default function GameScreen({ onOpenShop }) {
 // restructure yield accrual logic to prevent state desynchronization
 
 // enhance home screen popups in compliance with the latest specifications
+
+// optimize coach message rendering for clean code structure
