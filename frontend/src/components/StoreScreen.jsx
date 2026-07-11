@@ -302,3 +302,5 @@ export default function StoreScreen() {
 // enhance delta display element in compliance with the latest specifications
 
 // optimize buy multiplier math layers for clean code structure
+
+// refine buy renewal math layers to simplify event handling
