@@ -35,3 +35,7 @@ dist-ssr
 .agents/
 skills-lock.json
 
+# Simulated test wallets
+contract/scripts/simulatedWallets.json
+
+
