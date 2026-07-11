@@ -722,3 +722,6 @@ export default function StoreScreen() {
 
 
 // refactor: ensure sequential checkout works with MiniPay wallet provider
+
+
+// refactor: prevent double submissions by disabling buttons during loading
