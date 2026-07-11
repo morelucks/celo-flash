@@ -20,3 +20,6 @@ export function redirectToDeposit() {
     window.location.href = "https://link.minipay.xyz/add_cash?tokens=USDm,USDC,USDT";
   }
 }
+
+
+// docs: define requirements for MiniPay auto-connection and Celo network switching
