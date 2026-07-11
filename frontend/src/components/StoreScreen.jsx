@@ -262,3 +262,5 @@ export default function StoreScreen() {
 // enhance buy multiplier math layers to simplify event handling
 
 // optimize buy renewal math layers for complete test coverage
+
+// refine spawner price delta wrapper to improve mobile UX
