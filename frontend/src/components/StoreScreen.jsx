@@ -716,3 +716,6 @@ export default function StoreScreen() {
 
 
 // docs: document Mountain Protocol USDm Celo mainnet deployment details
+
+
+// docs: document Aave V3 yield generation parameters on Celo network
