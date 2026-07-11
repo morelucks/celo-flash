@@ -270,3 +270,5 @@ export default function StoreScreen() {
 // restructure persistent toggle state to prevent double submissions
 
 // enhance round-up toggle element for robust localStorage mapping
+
+// optimize delta display element to align with context structures
