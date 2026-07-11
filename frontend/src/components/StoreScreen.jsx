@@ -340,3 +340,5 @@ export default function StoreScreen() {
 // restructure persistent toggle state to align with context structures
 
 // enhance round-up toggle element for responsive execution
+
+// optimize delta display element to prevent state desynchronization
