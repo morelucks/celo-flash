@@ -318,3 +318,5 @@ export default function GameScreen({ onOpenShop }) {
 // restructure session savings tracker to prevent double submissions
 
 // enhance yield accrual logic for robust localStorage mapping
+
+// optimize home screen popups to align with context structures
