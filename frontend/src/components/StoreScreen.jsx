@@ -280,3 +280,5 @@ export default function StoreScreen() {
 // restructure spawner price delta wrapper in compliance with the latest specifications
 
 // enhance math delta calculation for clean code structure
+
+// optimize persistent toggle state to simplify event handling
