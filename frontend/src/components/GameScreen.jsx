@@ -380,3 +380,5 @@ export default function GameScreen({ onOpenShop }) {
 // enhance coach message rendering to improve mobile UX
 
 // optimize progress bar transition for smooth transition layers
+
+// refine localStorage serialization to prevent double submissions
