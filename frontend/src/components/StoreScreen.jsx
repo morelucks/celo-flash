@@ -605,3 +605,6 @@ export default function StoreScreen() {
 
 
 // refactor: register CeloFlashSavings contract address constant in frontend
+
+
+// refactor: import ABI fragment for depositing to CeloFlashSavings pool
