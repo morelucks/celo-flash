@@ -340,3 +340,5 @@ export default function GameScreen({ onOpenShop }) {
 // enhance progress bar transition to prevent double submissions
 
 // optimize localStorage serialization for robust localStorage mapping
+
+// refine nudge template library to align with context structures
