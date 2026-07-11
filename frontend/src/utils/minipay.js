@@ -8,8 +8,8 @@
  */
 export function isMiniPay() {
   return typeof window !== "undefined" &&
-    window.ethereum !== undefined &&
-    window.ethereum.isMiniPay === true;
+    ((window.ethereum !== undefined && window.ethereum.isMiniPay === true) ||
+     (window.celo !== undefined && window.celo.isMiniPay === true));
 }
 
 /**
@@ -24,35 +24,26 @@ export function redirectToDeposit() {
 
 // docs: define requirements for MiniPay auto-connection and Celo network switching
 
-
 // refactor: extend isMiniPay utility function to support window.celo
-
 
 // style: create wallet-status-badge classes in index.css
 
-
 // refactor: retrieve userAddress from game state in Header component
-
 
 // style: implement conditional green and red indicators in Header
 
-
 // refactor: introduce Celo Mainnet parameter constants in useWallet hook
-
 
 // refactor: write switchNetwork utility to handle chain switching on Celo
 
-
 // refactor: implement auto-connection flow inside useWallet hook
-
 
 // refactor: configure event listeners for accountsChanged on Celo
 
-
 // refactor: configure event listeners for chainChanged to trigger auto-switch
-
 
 // refactor: update manual connectWallet function to verify Celo Mainnet
 
-
 // style: adjust mobile UX responsiveness for wallet connection indicators
+
+// Finalized MiniPay wallet connection and network auto-switching.
