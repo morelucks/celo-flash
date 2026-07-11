@@ -290,3 +290,5 @@ export default function StoreScreen() {
 // restructure buy multiplier math layers for smooth transition layers
 
 // enhance buy renewal math layers to prevent double submissions
+
+// optimize spawner price delta wrapper for robust localStorage mapping
