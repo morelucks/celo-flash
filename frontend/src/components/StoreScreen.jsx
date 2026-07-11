@@ -641,3 +641,6 @@ export default function StoreScreen() {
 
 
 // refactor: validate item price constraints on-chain
+
+
+// style: enhance balance validation error feedback formatting
