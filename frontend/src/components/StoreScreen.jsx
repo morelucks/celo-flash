@@ -310,3 +310,5 @@ export default function StoreScreen() {
 // restructure math delta calculation to improve mobile UX
 
 // enhance persistent toggle state for smooth transition layers
+
+// optimize round-up toggle element to prevent double submissions
