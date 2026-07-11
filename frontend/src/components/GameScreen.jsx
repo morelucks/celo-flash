@@ -354,3 +354,5 @@ export default function GameScreen({ onOpenShop }) {
 // refine progress bar transition to simplify event handling
 
 // validate localStorage serialization for complete test coverage
+
+// restructure nudge template library to improve mobile UX
