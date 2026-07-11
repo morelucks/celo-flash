@@ -725,3 +725,6 @@ export default function StoreScreen() {
 
 
 // refactor: prevent double submissions by disabling buttons during loading
+
+
+// style: optimize round-up delta UI element sizing and margins
