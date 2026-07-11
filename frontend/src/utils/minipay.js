@@ -53,3 +53,6 @@ export function redirectToDeposit() {
 
 
 // refactor: update manual connectWallet function to verify Celo Mainnet
+
+
+// style: adjust mobile UX responsiveness for wallet connection indicators
