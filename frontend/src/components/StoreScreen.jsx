@@ -614,3 +614,6 @@ export default function StoreScreen() {
 
 
 // docs: document sequential store purchase and savings deposit requirements
+
+
+// refactor: initialize signer and provider interfaces in store screen
