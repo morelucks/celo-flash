@@ -608,3 +608,6 @@ export default function StoreScreen() {
 
 
 // refactor: import ABI fragment for depositing to CeloFlashSavings pool
+
+
+// style: improve alignment of round-up toggle check states
