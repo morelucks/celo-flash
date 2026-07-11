@@ -47,3 +47,6 @@ export function redirectToDeposit() {
 
 
 // refactor: configure event listeners for accountsChanged on Celo
+
+
+// refactor: configure event listeners for chainChanged to trigger auto-switch
