@@ -635,3 +635,6 @@ export default function StoreScreen() {
 
 
 // refactor: initialize ERC20 contract interface for allowance checks
+
+
+// refactor: verify user stablecoin balance before initiating checkout
