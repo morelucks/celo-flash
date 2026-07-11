@@ -41,3 +41,6 @@ export function redirectToDeposit() {
 
 
 // refactor: write switchNetwork utility to handle chain switching on Celo
+
+
+// refactor: implement auto-connection flow inside useWallet hook
