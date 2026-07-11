@@ -29,3 +29,6 @@ export function redirectToDeposit() {
 
 
 // style: create wallet-status-badge classes in index.css
+
+
+// refactor: retrieve userAddress from game state in Header component
