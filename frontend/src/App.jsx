@@ -13,6 +13,7 @@ import FooterNav from './components/FooterNav';
 import SwapModal from './components/SwapModal';
 import CreateTourneyModal from './components/CreateTourneyModal';
 import PlayTourneyModal from './components/PlayTourneyModal';
+import SavingsCoachDrawer from './components/SavingsCoachDrawer';
 
 function MainAppContent() {
   const [isSDKLoaded, setIsSDKLoaded] = useState(false);
@@ -39,13 +40,15 @@ function MainAppContent() {
     showPlayModal,
     setShowPlayModal,
     selectedTourney,
-    setSelectedTourney
+    setSelectedTourney,
+    savingsGoal
   } = useGameState();
 
   // Initialize wallet connection
   useWallet();
 
   const [swapOpen, setSwapOpen] = useState(false);
+  const [isCoachOpen, setIsCoachOpen] = useState(false);
 
   // Render the current screen
   const renderScreen = () => {
@@ -81,10 +84,35 @@ function MainAppContent() {
         {/* Rolling News Marquee */}
         <TickerMarquee />
 
+        {/* Goal Progress Banner */}
+        {savingsGoal && savingsGoal.target > 0 && (
+          <div className="goal-progress-banner" onClick={() => setIsCoachOpen(true)}>
+            <div className="goal-banner-info">
+              <span>Goal: {savingsGoal.title}</span>
+              <span>${savingsGoal.current.toFixed(2)} / ${savingsGoal.target.toFixed(2)}</span>
+            </div>
+            <div className="goal-banner-progress-bg">
+              <div 
+                className="goal-banner-progress-bar" 
+                style={{ width: `${Math.min(100, (savingsGoal.current / savingsGoal.target) * 100)}%` }}
+              ></div>
+            </div>
+          </div>
+        )}
+
         {/* Content Screens */}
         <div className={`app-screen-container tab-${currentTab}`}>
           {renderScreen()}
         </div>
+
+        {/* Floating AI Coach Trigger */}
+        <button 
+          className="ai-coach-floating-btn" 
+          onClick={() => setIsCoachOpen(true)}
+          title="AI Savings Coach"
+        >
+          🤖
+        </button>
 
         {/* Bottom Menu Navigation */}
         <FooterNav />
@@ -92,6 +120,8 @@ function MainAppContent() {
       </div>
 
       {/* Modal Dialog Overlays */}
+      <SavingsCoachDrawer isOpen={isCoachOpen} onClose={() => setIsCoachOpen(false)} />
+      
       <SwapModal isOpen={swapOpen} onClose={() => setSwapOpen(false)} />
       
       <CreateTourneyModal 
