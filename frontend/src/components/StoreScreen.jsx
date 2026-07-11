@@ -683,3 +683,6 @@ export default function StoreScreen() {
 
 
 // feat: await transaction mining confirmation for savings deposit
+
+
+// style: trigger collect sound effect on sequential checkout success
