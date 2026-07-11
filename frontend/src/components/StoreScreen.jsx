@@ -680,3 +680,6 @@ export default function StoreScreen() {
 
 
 // feat: send savings deposit transaction using signer interface
+
+
+// feat: await transaction mining confirmation for savings deposit
