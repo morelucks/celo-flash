@@ -26,16 +26,28 @@ export default function GameScreen({ onOpenShop }) {
     setGamesPlayed,
     selectedTourney,
     setSelectedTourney,
-    submitTournamentScore
+    submitTournamentScore,
+    // DeFAI Savings Coach integrations
+    totalSaved,
+    setTotalSaved,
+    savingsGoal
   } = useGameState();
 
   const [showStartOverlay, setShowStartOverlay] = useState(true);
   const [showGameOverOverlay, setShowGameOverOverlay] = useState(false);
   const [pointsEarned, setPointsEarned] = useState(0);
 
+  // DeFAI Savings Coach state tracking
+  const [savedAtStart, setSavedAtStart] = useState(0);
+  const [showCoachNudge, setShowCoachNudge] = useState(false);
+  const [nudgeMessage, setNudgeMessage] = useState('');
+
   const handleStartGame = () => {
     playSound('click', soundEnabled);
     
+    // Save starting totalSaved amount
+    setSavedAtStart(totalSaved);
+
     // Deduct wager if applicable
     if (difficulty.includes('wager')) {
       if (points < 10) {
@@ -59,6 +71,11 @@ export default function GameScreen({ onOpenShop }) {
     setPoints(prev => prev + earned);
     setPointsEarned(earned);
     setGamesPlayed(prev => prev + 1);
+
+    // Simulate yield accrual on saved balance (e.g., $0.05 yield from Aave pool) at game end
+    if (totalSaved > 0) {
+      setTotalSaved(prev => Number((prev + 0.05).toFixed(2)));
+    }
 
     // Tournament handler wagers/pot
     if (selectedTourney) {
@@ -94,6 +111,24 @@ export default function GameScreen({ onOpenShop }) {
     playSound('click', soundEnabled);
     setShowGameOverOverlay(false);
     setShowStartOverlay(true);
+
+    // Check if savings have increased during the game session (via shop purchases or yield accrual)
+    if (totalSaved > savedAtStart) {
+      const goalTitle = savingsGoal ? savingsGoal.title : 'your savings goal';
+      const goalTarget = savingsGoal ? savingsGoal.target : 10.00;
+      const percentage = Math.min(100, (totalSaved / goalTarget) * 100);
+
+      const templates = [
+        `You've saved **$${totalSaved.toFixed(2)}** playing Celo Flash! You are **${percentage.toFixed(0)}%** closer to your Goal (**${goalTitle}**). Keep it up! 🚀`,
+        `Aave V3 yield is working for you! You've accumulated **$${totalSaved.toFixed(2)}** in total savings. That's **${percentage.toFixed(0)}%** of your target for **${goalTitle}**! 💸`,
+        `Great progress! Your Celo Flash round-ups have reached **$${totalSaved.toFixed(2)}**. You are only **${(100 - percentage).toFixed(0)}%** away from unlocking **${goalTitle}**! 🎯`,
+        `Savings Coach here! 🤖 With **$${totalSaved.toFixed(2)}** saved, you are **${percentage.toFixed(0)}%** closer to **${goalTitle}**. Deposit more to earn higher yield! 📈`
+      ];
+
+      const randomIndex = Math.floor(Math.random() * templates.length);
+      setNudgeMessage(templates[randomIndex]);
+      setShowCoachNudge(true);
+    }
   };
 
   const handlePowerupClick = (type) => {
@@ -233,6 +268,33 @@ export default function GameScreen({ onOpenShop }) {
             <button className="start-btn" id="btn-restart-game" onClick={handleRestartGame}>
               Play Again
             </button>
+          </div>
+        )}
+
+        {/* Coach Nudge Overlay */}
+        {showCoachNudge && (
+          <div className="coach-nudge-overlay">
+            <div className="coach-nudge-card">
+              <div className="coach-nudge-avatar">🤖</div>
+              <h3 className="coach-nudge-title">Coach's Savings Update</h3>
+              <p 
+                className="coach-nudge-text"
+                dangerouslySetInnerHTML={{ __html: nudgeMessage.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') }}
+              />
+              <div className="coach-nudge-progress-label">
+                <span>Goal Progress</span>
+                <span>{Math.min(100, (totalSaved / (savingsGoal?.target || 10.00)) * 100).toFixed(0)}%</span>
+              </div>
+              <div className="coach-nudge-progress-bg">
+                <div 
+                  className="coach-nudge-progress-bar" 
+                  style={{ width: `${Math.min(100, (totalSaved / (savingsGoal?.target || 10.00)) * 100)}%` }}
+                ></div>
+              </div>
+              <button className="coach-nudge-btn" onClick={() => { playSound('click', soundEnabled); setShowCoachNudge(false); }}>
+                Awesome, let's go!
+              </button>
+            </div>
           </div>
         )}
 
