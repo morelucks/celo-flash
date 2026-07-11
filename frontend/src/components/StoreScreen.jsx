@@ -25,6 +25,18 @@ export default function StoreScreen() {
   const [loadingItem, setLoadingItem] = useState(null); // 'multiplier', 'renewal', 'bundle', 'valora', 'mento'
   const [txStatus, setTxStatus] = useState('');
 
+  // Persistent toggle state for the Round-Up Coach
+  const [roundUpEnabled, setRoundUpEnabled] = useState(() => {
+    return localStorage.getItem('celo_flash_roundup_coach') === 'true';
+  });
+
+  const handleToggleRoundUp = (e) => {
+    const val = e.target.checked;
+    setRoundUpEnabled(val);
+    localStorage.setItem('celo_flash_roundup_coach', val ? 'true' : 'false');
+    playSound('click', soundEnabled);
+  };
+
   const handleQtyChange = (type, direction) => {
     playSound('click', soundEnabled);
     if (type === 'multiplier') {
@@ -158,6 +170,26 @@ export default function StoreScreen() {
 
   return (
     <div className="screen active" id="screen-store">
+      
+      {/* AI Round-Up Coach Switch */}
+      <div className={`round-up-coach-toggle ${roundUpEnabled ? 'active' : ''}`}>
+        <div className="toggle-info">
+          <span style={{ fontSize: '1.4rem' }}>🤖</span>
+          <div>
+            <h4>Enable AI Round-Up Coach</h4>
+            <p className="toggle-sub">Automatically save the spare change to yield pool</p>
+          </div>
+        </div>
+        <label className="switch">
+          <input 
+            type="checkbox" 
+            checked={roundUpEnabled} 
+            onChange={handleToggleRoundUp} 
+          />
+          <span className="slider"></span>
+        </label>
+      </div>
+
       <div className="store-section">
         <div className="store-section-header">
           <h2 className="store-title">🚨 EMERGENCY TOP-UPS</h2>
@@ -177,6 +209,11 @@ export default function StoreScreen() {
             <button className="buy-item-btn" onClick={handleBuyMultiplier} disabled={loadingItem !== null}>
               {loadingItem === 'multiplier' ? txStatus : `Buy • $${(qtyMultiplier * 0.04).toFixed(2)}`}
             </button>
+            {roundUpEnabled && (
+              <div className="round-up-delta-indicator">
+                Coach: +${getRoundUpDelta(costMultiplier).toFixed(2)} round-up to ${(costMultiplier + getRoundUpDelta(costMultiplier)).toFixed(2)}
+              </div>
+            )}
           </div>
 
           {/* Topup 2 */}
@@ -192,6 +229,11 @@ export default function StoreScreen() {
             <button className="buy-item-btn" onClick={handleBuyRenewal} disabled={loadingItem !== null}>
               {loadingItem === 'renewal' ? txStatus : `Buy • $${(qtyRenewal * 0.10).toFixed(2)}`}
             </button>
+            {roundUpEnabled && (
+              <div className="round-up-delta-indicator">
+                Coach: +${getRoundUpDelta(costRenewal).toFixed(2)} round-up to ${(costRenewal + getRoundUpDelta(costRenewal)).toFixed(2)}
+              </div>
+            )}
           </div>
         </div>
 
