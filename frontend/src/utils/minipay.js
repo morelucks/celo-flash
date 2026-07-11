@@ -38,3 +38,6 @@ export function redirectToDeposit() {
 
 
 // refactor: introduce Celo Mainnet parameter constants in useWallet hook
+
+
+// refactor: write switchNetwork utility to handle chain switching on Celo
