@@ -39,23 +39,23 @@ export const useWallet = () => {
   };
 
   useEffect(() => {
-    const connectWalletOnLoad = async () => {
+    const checkWalletConnection = async () => {
       const ethProvider = window.ethereum || window.celo;
       if (ethProvider) {
         try {
-          // Check chainId and switch if needed
-          const chainId = await ethProvider.request({ method: 'eth_chainId' });
-          if (chainId !== '0xa4ec' && chainId !== '42220') {
-            await switchNetwork(ethProvider);
-          }
-
-          // Automatically prompt user to connect their wallet
+          // Check if already authorized (no popup)
           const accounts = await ethProvider.request({ 
-            method: 'eth_requestAccounts' 
+            method: 'eth_accounts' 
           });
           
           if (accounts.length > 0) {
             setUserAddress(accounts[0]);
+            
+            // Switch network only if already authorized
+            const chainId = await ethProvider.request({ method: 'eth_chainId' });
+            if (chainId !== '0xa4ec' && chainId !== '42220') {
+              await switchNetwork(ethProvider);
+            }
           }
 
           // Listen for account changes
@@ -77,12 +77,12 @@ export const useWallet = () => {
             });
           }
         } catch (error) {
-          console.error('Error auto-connecting wallet:', error);
+          console.error('Error checking wallet connection:', error);
         }
       }
     };
 
-    connectWalletOnLoad();
+    checkWalletConnection();
 
     // Cleanup
     return () => {

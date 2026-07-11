@@ -1,17 +1,25 @@
 import React from 'react';
 import { useGameState } from '../context/GameStateContext';
+import { useWallet } from '../hooks/useWallet';
 import { playSound } from '../utils/audio';
 
 import { isMiniPay } from '../utils/minipay';
 
 export default function Header({ onOpenSwap }) {
   const { points, cash, soundEnabled, setSoundEnabled, userAddress } = useGameState();
+  const { connectWallet } = useWallet();
 
   const handleSoundToggle = () => {
     const nextSound = !soundEnabled;
     setSoundEnabled(nextSound);
     // Play sound immediately after enabling to verify
     playSound('click', nextSound);
+  };
+
+  const handleConnect = async (e) => {
+    e.stopPropagation();
+    playSound('click', soundEnabled);
+    await connectWallet();
   };
 
   const isRunningInMiniPay = isMiniPay();
@@ -36,9 +44,12 @@ export default function Header({ onOpenSwap }) {
                 🟢 {formatAddress(userAddress)}
               </span>
             ) : (
-              <span className="wallet-status-badge disconnected">
-                🔴 Disconnected
-              </span>
+              <button 
+                className="wallet-status-badge disconnected connect-header-btn" 
+                onClick={handleConnect}
+              >
+                🔴 Connect Wallet
+              </button>
             )}
           </div>
         </div>
