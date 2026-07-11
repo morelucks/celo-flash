@@ -656,3 +656,6 @@ export default function StoreScreen() {
 
 
 // refactor: approve savings contract to transfer round-up in USDm
+
+
+// style: refine transaction status indicator transition timing
