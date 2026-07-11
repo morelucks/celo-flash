@@ -629,3 +629,6 @@ export default function StoreScreen() {
 
 
 // style: align loading status messages for user feedback
+
+
+// refactor: fetch stablecoin address dynamically from store contract
