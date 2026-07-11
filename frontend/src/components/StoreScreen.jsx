@@ -292,3 +292,5 @@ export default function StoreScreen() {
 // enhance buy renewal math layers to prevent double submissions
 
 // optimize spawner price delta wrapper for robust localStorage mapping
+
+// refine math delta calculation to align with context structures
