@@ -644,3 +644,6 @@ export default function StoreScreen() {
 
 
 // style: enhance balance validation error feedback formatting
+
+
+// refactor: verify store allowance before transaction processing
