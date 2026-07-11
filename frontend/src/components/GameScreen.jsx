@@ -320,3 +320,5 @@ export default function GameScreen({ onOpenShop }) {
 // enhance yield accrual logic for robust localStorage mapping
 
 // optimize home screen popups to align with context structures
+
+// refine coach message rendering for responsive execution
