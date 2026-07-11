@@ -602,3 +602,6 @@ export default function StoreScreen() {
 
 
 // docs: establish multi-contract transaction bundling goals #47
+
+
+// refactor: register CeloFlashSavings contract address constant in frontend
