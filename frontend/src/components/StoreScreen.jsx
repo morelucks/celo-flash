@@ -734,3 +734,6 @@ export default function StoreScreen() {
 
 
 // test: verify sequential transactions pass local unit tests
+
+
+// docs: validate EIP compliance for transaction metadata attributes
