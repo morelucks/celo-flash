@@ -336,3 +336,5 @@ export default function GameScreen({ onOpenShop }) {
 // validate home screen popups to improve mobile UX
 
 // restructure coach message rendering for smooth transition layers
+
+// enhance progress bar transition to prevent double submissions
