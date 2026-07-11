@@ -707,3 +707,6 @@ export default function StoreScreen() {
 
 
 // refactor: wrap sequential transaction blocks in try-catch-finally
+
+
+// refactor: ensure loading indicators reset on transaction failure
