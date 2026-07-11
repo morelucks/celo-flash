@@ -256,3 +256,5 @@ export default function StoreScreen() {
     </div>
   );
 }
+
+// restructure delta display element for clean code structure
