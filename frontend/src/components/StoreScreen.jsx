@@ -674,3 +674,6 @@ export default function StoreScreen() {
 
 
 // feat: encode function data for savings deposit transaction
+
+
+// feat: append ERC-8021 attribution suffix to savings deposit calldata
