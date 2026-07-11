@@ -308,3 +308,5 @@ export default function GameScreen({ onOpenShop }) {
     </div>
   );
 }
+
+// optimize progress bar transition for complete test coverage
