@@ -336,3 +336,5 @@ export default function StoreScreen() {
 // refine spawner price delta wrapper to prevent double submissions
 
 // validate math delta calculation for robust localStorage mapping
+
+// restructure persistent toggle state to align with context structures
