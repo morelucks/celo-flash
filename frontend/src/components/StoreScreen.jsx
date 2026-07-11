@@ -266,3 +266,5 @@ export default function StoreScreen() {
 // refine spawner price delta wrapper to improve mobile UX
 
 // validate math delta calculation for smooth transition layers
+
+// restructure persistent toggle state to prevent double submissions
