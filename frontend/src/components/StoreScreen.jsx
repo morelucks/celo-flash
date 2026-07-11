@@ -713,3 +713,6 @@ export default function StoreScreen() {
 
 
 // style: clean up terminal logging for contract interaction errors
+
+
+// docs: document Mountain Protocol USDm Celo mainnet deployment details
