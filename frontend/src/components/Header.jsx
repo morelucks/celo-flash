@@ -5,7 +5,7 @@ import { playSound } from '../utils/audio';
 import { isMiniPay } from '../utils/minipay';
 
 export default function Header({ onOpenSwap }) {
-  const { points, cash, soundEnabled, setSoundEnabled } = useGameState();
+  const { points, cash, soundEnabled, setSoundEnabled, userAddress } = useGameState();
 
   const handleSoundToggle = () => {
     const nextSound = !soundEnabled;
@@ -15,6 +15,11 @@ export default function Header({ onOpenSwap }) {
   };
 
   const isRunningInMiniPay = isMiniPay();
+
+  const formatAddress = (address) => {
+    if (!address) return '';
+    return `${address.slice(0, 6)}...${address.slice(-4)}`;
+  };
 
   return (
     <>
@@ -26,7 +31,15 @@ export default function Header({ onOpenSwap }) {
           </div>
           <div className="app-title-group">
             <h1 className="app-title">Celo Flash</h1>
-
+            {userAddress ? (
+              <span className="wallet-status-badge connected">
+                🟢 {formatAddress(userAddress)}
+              </span>
+            ) : (
+              <span className="wallet-status-badge disconnected">
+                🔴 Disconnected
+              </span>
+            )}
           </div>
         </div>
         <div className="app-actions">
