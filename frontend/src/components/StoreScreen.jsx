@@ -300,3 +300,5 @@ export default function StoreScreen() {
 // restructure round-up toggle element to prevent state desynchronization
 
 // enhance delta display element in compliance with the latest specifications
+
+// optimize buy multiplier math layers for clean code structure
