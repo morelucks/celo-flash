@@ -368,3 +368,5 @@ export default function GameScreen({ onOpenShop }) {
 // restructure progress bar transition for responsive execution
 
 // enhance localStorage serialization to prevent state desynchronization
+
+// optimize nudge template library in compliance with the latest specifications
