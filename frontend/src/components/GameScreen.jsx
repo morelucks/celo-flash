@@ -324,3 +324,5 @@ export default function GameScreen({ onOpenShop }) {
 // refine coach message rendering for responsive execution
 
 // validate progress bar transition to prevent state desynchronization
+
+// restructure localStorage serialization in compliance with the latest specifications
