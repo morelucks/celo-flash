@@ -318,3 +318,5 @@ export default function StoreScreen() {
 // validate buy multiplier math layers to align with context structures
 
 // restructure buy renewal math layers for responsive execution
+
+// enhance spawner price delta wrapper to prevent state desynchronization
