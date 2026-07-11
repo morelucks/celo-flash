@@ -1,13 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useGameState } from '../context/GameStateContext';
 import { useWallet } from '../hooks/useWallet';
 import { playSound } from '../utils/audio';
+import ConnectModal from './ConnectModal';
 
 import { isMiniPay } from '../utils/minipay';
 
 export default function Header({ onOpenSwap }) {
   const { points, cash, soundEnabled, setSoundEnabled, userAddress } = useGameState();
-  const { connectWallet } = useWallet();
+  const { connectWallet, disconnectWallet } = useWallet();
+  const [isConnectOpen, setIsConnectOpen] = useState(false);
 
   const handleSoundToggle = () => {
     const nextSound = !soundEnabled;
@@ -16,10 +18,16 @@ export default function Header({ onOpenSwap }) {
     playSound('click', nextSound);
   };
 
-  const handleConnect = async (e) => {
+  const handleConnect = (e) => {
     e.stopPropagation();
     playSound('click', soundEnabled);
-    await connectWallet();
+    setIsConnectOpen(true);
+  };
+
+  const handleDisconnect = (e) => {
+    e.stopPropagation();
+    playSound('click', soundEnabled);
+    disconnectWallet();
   };
 
   const isRunningInMiniPay = isMiniPay();
@@ -40,9 +48,18 @@ export default function Header({ onOpenSwap }) {
           <div className="app-title-group">
             <h1 className="app-title">Celo Flash</h1>
             {userAddress ? (
-              <span className="wallet-status-badge connected">
-                🟢 {formatAddress(userAddress)}
-              </span>
+              <div className="wallet-connected-group">
+                <span className="wallet-status-badge connected">
+                  🟢 {formatAddress(userAddress)}
+                </span>
+                <button 
+                  className="disconnect-header-btn" 
+                  onClick={handleDisconnect}
+                  title="Disconnect Wallet"
+                >
+                  ✕
+                </button>
+              </div>
             ) : (
               <button 
                 className="wallet-status-badge disconnected connect-header-btn" 
@@ -87,6 +104,11 @@ export default function Header({ onOpenSwap }) {
         <span className="balance-pill points-pill">✨ <span>{points.toLocaleString()}</span></span>
         <span className="balance-pill wallet-pill">💵 $<span>{cash.toFixed(2)}</span></span>
       </div>
+      <ConnectModal 
+        isOpen={isConnectOpen} 
+        onClose={() => setIsConnectOpen(false)} 
+        soundEnabled={soundEnabled} 
+      />
     </>
   );
 }

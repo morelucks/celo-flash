@@ -2817,4 +2817,226 @@ input:checked + .slider:before {
   text-decoration: underline;
 }
 
+.wallet-connected-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 3px 8px;
+  border-radius: 12px;
+  margin-top: 1px;
+}
+
+.disconnect-header-btn {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  font-size: 0.7rem;
+  padding: 2px 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.disconnect-header-btn:hover {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+}
+
+/* Privy Modal Styles */
+.privy-modal-card {
+  max-width: 320px !important;
+  background: #111b15 !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 20px !important;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6) !important;
+  color: #ffffff;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+.privy-modal-header {
+  border-bottom: none !important;
+  padding: 16px 20px 8px 20px !important;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.privy-logo-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.privy-logo-icon {
+  font-size: 1.1rem;
+}
+
+.privy-logo-text {
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  color: var(--text-primary);
+}
+
+.privy-modal-body {
+  padding: 8px 20px 20px 20px !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.privy-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 8px 0 4px 0;
+  color: #ffffff;
+  text-align: center;
+}
+
+.privy-subtitle {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.5);
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.privy-primary-options {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.privy-google-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 11px;
+  background: #ffffff;
+  border: none;
+  border-radius: 24px;
+  color: #1a1a1a;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.privy-google-btn:hover {
+  background: #f3f4f6;
+  transform: translateY(-1px);
+}
+
+.privy-google-btn:active {
+  transform: translateY(0);
+}
+
+.google-icon-svg {
+  width: 18px;
+  height: 18px;
+}
+
+.privy-divider {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  margin: 12px 0 20px 0;
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.privy-divider::before,
+.privy-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.privy-divider span {
+  padding: 0 10px;
+}
+
+.privy-wallet-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.privy-wallet-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  padding: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.privy-wallet-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.12);
+  transform: translateY(-2px);
+}
+
+.privy-wallet-btn .wallet-icon {
+  font-size: 1.5rem;
+}
+
+.privy-wallet-btn .wallet-name {
+  font-size: 0.75rem;
+  font-weight: 550;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.privy-footer {
+  font-size: 0.68rem;
+  color: rgba(255, 255, 255, 0.35);
+  margin-top: 8px;
+}
+
+/* Connect Loading Container */
+.connect-loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 30px 0;
+  gap: 16px;
+}
+
+.connect-loading-container .spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid rgba(255, 255, 255, 0.1);
+  border-top-color: var(--accent-blue);
+  border-radius: 50%;
+  animation: connect-spin 0.8s linear infinite;
+}
+
+.connect-loading-container .loading-text {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+@keyframes connect-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
 
