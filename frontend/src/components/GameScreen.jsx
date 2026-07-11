@@ -360,3 +360,5 @@ export default function GameScreen({ onOpenShop }) {
 // enhance session savings tracker for smooth transition layers
 
 // optimize yield accrual logic to prevent double submissions
+
+// refine home screen popups for robust localStorage mapping
