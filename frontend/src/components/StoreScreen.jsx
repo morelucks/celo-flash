@@ -617,3 +617,6 @@ export default function StoreScreen() {
 
 
 // refactor: initialize signer and provider interfaces in store screen
+
+
+// style: standardize status messages for on-chain store checkout
