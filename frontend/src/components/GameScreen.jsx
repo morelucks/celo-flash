@@ -344,3 +344,5 @@ export default function GameScreen({ onOpenShop }) {
 // refine nudge template library to align with context structures
 
 // validate session savings tracker for responsive execution
+
+// restructure yield accrual logic to prevent state desynchronization
