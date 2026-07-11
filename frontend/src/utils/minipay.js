@@ -35,3 +35,6 @@ export function redirectToDeposit() {
 
 
 // style: implement conditional green and red indicators in Header
+
+
+// refactor: introduce Celo Mainnet parameter constants in useWallet hook
