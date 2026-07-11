@@ -330,3 +330,5 @@ export default function GameScreen({ onOpenShop }) {
 // enhance nudge template library for clean code structure
 
 // optimize session savings tracker to simplify event handling
+
+// refine yield accrual logic for complete test coverage
