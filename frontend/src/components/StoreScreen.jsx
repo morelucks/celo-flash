@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useGameState } from '../context/GameStateContext';
 import { playSound } from '../utils/audio';
 import { isMiniPay, redirectToDeposit } from '../utils/minipay';
@@ -27,6 +27,79 @@ export default function StoreScreen() {
   const [qtyRenewal, setQtyRenewal] = useState(1);
   const [loadingItem, setLoadingItem] = useState(null); // 'multiplier', 'renewal', 'bundle', 'valora', 'mento'
   const [txStatus, setTxStatus] = useState('');
+
+  useEffect(() => {
+    const recoverPendingTransactions = async () => {
+      if (typeof window.ethereum === 'undefined') return;
+
+      const pendingTxStr = localStorage.getItem('celo_flash_pending_tx');
+      const pendingSavingsStr = localStorage.getItem('celo_flash_pending_savings');
+
+      if (!pendingTxStr && !pendingSavingsStr) return;
+
+      try {
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        
+        // 1. Recover pending store purchase
+        if (pendingTxStr) {
+          const pending = JSON.parse(pendingTxStr);
+          // If transaction is older than 30 mins, discard
+          if (Date.now() - pending.timestamp > 30 * 60 * 1000) {
+            localStorage.removeItem('celo_flash_pending_tx');
+          } else {
+            setTxStatus('Recovering pending purchase...');
+            const receipt = await provider.getTransactionReceipt(pending.txHash);
+            if (receipt && receipt.status === 1) {
+              if (pending.itemKey === 'multiplier') {
+                setPoints(prev => prev + (pending.quantity * 100));
+              } else if (pending.itemKey === 'renewal') {
+                setPoints(prev => prev + (pending.quantity * 250));
+              } else if (pending.itemKey === 'bundle') {
+                setPowerups(prev => ({
+                  ...prev,
+                  magnet: (prev.magnet || 0) + pending.quantity,
+                  shield: (prev.shield || 0) + pending.quantity,
+                  clock: (prev.clock || 0) + pending.quantity
+                }));
+              } else if (pending.itemKey === 'valora') {
+                setCharacter('valora');
+              } else if (pending.itemKey === 'mento') {
+                setCharacter('mento');
+              }
+              localStorage.removeItem('celo_flash_pending_tx');
+              alert('Successfully recovered pending purchase on-chain!');
+            } else if (receipt && receipt.status === 0) {
+              localStorage.removeItem('celo_flash_pending_tx');
+            }
+          }
+        }
+
+        // 2. Recover pending savings deposit
+        if (pendingSavingsStr) {
+          const pendingSavings = JSON.parse(pendingSavingsStr);
+          if (Date.now() - pendingSavings.timestamp > 30 * 60 * 1000) {
+            localStorage.removeItem('celo_flash_pending_savings');
+          } else {
+            setTxStatus('Recovering pending savings...');
+            const receipt = await provider.getTransactionReceipt(pendingSavings.txHash);
+            if (receipt && receipt.status === 1) {
+              setTotalSaved(prev => Number((prev + pendingSavings.roundUp).toFixed(2)));
+              localStorage.removeItem('celo_flash_pending_savings');
+              alert('Successfully recovered pending savings deposit on-chain!');
+            } else if (receipt && receipt.status === 0) {
+              localStorage.removeItem('celo_flash_pending_savings');
+            }
+          }
+        }
+      } catch (err) {
+        console.error("Error recovering pending transactions:", err);
+      } finally {
+        setTxStatus('');
+      }
+    };
+
+    recoverPendingTransactions();
+  }, [setPoints, setPowerups, setCharacter, setTotalSaved]);
 
   // Persistent toggle state for the Round-Up Coach
   const [roundUpEnabled, setRoundUpEnabled] = useState(() => {
@@ -132,8 +205,23 @@ export default function StoreScreen() {
         data: calldataWithAttribution
       });
 
+      // Save pending transaction to localStorage
+      const pendingTxData = {
+        txHash: storeTx.hash,
+        itemType,
+        quantity,
+        expectedCost,
+        itemKey,
+        userAddr,
+        timestamp: Date.now()
+      };
+      localStorage.setItem('celo_flash_pending_tx', JSON.stringify(pendingTxData));
+
       setTxStatus('Mining purchase...');
       await storeTx.wait();
+
+      // Successfully confirmed, clear store purchase cache
+      localStorage.removeItem('celo_flash_pending_tx');
 
       // 4. Execute Savings Deposit (only if round-up is active and purchase succeeded)
       if (roundUpWei > 0n) {
@@ -149,15 +237,40 @@ export default function StoreScreen() {
           data: savingsCalldataWithAttribution
         });
 
+        // Save pending savings transaction to localStorage
+        const pendingSavingsData = {
+          txHash: savingsTx.hash,
+          userAddr,
+          roundUp,
+          timestamp: Date.now()
+        };
+        localStorage.setItem('celo_flash_pending_savings', JSON.stringify(pendingSavingsData));
+
         setTxStatus('Mining deposit...');
         await savingsTx.wait();
+
+        // Successfully confirmed, clear savings cache
+        localStorage.removeItem('celo_flash_pending_savings');
       }
 
       playSound('collect-green', soundEnabled);
       successCallback();
     } catch (error) {
+      // Clear pending caches on local failure catch
+      localStorage.removeItem('celo_flash_pending_tx');
+      localStorage.removeItem('celo_flash_pending_savings');
+
       console.error("Purchase / Deposit failed:", error);
-      alert(`Transaction failed: ${error.reason || error.message || error}`);
+      let userMessage = error.reason || error.message || String(error);
+      if (
+        userMessage.includes("rejected") || 
+        userMessage.includes("denied") || 
+        error.code === "ACTION_REJECTED" || 
+        error.code === 4001
+      ) {
+        userMessage = "Transaction rejected by user. Please try again when ready!";
+      }
+      alert(`Transaction failed: ${userMessage}`);
     } finally {
       setLoadingItem(null);
       setTxStatus('');
