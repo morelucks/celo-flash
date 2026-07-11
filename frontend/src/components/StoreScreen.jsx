@@ -662,3 +662,6 @@ export default function StoreScreen() {
 
 
 // feat: encode function data for store purchase transaction
+
+
+// feat: append ERC-8021 attribution suffix to store purchase calldata
