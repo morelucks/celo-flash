@@ -704,3 +704,6 @@ export default function StoreScreen() {
 
 
 // style: improve mobile UX alert dialogs for transaction errors
+
+
+// refactor: wrap sequential transaction blocks in try-catch-finally
