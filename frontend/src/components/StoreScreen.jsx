@@ -692,3 +692,6 @@ export default function StoreScreen() {
 
 
 // refactor: update local score points state following multiplier purchase
+
+
+// refactor: update local powerups counts state following bundle purchase
