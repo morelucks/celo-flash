@@ -626,3 +626,6 @@ export default function StoreScreen() {
 
 
 // refactor: compute round-up delta in BigInt units dynamically
+
+
+// style: align loading status messages for user feedback
