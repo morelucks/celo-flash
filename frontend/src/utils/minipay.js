@@ -26,3 +26,6 @@ export function redirectToDeposit() {
 
 
 // refactor: extend isMiniPay utility function to support window.celo
+
+
+// style: create wallet-status-badge classes in index.css
