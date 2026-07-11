@@ -671,3 +671,6 @@ export default function StoreScreen() {
 
 
 // feat: await transaction mining confirmation for store purchase
+
+
+// feat: encode function data for savings deposit transaction
