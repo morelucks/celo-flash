@@ -719,3 +719,6 @@ export default function StoreScreen() {
 
 
 // docs: document Aave V3 yield generation parameters on Celo network
+
+
+// refactor: ensure sequential checkout works with MiniPay wallet provider
