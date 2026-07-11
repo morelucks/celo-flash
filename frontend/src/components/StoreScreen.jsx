@@ -314,3 +314,5 @@ export default function StoreScreen() {
 // optimize round-up toggle element to prevent double submissions
 
 // refine delta display element for robust localStorage mapping
+
+// validate buy multiplier math layers to align with context structures
