@@ -61,6 +61,22 @@ export const GameStateProvider = ({ children }) => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showPlayModal, setShowPlayModal] = useState(false);
 
+  // Total savings in Aave V3 yield pool and current saving goal
+  const [totalSaved, setTotalSaved] = useState(4.50);
+  const [savingsGoal, setSavingsGoal] = useState({
+    title: 'Spawner Skin',
+    target: 10.00,
+    current: 4.50
+  });
+
+  // Sync savingsGoal current with totalSaved dynamically
+  useEffect(() => {
+    setSavingsGoal(prev => ({
+      ...prev,
+      current: totalSaved
+    }));
+  }, [totalSaved]);
+
   // Load from local storage on mount
   useEffect(() => {
     const data = localStorage.getItem('celo_flash_state');
@@ -77,6 +93,8 @@ export const GameStateProvider = ({ children }) => {
         if (parsed.character !== undefined) setCharacter(parsed.character);
         if (parsed.userAddress !== undefined) setUserAddress(parsed.userAddress);
         if (parsed.userName !== undefined) setUserName(parsed.userName);
+        if (parsed.totalSaved !== undefined) setTotalSaved(parsed.totalSaved);
+        if (parsed.savingsGoal !== undefined) setSavingsGoal(parsed.savingsGoal);
       } catch (e) {
         console.error("Error loading localStorage state:", e);
       }
@@ -95,9 +113,11 @@ export const GameStateProvider = ({ children }) => {
       tournaments,
       character,
       userAddress,
-      userName
+      userName,
+      totalSaved,
+      savingsGoal
     }));
-  }, [bestScore, points, cash, gamesPlayed, powerups, tasks, tournaments, character, userAddress, userName]);
+  }, [bestScore, points, cash, gamesPlayed, powerups, tasks, tournaments, character, userAddress, userName, totalSaved, savingsGoal]);
 
   const addPoints = (amount) => setPoints(prev => prev + amount);
   const addCash = (amount) => setCash(prev => prev + amount);
@@ -218,6 +238,10 @@ export const GameStateProvider = ({ children }) => {
       setUserAddress,
       userName,
       setUserName,
+      totalSaved,
+      setTotalSaved,
+      savingsGoal,
+      setSavingsGoal,
       addPoints,
       addCash,
       spendPoints,
