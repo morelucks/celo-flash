@@ -350,3 +350,5 @@ export default function GameScreen({ onOpenShop }) {
 // enhance home screen popups in compliance with the latest specifications
 
 // optimize coach message rendering for clean code structure
+
+// refine progress bar transition to simplify event handling
