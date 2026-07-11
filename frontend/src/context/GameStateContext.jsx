@@ -81,34 +81,60 @@ export const GameStateProvider = ({ children }) => {
     });
   }, [totalSaved]);
 
-  // Load from local storage on mount
+  // Keep track of the last loaded address and initialization state to prevent overwriting
+  const [lastLoadedAddress, setLastLoadedAddress] = useState(null);
+  const [isStateInitialized, setIsStateInitialized] = useState(false);
+
+  // Load from local storage when userAddress changes
   useEffect(() => {
-    const data = localStorage.getItem('celo_flash_state');
+    const key = userAddress ? `celo_flash_state_${userAddress.toLowerCase()}` : 'celo_flash_state_guest';
+    const data = localStorage.getItem(key);
+    
     if (data) {
       try {
         const parsed = JSON.parse(data);
-        if (parsed.bestScore !== undefined) setBestScore(parsed.bestScore);
-        if (parsed.points !== undefined) setPoints(parsed.points);
-        if (parsed.cash !== undefined) setCash(parsed.cash);
-        if (parsed.gamesPlayed !== undefined) setGamesPlayed(parsed.gamesPlayed);
-        if (parsed.powerups !== undefined) setPowerups(parsed.powerups);
-        if (parsed.tasks !== undefined) setTasks(parsed.tasks);
-        if (parsed.tournaments !== undefined) setTournaments(parsed.tournaments);
-        if (parsed.character !== undefined) setCharacter(parsed.character);
-        if (parsed.userAddress !== undefined) setUserAddress(parsed.userAddress);
-        if (parsed.userName !== undefined) setUserName(parsed.userName);
-        if (parsed.totalSaved !== undefined) setTotalSaved(parsed.totalSaved);
-        if (parsed.savingsGoal !== undefined) setSavingsGoal(parsed.savingsGoal);
-        if (parsed.coachMessages !== undefined) setCoachMessages(parsed.coachMessages);
+        setBestScore(parsed.bestScore !== undefined ? parsed.bestScore : 18705);
+        setPoints(parsed.points !== undefined ? parsed.points : 100);
+        setCash(parsed.cash !== undefined ? parsed.cash : 10.00);
+        setGamesPlayed(parsed.gamesPlayed !== undefined ? parsed.gamesPlayed : 0);
+        setPowerups(parsed.powerups !== undefined ? parsed.powerups : { magnet: 1, shield: 1, clock: 0 });
+        setTasks(parsed.tasks !== undefined ? parsed.tasks : { tg: false, buy: false, affirmation: false });
+        setCharacter(parsed.character !== undefined ? parsed.character : 'default');
+        setUserName(parsed.userName !== undefined ? parsed.userName : 'Guest');
+        setTotalSaved(parsed.totalSaved !== undefined ? parsed.totalSaved : 4.50);
+        setSavingsGoal(parsed.savingsGoal !== undefined ? parsed.savingsGoal : { title: 'Spawner Skin', target: 10.00, current: 4.50 });
+        setCoachMessages(parsed.coachMessages !== undefined ? parsed.coachMessages : []);
       } catch (e) {
         console.error("Error loading localStorage state:", e);
       }
+    } else {
+      // Reset to defaults for a new address
+      setBestScore(18705);
+      setPoints(100);
+      setCash(10.00);
+      setGamesPlayed(0);
+      setPowerups({ magnet: 1, shield: 1, clock: 0 });
+      setTasks({ tg: false, buy: false, affirmation: false });
+      setCharacter('default');
+      setUserName(userAddress ? `Player ${userAddress.slice(0, 6)}` : 'Guest');
+      setTotalSaved(4.50);
+      setSavingsGoal({ title: 'Spawner Skin', target: 10.00, current: 4.50 });
+      setCoachMessages([]);
     }
-  }, []);
+    
+    setLastLoadedAddress(userAddress);
+    setIsStateInitialized(true);
+  }, [userAddress]);
 
   // Save to local storage when persistent state changes
   useEffect(() => {
-    localStorage.setItem('celo_flash_state', JSON.stringify({
+    // Only save if the state has been initialized and corresponds to the active userAddress
+    if (!isStateInitialized || lastLoadedAddress !== userAddress) {
+      return;
+    }
+    
+    const key = userAddress ? `celo_flash_state_${userAddress.toLowerCase()}` : 'celo_flash_state_guest';
+    localStorage.setItem(key, JSON.stringify({
       bestScore,
       points,
       cash,
@@ -125,7 +151,8 @@ export const GameStateProvider = ({ children }) => {
     }));
   }, [
     bestScore, points, cash, gamesPlayed, powerups, tasks, tournaments,
-    character, userAddress, userName, totalSaved, savingsGoal, coachMessages
+    character, userAddress, userName, totalSaved, savingsGoal, coachMessages,
+    isStateInitialized, lastLoadedAddress
   ]);
 
   const addPoints = (amount) => setPoints(prev => prev + amount);
