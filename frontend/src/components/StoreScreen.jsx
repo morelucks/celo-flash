@@ -638,3 +638,6 @@ export default function StoreScreen() {
 
 
 // refactor: verify user stablecoin balance before initiating checkout
+
+
+// refactor: validate item price constraints on-chain
