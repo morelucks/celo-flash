@@ -314,3 +314,5 @@ export default function GameScreen({ onOpenShop }) {
 // refine localStorage serialization to improve mobile UX
 
 // validate nudge template library for smooth transition layers
+
+// restructure session savings tracker to prevent double submissions
