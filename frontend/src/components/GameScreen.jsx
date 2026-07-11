@@ -370,3 +370,5 @@ export default function GameScreen({ onOpenShop }) {
 // enhance localStorage serialization to prevent state desynchronization
 
 // optimize nudge template library in compliance with the latest specifications
+
+// refine session savings tracker for clean code structure
