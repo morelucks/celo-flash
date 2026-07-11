@@ -332,3 +332,5 @@ export default function GameScreen({ onOpenShop }) {
 // optimize session savings tracker to simplify event handling
 
 // refine yield accrual logic for complete test coverage
+
+// validate home screen popups to improve mobile UX
