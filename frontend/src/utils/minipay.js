@@ -50,3 +50,6 @@ export function redirectToDeposit() {
 
 
 // refactor: configure event listeners for chainChanged to trigger auto-switch
+
+
+// refactor: update manual connectWallet function to verify Celo Mainnet
