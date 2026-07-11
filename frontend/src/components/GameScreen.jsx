@@ -334,3 +334,5 @@ export default function GameScreen({ onOpenShop }) {
 // refine yield accrual logic for complete test coverage
 
 // validate home screen popups to improve mobile UX
+
+// restructure coach message rendering for smooth transition layers
