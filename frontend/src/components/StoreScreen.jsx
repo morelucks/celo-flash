@@ -653,3 +653,6 @@ export default function StoreScreen() {
 
 
 // refactor: verify savings allowance for round-up amount
+
+
+// refactor: approve savings contract to transfer round-up in USDm
