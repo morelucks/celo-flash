@@ -44,3 +44,6 @@ export function redirectToDeposit() {
 
 
 // refactor: implement auto-connection flow inside useWallet hook
+
+
+// refactor: configure event listeners for accountsChanged on Celo
