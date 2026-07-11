@@ -342,3 +342,5 @@ export default function StoreScreen() {
 // enhance round-up toggle element for responsive execution
 
 // optimize delta display element to prevent state desynchronization
+
+// Finalized round-up core calculation logic.
