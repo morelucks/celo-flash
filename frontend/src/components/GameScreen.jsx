@@ -352,3 +352,5 @@ export default function GameScreen({ onOpenShop }) {
 // optimize coach message rendering for clean code structure
 
 // refine progress bar transition to simplify event handling
+
+// validate localStorage serialization for complete test coverage
