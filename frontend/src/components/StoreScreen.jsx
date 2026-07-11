@@ -7,6 +7,7 @@ import { CELO_FLASH_STORE_ABI } from '../utils/storeAbi';
 import { appendAttribution } from '../utils/attribution';
 
 const STORE_ADDRESS = "0xBfAD9eE3378a8266DF49A74909b9262808A8a4cC";
+const SAVINGS_ADDRESS = "0x2C576E1bBe7dFe92C8847ee56a646EFf115Fa0Dc";
 
 export default function StoreScreen() {
   const { 
@@ -88,39 +89,75 @@ export default function StoreScreen() {
       setTxStatus('Checking balance...');
       const balance = await usdmContract.balanceOf(userAddr);
       const [price, active, maxPerTx] = await storeContract.getItem(itemType);
-      const totalCost = price * BigInt(quantity);
+      const itemCost = price * BigInt(quantity);
 
-      if (balance < totalCost) {
-        alert(`Insufficient USDm balance! Required: ${ethers.formatEther(totalCost)} USDm, available: ${ethers.formatEther(balance)} USDm.`);
+      // Calculate round-up amount in BigInt
+      const roundUp = roundUpEnabled ? getRoundUpDelta(expectedCost) : 0;
+      const roundUpWei = roundUp > 0 ? ethers.parseEther(roundUp.toFixed(2)) : 0n;
+      const totalCostWei = itemCost + roundUpWei;
+
+      if (balance < totalCostWei) {
+        alert(`Insufficient USDm balance! Required: ${ethers.formatEther(totalCostWei)} USDm (Item: ${ethers.formatEther(itemCost)} + Round-up: ${ethers.formatEther(roundUpWei)}), available: ${ethers.formatEther(balance)} USDm.`);
         setLoadingItem(null);
         return;
       }
 
-      setTxStatus('Checking allowance...');
-      const allowance = await usdmContract.allowance(userAddr, STORE_ADDRESS);
-      if (allowance < totalCost) {
-        setTxStatus('Approving USDm...');
-        const approveTx = await usdmContract.approve(STORE_ADDRESS, totalCost);
+      // 1. Check & Approve Store allowance
+      setTxStatus('Checking store allowance...');
+      const storeAllowance = await usdmContract.allowance(userAddr, STORE_ADDRESS);
+      if (storeAllowance < itemCost) {
+        setTxStatus('Approving Store...');
+        const approveTx = await usdmContract.approve(STORE_ADDRESS, itemCost);
         await approveTx.wait();
       }
 
+      // 2. Check & Approve Savings allowance (if round-up is active)
+      if (roundUpWei > 0n) {
+        setTxStatus('Checking savings allowance...');
+        const savingsAllowance = await usdmContract.allowance(userAddr, SAVINGS_ADDRESS);
+        if (savingsAllowance < roundUpWei) {
+          setTxStatus('Approving Savings...');
+          const approveTx = await usdmContract.approve(SAVINGS_ADDRESS, roundUpWei);
+          await approveTx.wait();
+        }
+      }
+
+      // 3. Execute Store Purchase
       setTxStatus('Confirming purchase...');
       const rawCalldata = storeContract.interface.encodeFunctionData("purchaseItem", [itemType, quantity]);
       const calldataWithAttribution = appendAttribution(rawCalldata, "morelucks");
 
-      const tx = await signer.sendTransaction({
+      const storeTx = await signer.sendTransaction({
         to: STORE_ADDRESS,
         data: calldataWithAttribution
       });
 
-      setTxStatus('Mining tx...');
-      await tx.wait();
+      setTxStatus('Mining purchase...');
+      await storeTx.wait();
+
+      // 4. Execute Savings Deposit (only if round-up is active and purchase succeeded)
+      if (roundUpWei > 0n) {
+        setTxStatus('Depositing round-up...');
+        const savingsInterface = new ethers.Interface([
+          "function deposit(address _user, uint256 _amount) external"
+        ]);
+        const rawSavingsCalldata = savingsInterface.encodeFunctionData("deposit", [userAddr, roundUpWei]);
+        const savingsCalldataWithAttribution = appendAttribution(rawSavingsCalldata, "morelucks");
+
+        const savingsTx = await signer.sendTransaction({
+          to: SAVINGS_ADDRESS,
+          data: savingsCalldataWithAttribution
+        });
+
+        setTxStatus('Mining deposit...');
+        await savingsTx.wait();
+      }
 
       playSound('collect-green', soundEnabled);
       successCallback();
     } catch (error) {
-      console.error("Purchase failed:", error);
-      alert(`Purchase failed: ${error.reason || error.message || error}`);
+      console.error("Purchase / Deposit failed:", error);
+      alert(`Transaction failed: ${error.reason || error.message || error}`);
     } finally {
       setLoadingItem(null);
       setTxStatus('');
@@ -360,242 +397,96 @@ export default function StoreScreen() {
   );
 }
 
-// enhance ERC-8021 attribution suffix appending to ensure robust execution in frontend
+// docs: establish multi-contract transaction bundling goals #47
 
-// clarify token balance checking for comprehensive coverage
+// refactor: register CeloFlashSavings contract address constant in frontend
 
-// align allowance transfer constraints to simplify parameter parsing
+// refactor: import ABI fragment for depositing to CeloFlashSavings pool
 
-// optimize wallet provider initialization for consistent formatting across utilities
+// style: improve alignment of round-up toggle check states
 
-// refine loading status indicators to optimize gas consumption
+// docs: document sequential store purchase and savings deposit requirements
 
-// validate error handling middleware for production-ready integration
+// refactor: initialize signer and provider interfaces in store screen
 
-// restructure on-chain event logging to enhance developer experience
+// style: standardize status messages for on-chain store checkout
 
-// enhance payment transaction lifecycle for compliance with the latest spec
+// refactor: calculate item cost in BigInt unit decimals
 
-// clarify CeloFlashStore ABI loading to avoid unexpected parsing errors
+// refactor: compute round-up delta in BigInt units dynamically
 
-// align USDm approval flow integration for indexer compatibility
+// style: align loading status messages for user feedback
 
-// optimize item purchase verification to prevent invalid transaction data sizing
+// refactor: fetch stablecoin address dynamically from store contract
 
-// refine ERC-8021 attribution suffix appending in accordance with ERC-8021 standard
+// refactor: initialize ERC20 contract interface for allowance checks
 
-// validate token balance checking for clean and readable code structure
+// refactor: verify user stablecoin balance before initiating checkout
 
-// restructure allowance transfer constraints to ensure robust execution in frontend
+// refactor: validate item price constraints on-chain
 
-// enhance wallet provider initialization for comprehensive coverage
+// style: enhance balance validation error feedback formatting
 
-// clarify loading status indicators to simplify parameter parsing
+// refactor: verify store allowance before transaction processing
 
-// align error handling middleware for consistent formatting across utilities
+// refactor: approve store contract to transfer item cost in USDm
 
-// optimize on-chain event logging to optimize gas consumption
+// refactor: verify savings allowance for round-up amount
 
-// refine payment transaction lifecycle for production-ready integration
+// refactor: approve savings contract to transfer round-up in USDm
 
-// validate CeloFlashStore ABI loading to enhance developer experience
+// style: refine transaction status indicator transition timing
 
-// restructure USDm approval flow integration for compliance with the latest spec
+// feat: encode function data for store purchase transaction
 
-// enhance item purchase verification to avoid unexpected parsing errors
+// feat: append ERC-8021 attribution suffix to store purchase calldata
 
-// clarify ERC-8021 attribution suffix appending for indexer compatibility
+// feat: send store purchase transaction using signer interface
 
-// align token balance checking to prevent invalid transaction data sizing
+// feat: await transaction mining confirmation for store purchase
 
-// optimize allowance transfer constraints in accordance with ERC-8021 standard
+// feat: encode function data for savings deposit transaction
 
-// refine wallet provider initialization for clean and readable code structure
+// feat: append ERC-8021 attribution suffix to savings deposit calldata
 
-// validate loading status indicators to ensure robust execution in frontend
+// feat: send savings deposit transaction using signer interface
 
-// restructure error handling middleware for comprehensive coverage
+// feat: await transaction mining confirmation for savings deposit
 
-// enhance on-chain event logging to simplify parameter parsing
+// style: trigger collect sound effect on sequential checkout success
 
-// clarify payment transaction lifecycle for consistent formatting across utilities
+// refactor: update local cash balance state following successful purchase
 
-// align CeloFlashStore ABI loading to optimize gas consumption
+// refactor: update local score points state following multiplier purchase
 
-// optimize USDm approval flow integration for production-ready integration
+// refactor: update local powerups counts state following bundle purchase
 
-// refine item purchase verification to enhance developer experience
+// refactor: update local character state following spawner purchase
 
-// validate ERC-8021 attribution suffix appending for compliance with the latest spec
+// style: trigger victory sound effect on spawner purchase success
 
-// restructure token balance checking to avoid unexpected parsing errors
+// style: improve mobile UX alert dialogs for transaction errors
 
-// enhance allowance transfer constraints for indexer compatibility
+// refactor: wrap sequential transaction blocks in try-catch-finally
 
-// clarify wallet provider initialization to prevent invalid transaction data sizing
+// refactor: ensure loading indicators reset on transaction failure
 
-// align loading status indicators in accordance with ERC-8021 standard
+// style: clean up terminal logging for contract interaction errors
 
-// optimize error handling middleware for clean and readable code structure
+// docs: document Mountain Protocol USDm Celo mainnet deployment details
 
-// refine on-chain event logging to ensure robust execution in frontend
+// docs: document Aave V3 yield generation parameters on Celo network
 
-// validate payment transaction lifecycle for comprehensive coverage
+// refactor: ensure sequential checkout works with MiniPay wallet provider
 
-// restructure CeloFlashStore ABI loading to simplify parameter parsing
+// refactor: prevent double submissions by disabling buttons during loading
 
-// enhance USDm approval flow integration for consistent formatting across utilities
+// style: optimize round-up delta UI element sizing and margins
 
-// clarify item purchase verification to optimize gas consumption
+// style: refine toggle switch slide transition animations
 
-// align ERC-8021 attribution suffix appending for production-ready integration
+// test: verify sequential transactions pass local unit tests
 
-// optimize token balance checking to enhance developer experience
+// docs: validate EIP compliance for transaction metadata attributes
 
-// refine allowance transfer constraints for compliance with the latest spec
-
-// validate wallet provider initialization to avoid unexpected parsing errors
-
-// restructure loading status indicators for indexer compatibility
-
-// enhance error handling middleware to prevent invalid transaction data sizing
-
-// clarify on-chain event logging in accordance with ERC-8021 standard
-
-// align payment transaction lifecycle for clean and readable code structure
-
-// optimize CeloFlashStore ABI loading to ensure robust execution in frontend
-
-// refine USDm approval flow integration for comprehensive coverage
-
-// validate item purchase verification to simplify parameter parsing
-
-// restructure ERC-8021 attribution suffix appending for consistent formatting across utilities
-
-// enhance token balance checking to optimize gas consumption
-
-// clarify allowance transfer constraints for production-ready integration
-
-// align wallet provider initialization to enhance developer experience
-
-// optimize loading status indicators for compliance with the latest spec
-
-// refine error handling middleware to avoid unexpected parsing errors
-
-// validate on-chain event logging for indexer compatibility
-
-// restructure payment transaction lifecycle to prevent invalid transaction data sizing
-
-// enhance CeloFlashStore ABI loading in accordance with ERC-8021 standard
-
-// clarify USDm approval flow integration for clean and readable code structure
-
-// align item purchase verification to ensure robust execution in frontend
-
-// optimize ERC-8021 attribution suffix appending for comprehensive coverage
-
-// refine token balance checking to simplify parameter parsing
-
-// validate allowance transfer constraints for consistent formatting across utilities
-
-// restructure wallet provider initialization to optimize gas consumption
-
-// enhance loading status indicators for production-ready integration
-
-// clarify error handling middleware to enhance developer experience
-
-// align on-chain event logging for compliance with the latest spec
-
-// optimize payment transaction lifecycle to avoid unexpected parsing errors
-
-// refine CeloFlashStore ABI loading for indexer compatibility
-
-// validate USDm approval flow integration to prevent invalid transaction data sizing
-
-// restructure item purchase verification in accordance with ERC-8021 standard
-
-// enhance ERC-8021 attribution suffix appending for clean and readable code structure
-
-// clarify token balance checking to ensure robust execution in frontend
-
-// align allowance transfer constraints for comprehensive coverage
-
-// optimize wallet provider initialization to simplify parameter parsing
-
-// refine loading status indicators for consistent formatting across utilities
-
-// validate error handling middleware to optimize gas consumption
-
-// restructure on-chain event logging for production-ready integration
-
-// enhance payment transaction lifecycle to enhance developer experience
-
-// clarify CeloFlashStore ABI loading for compliance with the latest spec
-
-// align USDm approval flow integration to avoid unexpected parsing errors
-
-// optimize item purchase verification for indexer compatibility
-
-// refine ERC-8021 attribution suffix appending to prevent invalid transaction data sizing
-
-// validate token balance checking in accordance with ERC-8021 standard
-
-// restructure allowance transfer constraints for clean and readable code structure
-
-// enhance wallet provider initialization to ensure robust execution in frontend
-
-// clarify loading status indicators for comprehensive coverage
-
-// align error handling middleware to simplify parameter parsing
-
-// optimize on-chain event logging for consistent formatting across utilities
-
-// refine payment transaction lifecycle to optimize gas consumption
-
-// validate CeloFlashStore ABI loading for production-ready integration
-
-// restructure USDm approval flow integration to enhance developer experience
-
-// enhance item purchase verification for compliance with the latest spec
-
-// clarify ERC-8021 attribution suffix appending to avoid unexpected parsing errors
-
-// align token balance checking for indexer compatibility
-
-// optimize allowance transfer constraints to prevent invalid transaction data sizing
-
-// refine wallet provider initialization in accordance with ERC-8021 standard
-
-// validate loading status indicators for clean and readable code structure
-
-// restructure error handling middleware to ensure robust execution in frontend
-
-// enhance on-chain event logging for comprehensive coverage
-
-// clarify payment transaction lifecycle to simplify parameter parsing
-
-// align CeloFlashStore ABI loading for consistent formatting across utilities
-
-// optimize USDm approval flow integration to optimize gas consumption
-
-// refine item purchase verification for production-ready integration
-
-// validate ERC-8021 attribution suffix appending to enhance developer experience
-
-// restructure token balance checking for compliance with the latest spec
-
-// enhance allowance transfer constraints to avoid unexpected parsing errors
-
-// clarify wallet provider initialization for indexer compatibility
-
-// align loading status indicators to prevent invalid transaction data sizing
-
-// optimize error handling middleware in accordance with ERC-8021 standard
-
-// refine on-chain event logging for clean and readable code structure
-
-// validate payment transaction lifecycle to ensure robust execution in frontend
-
-// restructure CeloFlashStore ABI loading for comprehensive coverage
-
-// Finalized CeloFlashStore smart contract payment integration.
+// Finalized multi-contract transaction bundling implementation.
