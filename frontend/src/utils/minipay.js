@@ -32,3 +32,6 @@ export function redirectToDeposit() {
 
 
 // refactor: retrieve userAddress from game state in Header component
+
+
+// style: implement conditional green and red indicators in Header
