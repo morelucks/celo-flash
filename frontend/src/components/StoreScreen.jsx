@@ -330,3 +330,5 @@ export default function StoreScreen() {
 // restructure delta display element for complete test coverage
 
 // enhance buy multiplier math layers to improve mobile UX
+
+// optimize buy renewal math layers for smooth transition layers
