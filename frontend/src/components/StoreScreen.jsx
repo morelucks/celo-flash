@@ -689,3 +689,6 @@ export default function StoreScreen() {
 
 
 // refactor: update local cash balance state following successful purchase
+
+
+// refactor: update local score points state following multiplier purchase
