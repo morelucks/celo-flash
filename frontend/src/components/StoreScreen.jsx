@@ -632,3 +632,6 @@ export default function StoreScreen() {
 
 
 // refactor: fetch stablecoin address dynamically from store contract
+
+
+// refactor: initialize ERC20 contract interface for allowance checks
