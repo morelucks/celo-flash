@@ -18,6 +18,18 @@ export default function StoreScreen() {
   const [qtyMultiplier, setQtyMultiplier] = useState(1);
   const [qtyRenewal, setQtyRenewal] = useState(1);
 
+  // Persistent toggle state for the Round-Up Coach
+  const [roundUpEnabled, setRoundUpEnabled] = useState(() => {
+    return localStorage.getItem('celo_flash_roundup_coach') === 'true';
+  });
+
+  const handleToggleRoundUp = (e) => {
+    const val = e.target.checked;
+    setRoundUpEnabled(val);
+    localStorage.setItem('celo_flash_roundup_coach', val ? 'true' : 'false');
+    playSound('click', soundEnabled);
+  };
+
   const handleQtyChange = (type, direction) => {
     playSound('click', soundEnabled);
     if (type === 'multiplier') {
@@ -25,6 +37,14 @@ export default function StoreScreen() {
     } else if (type === 'renewal') {
       setQtyRenewal(prev => direction === 'plus' ? Math.min(99, prev + 1) : Math.max(1, prev - 1));
     }
+  };
+
+  // Helper to calculate round-up delta to the next whole dollar
+  const getRoundUpDelta = (cost) => {
+    if (cost <= 0) return 0;
+    const nextWhole = Math.ceil(cost);
+    const delta = nextWhole - cost;
+    return delta === 0 ? 1.00 : Number(delta.toFixed(2));
   };
 
   const handleBuyMultiplier = () => {
@@ -96,9 +116,31 @@ export default function StoreScreen() {
     }
   };
 
+  const costMultiplier = qtyMultiplier * 0.04;
+  const costRenewal = qtyRenewal * 0.10;
 
   return (
     <div className="screen active" id="screen-store">
+      
+      {/* AI Round-Up Coach Switch */}
+      <div className={`round-up-coach-toggle ${roundUpEnabled ? 'active' : ''}`}>
+        <div className="toggle-info">
+          <span style={{ fontSize: '1.4rem' }}>🤖</span>
+          <div>
+            <h4>Enable AI Round-Up Coach</h4>
+            <p className="toggle-sub">Automatically save the spare change to yield pool</p>
+          </div>
+        </div>
+        <label className="switch">
+          <input 
+            type="checkbox" 
+            checked={roundUpEnabled} 
+            onChange={handleToggleRoundUp} 
+          />
+          <span className="slider"></span>
+        </label>
+      </div>
+
       <div className="store-section">
         <div className="store-section-header">
           <h2 className="store-title">🚨 EMERGENCY TOP-UPS</h2>
@@ -116,8 +158,13 @@ export default function StoreScreen() {
               <button className="qty-btn qty-plus" onClick={() => handleQtyChange('multiplier', 'plus')}>+</button>
             </div>
             <button className="buy-item-btn" onClick={handleBuyMultiplier}>
-              Buy • ${(qtyMultiplier * 0.04).toFixed(2)}
+              Buy • ${costMultiplier.toFixed(2)}
             </button>
+            {roundUpEnabled && (
+              <div className="round-up-delta-indicator">
+                Coach: +${getRoundUpDelta(costMultiplier).toFixed(2)} round-up to ${(costMultiplier + getRoundUpDelta(costMultiplier)).toFixed(2)}
+              </div>
+            )}
           </div>
 
           {/* Topup 2 */}
@@ -131,8 +178,13 @@ export default function StoreScreen() {
               <button className="qty-btn qty-plus" onClick={() => handleQtyChange('renewal', 'plus')}>+</button>
             </div>
             <button className="buy-item-btn" onClick={handleBuyRenewal}>
-              Buy • ${(qtyRenewal * 0.10).toFixed(2)}
+              Buy • ${costRenewal.toFixed(2)}
             </button>
+            {roundUpEnabled && (
+              <div className="round-up-delta-indicator">
+                Coach: +${getRoundUpDelta(costRenewal).toFixed(2)} round-up to ${(costRenewal + getRoundUpDelta(costRenewal)).toFixed(2)}
+              </div>
+            )}
           </div>
         </div>
 
@@ -141,9 +193,16 @@ export default function StoreScreen() {
             <h4>Buy All Power-ups</h4>
             <p>Activate Magnet, Shield, and Clock at once!</p>
           </div>
-          <button className="buy-all-btn" onClick={handleBuyAllPowerups}>
-            $0.20 BUY ALL
-          </button>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+            <button className="buy-all-btn" onClick={handleBuyAllPowerups}>
+              $0.20 BUY ALL
+            </button>
+            {roundUpEnabled && (
+              <div className="round-up-delta-indicator" style={{ marginTop: '4px', textAlign: 'right' }}>
+                Coach: +${getRoundUpDelta(0.20).toFixed(2)} round-up
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -157,12 +216,19 @@ export default function StoreScreen() {
               <h4>Valora Coin</h4>
               <p>Spawns Valora hearts. Lasts 24h once bought.</p>
             </div>
-            <button 
-              className={`buy-spawner-btn ${character === 'valora' ? 'active-spawner' : ''}`}
-              onClick={() => handleBuySpawner('valora')}
-            >
-              {character === 'valora' ? 'Active' : 'Buy • $0.05'}
-            </button>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <button 
+                className={`buy-spawner-btn ${character === 'valora' ? 'active-spawner' : ''}`}
+                onClick={() => handleBuySpawner('valora')}
+              >
+                {character === 'valora' ? 'Active' : 'Buy • $0.05'}
+              </button>
+              {roundUpEnabled && character !== 'valora' && (
+                <div className="round-up-delta-indicator">
+                  Coach: +${getRoundUpDelta(0.05).toFixed(2)} round-up
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="spawner-card">
@@ -171,12 +237,19 @@ export default function StoreScreen() {
               <h4>Mento Token</h4>
               <p>Spawns Mento leaves. Lasts 24h once bought.</p>
             </div>
-            <button 
-              className={`buy-spawner-btn ${character === 'mento' ? 'active-spawner' : ''}`}
-              onClick={() => handleBuySpawner('mento')}
-            >
-              {character === 'mento' ? 'Active' : 'Buy • $0.05'}
-            </button>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <button 
+                className={`buy-spawner-btn ${character === 'mento' ? 'active-spawner' : ''}`}
+                onClick={() => handleBuySpawner('mento')}
+              >
+                {character === 'mento' ? 'Active' : 'Buy • $0.05'}
+              </button>
+              {roundUpEnabled && character !== 'mento' && (
+                <div className="round-up-delta-indicator">
+                  Coach: +${getRoundUpDelta(0.05).toFixed(2)} round-up
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
