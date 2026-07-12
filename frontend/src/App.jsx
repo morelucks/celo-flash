@@ -14,6 +14,7 @@ import SwapModal from './components/SwapModal';
 import CreateTourneyModal from './components/CreateTourneyModal';
 import PlayTourneyModal from './components/PlayTourneyModal';
 import SavingsCoachDrawer from './components/SavingsCoachDrawer';
+import SavingsScreen from './components/SavingsScreen';
 
 function MainAppContent() {
   const [isSDKLoaded, setIsSDKLoaded] = useState(false);
@@ -66,6 +67,8 @@ function MainAppContent() {
         );
       case 'store':
         return <StoreScreen />;
+      case 'savings':
+        return <SavingsScreen />;
       case 'me':
         return <MeScreen />;
       default:
