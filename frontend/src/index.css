@@ -1632,15 +1632,13 @@ body::after {
 
 /* --- FOOTER NAV MENU --- */
 .app-footer-nav {
-  min-height: 64px;
+  height: 64px;
   background-color: var(--bg-dark);
   border-top: 1px solid rgba(255, 255, 255, 0.04);
   display: flex;
   justify-content: space-around;
   align-items: center;
-  padding-top: 6px;
-  padding-bottom: calc(6px + env(safe-area-inset-bottom));
-  box-sizing: border-box;
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 .nav-item {
@@ -1914,9 +1912,8 @@ body::after {
     padding: 8px 12px;
   }
   .app-footer-nav {
-    min-height: 58px;
-    padding-top: 4px;
-    padding-bottom: calc(4px + env(safe-area-inset-bottom));
+    height: 58px;
+    padding-bottom: env(safe-area-inset-bottom);
   }
   .nav-item {
     padding: 2px 0;
