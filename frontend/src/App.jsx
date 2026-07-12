@@ -24,18 +24,20 @@ function MainAppContent() {
       try {
         const inMiniApp = await sdk.isInMiniApp();
         if (inMiniApp) {
-          try {
-            const context = await sdk.context;
+          // 1. Call ready() immediately to hide splash/loading screens
+          await sdk.actions.ready();
+          
+          // 2. Fetch context asynchronously in the background
+          sdk.context.then((context) => {
             if (context && context.user) {
               setFarcasterUser(context.user);
               if (context.user.username) {
                 setUserName(context.user.username);
               }
             }
-          } catch (ctxError) {
+          }).catch((ctxError) => {
             console.error("Error loading Farcaster context:", ctxError);
-          }
-          await sdk.actions.ready();
+          });
         }
       } catch (error) {
         console.error("Failed to initialize Farcaster SDK:", error);
