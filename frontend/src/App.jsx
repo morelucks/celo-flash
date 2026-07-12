@@ -22,17 +22,25 @@ function MainAppContent() {
   useEffect(() => {
     const load = async () => {
       try {
-        const context = await sdk.context;
-        if (context && context.user) {
-          setFarcasterUser(context.user);
-          if (context.user.username) {
-            setUserName(context.user.username);
+        const inMiniApp = await sdk.isInMiniApp();
+        if (inMiniApp) {
+          try {
+            const context = await sdk.context;
+            if (context && context.user) {
+              setFarcasterUser(context.user);
+              if (context.user.username) {
+                setUserName(context.user.username);
+              }
+            }
+          } catch (ctxError) {
+            console.error("Error loading Farcaster context:", ctxError);
           }
+          await sdk.actions.ready();
         }
-        await sdk.actions.ready();
-        setIsSDKLoaded(true);
       } catch (error) {
         console.error("Failed to initialize Farcaster SDK:", error);
+      } finally {
+        setIsSDKLoaded(true);
       }
     };
     if (!isSDKLoaded) {
