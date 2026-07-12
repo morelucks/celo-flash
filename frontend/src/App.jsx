@@ -17,6 +17,20 @@ import SavingsCoachDrawer from './components/SavingsCoachDrawer';
 import SavingsScreen from './components/SavingsScreen';
 
 function MainAppContent() {
+  const {
+    currentTab,
+    setCurrentTab,
+    showCreateModal,
+    setShowCreateModal,
+    showPlayModal,
+    setShowPlayModal,
+    selectedTourney,
+    setSelectedTourney,
+    savingsGoal,
+    setFarcasterUser,
+    setUserName
+  } = useGameState();
+
   const [isSDKLoaded, setIsSDKLoaded] = useState(false);
 
   useEffect(() => {
@@ -49,20 +63,6 @@ function MainAppContent() {
       load();
     }
   }, [isSDKLoaded, setFarcasterUser, setUserName]);
-
-  const {
-    currentTab,
-    setCurrentTab,
-    showCreateModal,
-    setShowCreateModal,
-    showPlayModal,
-    setShowPlayModal,
-    selectedTourney,
-    setSelectedTourney,
-    savingsGoal,
-    setFarcasterUser,
-    setUserName
-  } = useGameState();
 
   // Initialize wallet connection
   useWallet();
