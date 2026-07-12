@@ -6,7 +6,7 @@ import avatarUrl from '../assets/avatar.png';
 import UsernameModal from './UsernameModal';
 
 export default function MeScreen() {
-  const { cash, points, gamesPlayed, setCurrentTab, soundEnabled, userAddress, userName, setUserName } = useGameState();
+  const { cash, points, gamesPlayed, setCurrentTab, soundEnabled, userAddress, userName, setUserName, farcasterUser } = useGameState();
   const { connectWallet } = useWallet();
   const [statsTab, setStatsTab] = useState('usage');
   const [showUsernameModal, setShowUsernameModal] = useState(false);
@@ -16,7 +16,9 @@ export default function MeScreen() {
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
   };
 
-  const displayName = userName || (userAddress ? formatAddress(userAddress) : 'Guest');
+  const avatarImage = farcasterUser?.pfpUrl || avatarUrl;
+  const displayName = farcasterUser?.displayName || farcasterUser?.username || userName || 'Guest';
+  const displayHandle = farcasterUser?.username ? `@${farcasterUser.username}` : (userName !== 'Guest' ? `@${userName}` : '');
 
   const handleConnectWallet = async () => {
     playSound('click', soundEnabled);
@@ -62,12 +64,12 @@ export default function MeScreen() {
       <div className="profile-card">
         <div className="profile-header">
           <div className="profile-avatar-container">
-            <img src={avatarUrl} alt={`${displayName} Avatar`} className="profile-avatar" id="me-avatar-img" />
+            <img src={avatarImage} alt={`${displayName} Avatar`} className="profile-avatar" id="me-avatar-img" referrerPolicy="no-referrer" />
           </div>
           <div className="profile-meta">
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <h3 className="profile-handle">@{displayName}</h3>
-              {userAddress && (
+              <h3 className="profile-handle">{displayName}</h3>
+              {userAddress && !farcasterUser && (
                 <button 
                   onClick={handleEditUsername}
                   className="edit-username-btn"
@@ -77,7 +79,16 @@ export default function MeScreen() {
                 </button>
               )}
             </div>
-            <span className="profile-fid">{userAddress ? formatAddress(userAddress) : 'Connect Wallet'}</span>
+            {displayHandle && (
+              <span className="profile-sub-handle" style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginTop: '-2px' }}>
+                {displayHandle}
+              </span>
+            )}
+            <span className="profile-fid" style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '4px', display: 'block' }}>
+              {farcasterUser?.fid ? `FID: ${farcasterUser.fid}` : ''}
+              {farcasterUser?.fid && userAddress ? ' • ' : ''}
+              {userAddress ? formatAddress(userAddress) : (!farcasterUser?.fid ? 'Connect Wallet' : '')}
+            </span>
           </div>
           <button className="share-btn" onClick={handleShare}>
             <svg className="share-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

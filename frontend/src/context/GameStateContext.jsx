@@ -41,6 +41,7 @@ export const GameStateProvider = ({ children }) => {
   const [character, setCharacter] = useState('default'); // 'default', 'valora', 'mento'
   const [userAddress, setUserAddress] = useState(null);
   const [userName, setUserName] = useState('Guest');
+  const [farcasterUser, setFarcasterUser] = useState(null);
   const [powerups, setPowerups] = useState({
     magnet: 1,
     shield: 1,
@@ -274,6 +275,8 @@ export const GameStateProvider = ({ children }) => {
       setUserAddress,
       userName,
       setUserName,
+      farcasterUser,
+      setFarcasterUser,
       totalSaved,
       setTotalSaved,
       savingsGoal,

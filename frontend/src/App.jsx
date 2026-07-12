@@ -22,6 +22,13 @@ function MainAppContent() {
   useEffect(() => {
     const load = async () => {
       try {
+        const context = await sdk.context;
+        if (context && context.user) {
+          setFarcasterUser(context.user);
+          if (context.user.username) {
+            setUserName(context.user.username);
+          }
+        }
         await sdk.actions.ready();
         setIsSDKLoaded(true);
       } catch (error) {
@@ -31,7 +38,7 @@ function MainAppContent() {
     if (!isSDKLoaded) {
       load();
     }
-  }, [isSDKLoaded]);
+  }, [isSDKLoaded, setFarcasterUser, setUserName]);
 
   const {
     currentTab,
@@ -42,7 +49,9 @@ function MainAppContent() {
     setShowPlayModal,
     selectedTourney,
     setSelectedTourney,
-    savingsGoal
+    savingsGoal,
+    setFarcasterUser,
+    setUserName
   } = useGameState();
 
   // Initialize wallet connection
