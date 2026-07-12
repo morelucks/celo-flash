@@ -124,6 +124,33 @@ export default function SavingsScreen() {
       return;
     }
 
+    // Pre-flight balance validation
+    if (activeAction === 'deposit') {
+      if (activeAsset === 'celo') {
+        if (valueFloat > parseFloat(walletCelo)) {
+          alert(`Insufficient CELO balance! You only have ${walletCelo} CELO in your wallet.`);
+          return;
+        }
+      } else {
+        if (valueFloat > parseFloat(walletUsdm)) {
+          alert(`Insufficient USDm balance! You only have ${walletUsdm} USDm in your wallet.`);
+          return;
+        }
+      }
+    } else {
+      if (activeAsset === 'celo') {
+        if (valueFloat > parseFloat(lockedCelo)) {
+          alert(`Insufficient locked CELO balance! You only have ${lockedCelo} CELO in your savings pool.`);
+          return;
+        }
+      } else {
+        if (valueFloat > parseFloat(lockedUsdm)) {
+          alert(`Insufficient locked USDm balance! You only have ${lockedUsdm} USDm in your savings pool.`);
+          return;
+        }
+      }
+    }
+
     playSound('click', soundEnabled);
     setIsLoading(true);
     setStatusMessage('Preparing transaction...');
