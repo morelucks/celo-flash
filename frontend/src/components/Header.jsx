@@ -95,15 +95,6 @@ export default function Header({ onOpenSwap }) {
         </div>
       </div>
 
-      {/* Token / Balance Info Bar */}
-      <div className="balance-bar">
-        <button className="balance-action buy-celo-btn" onClick={onOpenSwap}>
-          <span className="plus-icon">+</span> Swap
-        </button>
-        <span className="balance-pill fee-pill">🟢 FREE</span>
-        <span className="balance-pill points-pill">✨ <span>{points.toLocaleString()}</span></span>
-        <span className="balance-pill wallet-pill">💵 $<span>{cash.toFixed(2)}</span></span>
-      </div>
       <ConnectModal 
         isOpen={isConnectOpen} 
         onClose={() => setIsConnectOpen(false)} 

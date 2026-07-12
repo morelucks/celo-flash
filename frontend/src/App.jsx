@@ -17,29 +17,6 @@ import SavingsCoachDrawer from './components/SavingsCoachDrawer';
 import SavingsScreen from './components/SavingsScreen';
 
 function MainAppContent() {
-  const [isSDKLoaded, setIsSDKLoaded] = useState(false);
-
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const context = await sdk.context;
-        if (context && context.user) {
-          setFarcasterUser(context.user);
-          if (context.user.username) {
-            setUserName(context.user.username);
-          }
-        }
-        await sdk.actions.ready();
-        setIsSDKLoaded(true);
-      } catch (error) {
-        console.error("Failed to initialize Farcaster SDK:", error);
-      }
-    };
-    if (!isSDKLoaded) {
-      load();
-    }
-  }, [isSDKLoaded, setFarcasterUser, setUserName]);
-
   const {
     currentTab,
     setCurrentTab,
@@ -53,6 +30,39 @@ function MainAppContent() {
     setFarcasterUser,
     setUserName
   } = useGameState();
+
+  const [isSDKLoaded, setIsSDKLoaded] = useState(false);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const inMiniApp = await sdk.isInMiniApp();
+        if (inMiniApp) {
+          // 1. Call ready() immediately to hide splash/loading screens
+          await sdk.actions.ready();
+          
+          // 2. Fetch context asynchronously in the background
+          sdk.context.then((context) => {
+            if (context && context.user) {
+              setFarcasterUser(context.user);
+              if (context.user.username) {
+                setUserName(context.user.username);
+              }
+            }
+          }).catch((ctxError) => {
+            console.error("Error loading Farcaster context:", ctxError);
+          });
+        }
+      } catch (error) {
+        console.error("Failed to initialize Farcaster SDK:", error);
+      } finally {
+        setIsSDKLoaded(true);
+      }
+    };
+    if (!isSDKLoaded) {
+      load();
+    }
+  }, [isSDKLoaded, setFarcasterUser, setUserName]);
 
   // Initialize wallet connection
   useWallet();
