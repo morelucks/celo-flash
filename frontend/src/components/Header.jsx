@@ -1,15 +1,13 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useGameState } from '../context/GameStateContext';
 import { useWallet } from '../hooks/useWallet';
 import { playSound } from '../utils/audio';
-import ConnectModal from './ConnectModal';
 
 import { isMiniPay } from '../utils/minipay';
 
 export default function Header({ onOpenSwap }) {
   const { points, cash, soundEnabled, setSoundEnabled, userAddress } = useGameState();
   const { connectWallet, disconnectWallet } = useWallet();
-  const [isConnectOpen, setIsConnectOpen] = useState(false);
 
   const handleSoundToggle = () => {
     const nextSound = !soundEnabled;
@@ -21,7 +19,8 @@ export default function Header({ onOpenSwap }) {
   const handleConnect = (e) => {
     e.stopPropagation();
     playSound('click', soundEnabled);
-    setIsConnectOpen(true);
+    // Directly opens Privy's login modal (or connects MiniPay) — no intermediate modal
+    connectWallet();
   };
 
   const handleDisconnect = (e) => {
@@ -94,12 +93,6 @@ export default function Header({ onOpenSwap }) {
           </button>
         </div>
       </div>
-
-      <ConnectModal 
-        isOpen={isConnectOpen} 
-        onClose={() => setIsConnectOpen(false)} 
-        soundEnabled={soundEnabled} 
-      />
     </>
   );
 }
