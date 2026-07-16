@@ -1,21 +1,21 @@
 import { useEffect, useCallback } from 'react';
-import { usePrivy, useWallets } from '@privy-io/react-auth';
 import { useGameState } from '../context/GameStateContext';
+import { usePrivyState } from '../providers/PrivyProviderWrapper';
 import { isMiniPay } from '../utils/minipay';
 
 /**
  * Unified wallet hook that supports:
  * 1. MiniPay (injected provider, auto-connects inside MiniPay app)
  * 2. Privy (social login via Google/email + external wallets via WalletConnect)
+ * 3. Fallback to MetaMask injected if Privy isn't configured
  *
- * Priority: MiniPay detection first → then Privy
+ * Priority: MiniPay detection first → then Privy → then injected fallback
  */
 export const useWallet = () => {
   const { setUserAddress, setUserName, userAddress } = useGameState();
-  const { login, logout, authenticated, user, ready } = usePrivy();
-  const { wallets } = useWallets();
+  const { login, logout, authenticated, user, ready, wallets, isAvailable: isPrivyAvailable } = usePrivyState();
 
-  // ─── MiniPay: auto-connect via injected provider ───────────────────
+  // ─── MiniPay / injected: network switching ─────────────────────────
   const switchNetwork = useCallback(async (ethProvider) => {
     try {
       await ethProvider.request({
@@ -109,9 +109,8 @@ export const useWallet = () => {
 
   // ─── Privy: sync wallet address when user authenticates ────────────
   useEffect(() => {
-    // Skip Privy sync if inside MiniPay (MiniPay handles its own connection)
     if (isMiniPay()) return;
-    if (!ready) return;
+    if (!isPrivyAvailable || !ready) return;
 
     if (authenticated && wallets.length > 0) {
       // Prefer embedded wallet, fall back to first connected wallet
@@ -132,16 +131,10 @@ export const useWallet = () => {
           }
         }
       }
-    } else if (!authenticated && !isMiniPay()) {
-      // Only clear if not in MiniPay (MiniPay manages its own state)
-      // Don't clear if we have a MiniPay-derived address
-      if (userAddress && !isMiniPay()) {
-        // User logged out of Privy — keep guest state
-      }
     }
-  }, [authenticated, wallets, user, ready, setUserAddress, setUserName, userAddress]);
+  }, [authenticated, wallets, user, ready, isPrivyAvailable, setUserAddress, setUserName]);
 
-  // ─── Connect: MiniPay direct or Privy login ────────────────────────
+  // ─── Connect: MiniPay → Privy → MetaMask fallback ─────────────────
   const connectWallet = useCallback(async () => {
     // Inside MiniPay → use injected provider directly
     if (isMiniPay()) {
@@ -166,41 +159,59 @@ export const useWallet = () => {
       return null;
     }
 
-    // Outside MiniPay → open Privy login modal (Google / email / wallet)
-    try {
-      login();
-      // Address will be set by the useEffect above when authentication completes
-      return null; // Privy handles the flow asynchronously
-    } catch (error) {
-      console.error('Error opening Privy login:', error);
-      return null;
+    // Privy is configured → open Privy login modal
+    if (isPrivyAvailable) {
+      try {
+        login();
+        return null; // Privy handles the flow asynchronously
+      } catch (error) {
+        console.error('Error opening Privy login:', error);
+        return null;
+      }
     }
-  }, [login, switchNetwork, setUserAddress]);
+
+    // Fallback: try MetaMask / injected provider directly
+    const ethProvider = window.ethereum;
+    if (ethProvider) {
+      try {
+        const chainId = await ethProvider.request({ method: 'eth_chainId' });
+        if (chainId !== '0xa4ec' && chainId !== '42220') {
+          await switchNetwork(ethProvider);
+        }
+        const accounts = await ethProvider.request({
+          method: 'eth_requestAccounts',
+        });
+        setUserAddress(accounts[0]);
+        return accounts[0];
+      } catch (error) {
+        console.error('Error connecting wallet:', error);
+        return null;
+      }
+    }
+
+    alert('Please install MetaMask or open inside MiniPay.');
+    return null;
+  }, [login, switchNetwork, setUserAddress, isPrivyAvailable]);
 
   // ─── Disconnect ────────────────────────────────────────────────────
   const disconnectWallet = useCallback(async () => {
-    if (isMiniPay()) {
-      // MiniPay doesn't support disconnect, just clear local state
-      setUserAddress(null);
-      setUserName('Guest');
-      return;
-    }
-
-    // Privy logout
-    try {
-      await logout();
-    } catch (e) {
-      console.error('Privy logout error:', e);
+    if (isPrivyAvailable && authenticated) {
+      try {
+        await logout();
+      } catch (e) {
+        console.error('Privy logout error:', e);
+      }
     }
     setUserAddress(null);
     setUserName('Guest');
-  }, [logout, setUserAddress, setUserName]);
+  }, [logout, setUserAddress, setUserName, isPrivyAvailable, authenticated]);
 
   return {
     userAddress,
     connectWallet,
     disconnectWallet,
     isPrivyAuthenticated: authenticated,
+    isPrivyAvailable,
     privyUser: user,
     privyReady: ready,
   };
