@@ -14,4 +14,24 @@ export default defineConfig({
       },
     }),
   ],
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('@privy-io')) {
+              return 'privy';
+            }
+            if (id.includes('ethers')) {
+              return 'ethers';
+            }
+            if (id.includes('react') || id.includes('scheduler')) {
+              return 'react-core';
+            }
+            return 'vendor';
+          }
+        },
+      },
+    },
+  },
 })

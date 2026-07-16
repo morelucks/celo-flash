@@ -1,20 +1,29 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import sdk from '@farcaster/miniapp-sdk';
 import { GameStateProvider, useGameState } from './context/GameStateContext';
 import { useWallet } from './hooks/useWallet';
 import Header from './components/Header';
 import TickerMarquee from './components/TickerMarquee';
-import GameScreen from './components/GameScreen';
-import TasksScreen from './components/TasksScreen';
-import TourneysScreen from './components/TourneysScreen';
-import StoreScreen from './components/StoreScreen';
-import MeScreen from './components/MeScreen';
 import FooterNav from './components/FooterNav';
-import SwapModal from './components/SwapModal';
-import CreateTourneyModal from './components/CreateTourneyModal';
-import PlayTourneyModal from './components/PlayTourneyModal';
-import SavingsCoachDrawer from './components/SavingsCoachDrawer';
-import SavingsScreen from './components/SavingsScreen';
+
+// Lazy load screens and modals for code splitting
+const GameScreen = React.lazy(() => import('./components/GameScreen'));
+const TasksScreen = React.lazy(() => import('./components/TasksScreen'));
+const TourneysScreen = React.lazy(() => import('./components/TourneysScreen'));
+const StoreScreen = React.lazy(() => import('./components/StoreScreen'));
+const MeScreen = React.lazy(() => import('./components/MeScreen'));
+const SavingsScreen = React.lazy(() => import('./components/SavingsScreen'));
+const SwapModal = React.lazy(() => import('./components/SwapModal'));
+const CreateTourneyModal = React.lazy(() => import('./components/CreateTourneyModal'));
+const PlayTourneyModal = React.lazy(() => import('./components/PlayTourneyModal'));
+const SavingsCoachDrawer = React.lazy(() => import('./components/SavingsCoachDrawer'));
+
+const PageLoader = () => (
+  <div className="connect-loading-container" style={{ minHeight: '300px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+    <div className="spinner"></div>
+    <div className="loading-text">Loading...</div>
+  </div>
+);
 
 function MainAppContent() {
   const {
@@ -124,7 +133,9 @@ function MainAppContent() {
 
         {/* Content Screens */}
         <div className={`app-screen-container tab-${currentTab}`}>
-          {renderScreen()}
+          <Suspense fallback={<PageLoader />}>
+            {renderScreen()}
+          </Suspense>
         </div>
 
         {/* Floating AI Coach Trigger */}
@@ -142,22 +153,24 @@ function MainAppContent() {
       </div>
 
       {/* Modal Dialog Overlays */}
-      <SavingsCoachDrawer isOpen={isCoachOpen} onClose={() => setIsCoachOpen(false)} />
-      
-      <SwapModal isOpen={swapOpen} onClose={() => setSwapOpen(false)} />
-      
-      <CreateTourneyModal 
-        isOpen={showCreateModal} 
-        onClose={() => setShowCreateModal(false)} 
-      />
+      <Suspense fallback={null}>
+        <SavingsCoachDrawer isOpen={isCoachOpen} onClose={() => setIsCoachOpen(false)} />
+        
+        <SwapModal isOpen={swapOpen} onClose={() => setSwapOpen(false)} />
+        
+        <CreateTourneyModal 
+          isOpen={showCreateModal} 
+          onClose={() => setShowCreateModal(false)} 
+        />
 
-      <PlayTourneyModal 
-        isOpen={showPlayModal} 
-        onClose={() => setShowPlayModal(false)}
-        onStartGame={(t) => {
-          // PlayTourneyModal redirects to game tab, which handles starting the game
-        }}
-      />
+        <PlayTourneyModal 
+          isOpen={showPlayModal} 
+          onClose={() => setShowPlayModal(false)}
+          onStartGame={(t) => {
+            // PlayTourneyModal redirects to game tab, which handles starting the game
+          }}
+        />
+      </Suspense>
     </div>
   );
 }
