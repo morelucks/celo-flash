@@ -259,5 +259,45 @@ describe("CeloFlashTournament — Fee Withdrawal & Accounting", function () {
       // Only the 3 cancelled entries' protocol portion is returned to the pool
       expect(await tournament.accumulatedFees()).to.equal(FEE_PER_ENTRY * 2n);
     });
+
+    it("Should reduce accumulatedNativeFees by the refunded protocol portion for native tournaments", async function () {
+      const cancelledId = await createTournament({ isNative: true });
+      await joinAll(cancelledId, players.slice(0, 3), true);
+
+      const survivingId = await createTournament({ isNative: true });
+      await joinAll(survivingId, players.slice(3, 5), true);
+
+      expect(await tournament.accumulatedNativeFees()).to.equal(FEE_PER_ENTRY * 5n);
+
+      await tournament.connect(creator).cancelTournament(cancelledId);
+
+      expect(await tournament.accumulatedNativeFees()).to.equal(FEE_PER_ENTRY * 2n);
+    });
+
+    it("Should leave no funds stuck after a full cancel + refund cycle (USDm)", async function () {
+      const id = await createTournament();
+      await joinAll(id, players, false);
+
+      // Seed refund back to creator on cancellation
+      await expect(tournament.connect(creator).cancelTournament(id)).to.changeTokenBalance(
+        usdm,
+        creator,
+        SEED_AMOUNT
+      );
+
+      expect(await tournament.accumulatedFees()).to.equal(0);
+
+      // Every participant claims back the full entry fee
+      for (const player of players) {
+        await expect(tournament.connect(player).claimPrize(id)).to.changeTokenBalance(
+          usdm,
+          player,
+          ENTRY_FEE
+        );
+      }
+
+      // Nothing left in the contract
+      expect(await usdm.balanceOf(await tournament.getAddress())).to.equal(0);
+    });
   });
 });
