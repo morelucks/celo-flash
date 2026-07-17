@@ -105,5 +105,11 @@ describe("CeloFlashWager — House Edge Withdrawal & Accounting", function () {
         "NoHouseEdgeToWithdraw"
       );
     });
+
+    it("Should revert if a non-owner tries to withdraw", async function () {
+      await expect(
+        wager.connect(players[0]).withdrawHouseEdge()
+      ).to.be.revertedWithCustomError(wager, "OwnableUnauthorizedAccount");
+    });
   });
 });
