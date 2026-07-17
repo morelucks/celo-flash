@@ -299,5 +299,26 @@ describe("CeloFlashTournament — Fee Withdrawal & Accounting", function () {
       // Nothing left in the contract
       expect(await usdm.balanceOf(await tournament.getAddress())).to.equal(0);
     });
+
+    it("Should leave no funds stuck after a full cancel + refund cycle (native)", async function () {
+      const id = await createTournament({ isNative: true });
+      await joinAll(id, players, true);
+
+      await expect(tournament.connect(creator).cancelTournament(id)).to.changeEtherBalance(
+        creator,
+        SEED_AMOUNT
+      );
+
+      expect(await tournament.accumulatedNativeFees()).to.equal(0);
+
+      for (const player of players) {
+        await expect(tournament.connect(player).claimPrize(id)).to.changeEtherBalance(
+          player,
+          ENTRY_FEE
+        );
+      }
+
+      expect(await ethers.provider.getBalance(await tournament.getAddress())).to.equal(0);
+    });
   });
 });
