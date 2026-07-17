@@ -63,4 +63,18 @@ describe("CeloFlashWager — House Edge Withdrawal & Accounting", function () {
 
     await wager.fundHouse({ value: FUND_AMOUNT });
   });
+
+  describe("House edge accumulation", function () {
+    it("Should accumulate 5% of the gross payout when a wager is won", async function () {
+      await placeAndResolve(players[0], SCORE_THRESHOLD + 50);
+
+      expect(await wager.accumulatedHouseEdge()).to.equal(EDGE_PER_WIN);
+    });
+
+    it("Should not accumulate house edge when a wager is lost", async function () {
+      await placeAndResolve(players[0], SCORE_THRESHOLD - 1);
+
+      expect(await wager.accumulatedHouseEdge()).to.equal(0);
+    });
+  });
 });
