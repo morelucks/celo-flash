@@ -139,5 +139,13 @@ describe("CeloFlashTournament — Fee Withdrawal & Accounting", function () {
       expect(feeEvents.length).to.equal(1);
       expect(feeEvents[0].args.isNative).to.equal(false);
     });
+
+    it("Should revert on a second withdrawal since the pool was reset", async function () {
+      await tournament.withdrawFees();
+      await expect(tournament.withdrawFees()).to.be.revertedWithCustomError(
+        tournament,
+        "NoFeesToWithdraw"
+      );
+    });
   });
 });
