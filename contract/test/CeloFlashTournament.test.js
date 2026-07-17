@@ -77,4 +77,14 @@ describe("CeloFlashTournament — Fee Withdrawal & Accounting", function () {
       await usdm.connect(player).approve(await tournament.getAddress(), ethers.MaxUint256);
     }
   });
+
+  describe("Fee accumulation", function () {
+    it("Should accumulate 5% of each USDm entry into accumulatedFees", async function () {
+      const id = await createTournament();
+      await joinAll(id, players, false);
+
+      expect(await tournament.accumulatedFees()).to.equal(FEE_PER_ENTRY * 5n);
+      expect(await tournament.accumulatedNativeFees()).to.equal(0);
+    });
+  });
 });
