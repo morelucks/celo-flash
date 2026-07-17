@@ -7,4 +7,5 @@ describe("CeloFlashTournament — Fee Withdrawal & Accounting", function () {
   const SEED_AMOUNT = ethers.parseEther("20");
   const DURATION = 3600; // 1 hour (MIN_DURATION)
   const PROTOCOL_FEE_BPS = 500n;
+  const BPS_DENOMINATOR = 10_000n;
 });
