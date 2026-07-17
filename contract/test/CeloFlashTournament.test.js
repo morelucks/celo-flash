@@ -12,4 +12,18 @@ describe("CeloFlashTournament — Fee Withdrawal & Accounting", function () {
   // 5% of each entry fee
   const FEE_PER_ENTRY = (ENTRY_FEE * PROTOCOL_FEE_BPS) / BPS_DENOMINATOR;
   const PRIZE_PER_ENTRY = ENTRY_FEE - FEE_PER_ENTRY;
+
+  let tournament;
+  let usdm;
+  let owner;
+  let verifier;
+  let feeRecipient;
+  let creator;
+  let players;
+
+  let nonceCounter = 0;
+
+  function uniqueNonce() {
+    return ethers.encodeBytes32String(`nonce-${nonceCounter++}`);
+  }
 });
