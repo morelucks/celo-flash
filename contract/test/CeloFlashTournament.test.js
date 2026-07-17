@@ -34,4 +34,14 @@ describe("CeloFlashTournament — Fee Withdrawal & Accounting", function () {
     );
     return verifier.signMessage(ethers.getBytes(messageHash));
   }
+
+  async function createTournament({ isNative = false, seed = SEED_AMOUNT, entryFee = ENTRY_FEE } = {}) {
+    const tournamentId = await tournament.nextTournamentId();
+    await tournament
+      .connect(creator)
+      .createTournament("Test Tournament", entryFee, seed, DURATION, isNative, {
+        value: isNative ? seed : 0n,
+      });
+    return tournamentId;
+  }
 });
