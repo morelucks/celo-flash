@@ -12,4 +12,5 @@ describe("CeloFlashWager — House Edge Withdrawal & Accounting", function () {
 
   // 2x gross payout, 5% house edge on the gross payout
   const GROSS_PAYOUT = (WAGER_AMOUNT * WIN_MULTIPLIER_BPS) / BPS_DENOMINATOR;
+  const EDGE_PER_WIN = (GROSS_PAYOUT * HOUSE_EDGE_BPS) / BPS_DENOMINATOR;
 });
