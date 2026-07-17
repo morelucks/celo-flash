@@ -26,4 +26,12 @@ describe("CeloFlashTournament — Fee Withdrawal & Accounting", function () {
   function uniqueNonce() {
     return ethers.encodeBytes32String(`nonce-${nonceCounter++}`);
   }
+
+  async function signScore(tournamentId, playerAddress, score, nonce) {
+    const messageHash = ethers.solidityPackedKeccak256(
+      ["uint256", "address", "uint256", "bytes32"],
+      [tournamentId, playerAddress, score, nonce]
+    );
+    return verifier.signMessage(ethers.getBytes(messageHash));
+  }
 });
