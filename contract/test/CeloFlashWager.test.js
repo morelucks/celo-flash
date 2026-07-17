@@ -82,5 +82,14 @@ describe("CeloFlashWager — House Edge Withdrawal & Accounting", function () {
     beforeEach(async function () {
       await placeAndResolve(players[0], SCORE_THRESHOLD + 50);
     });
+
+    it("Should natively transfer the accumulated house edge to treasury and reset to 0", async function () {
+      await expect(wager.withdrawHouseEdge()).to.changeEtherBalances(
+        [wager, treasury],
+        [-EDGE_PER_WIN, EDGE_PER_WIN]
+      );
+
+      expect(await wager.accumulatedHouseEdge()).to.equal(0);
+    });
   });
 });
