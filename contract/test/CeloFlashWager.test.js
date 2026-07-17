@@ -123,4 +123,49 @@ describe("CeloFlashWager — House Edge Withdrawal & Accounting", function () {
       );
     });
   });
+
+  describe("Accounting invariants", function () {
+    it("After 5 won wagers + house edge withdrawal + all claims: contract balance == funded reserve only", async function () {
+      const contractAddress = await wager.getAddress();
+      const wagerIds = [];
+
+      for (const player of players) {
+        wagerIds.push(await placeAndResolve(player, SCORE_THRESHOLD + 10));
+        await expectSolvent();
+      }
+
+      expect(await wager.accumulatedHouseEdge()).to.equal(EDGE_PER_WIN * 5n);
+      expect(await wager.totalPendingLiabilities()).to.equal(0);
+
+      await wager.withdrawHouseEdge();
+      await expectSolvent();
+
+      for (let i = 0; i < players.length; i++) {
+        await expect(wager.connect(players[i]).claimWinnings(wagerIds[i])).to.changeEtherBalance(
+          players[i],
+          NET_PAYOUT
+        );
+        await expectSolvent();
+      }
+
+      // The house paid out NET_PAYOUT against each 1 CELO stake and the edge
+      // left the contract, so only the (reduced) funded reserve remains.
+      const expectedReserve =
+        FUND_AMOUNT + WAGER_AMOUNT * 5n - NET_PAYOUT * 5n - EDGE_PER_WIN * 5n;
+
+      expect(await ethers.provider.getBalance(contractAddress)).to.equal(expectedReserve);
+      expect(await wager.getHouseReserve()).to.equal(expectedReserve);
+      expect(await wager.totalPendingLiabilities()).to.equal(0);
+      expect(await wager.accumulatedHouseEdge()).to.equal(0);
+    });
+
+    it("Should keep a lost wager's stake in the house reserve", async function () {
+      await placeAndResolve(players[0], SCORE_THRESHOLD - 1);
+
+      expect(await wager.totalPendingLiabilities()).to.equal(0);
+      expect(await wager.accumulatedHouseEdge()).to.equal(0);
+      expect(await wager.getHouseReserve()).to.equal(FUND_AMOUNT + WAGER_AMOUNT);
+      await expectSolvent();
+    });
+  });
 });
