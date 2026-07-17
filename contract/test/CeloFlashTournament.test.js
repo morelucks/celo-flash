@@ -52,4 +52,29 @@ describe("CeloFlashTournament — Fee Withdrawal & Accounting", function () {
       });
     }
   }
+
+  beforeEach(async function () {
+    [owner, verifier, feeRecipient, creator, ...players] = await ethers.getSigners();
+    players = players.slice(0, 5);
+
+    const MockERC20 = await ethers.getContractFactory("MockERC20");
+    usdm = await MockERC20.deploy("Mock USDm", "USDm", 18);
+    await usdm.waitForDeployment();
+
+    const CeloFlashTournament = await ethers.getContractFactory("CeloFlashTournament");
+    tournament = await CeloFlashTournament.deploy(
+      await usdm.getAddress(),
+      verifier.address,
+      feeRecipient.address
+    );
+    await tournament.waitForDeployment();
+
+    await usdm.mint(creator.address, ethers.parseEther("1000"));
+    await usdm.connect(creator).approve(await tournament.getAddress(), ethers.MaxUint256);
+
+    for (const player of players) {
+      await usdm.mint(player.address, ethers.parseEther("1000"));
+      await usdm.connect(player).approve(await tournament.getAddress(), ethers.MaxUint256);
+    }
+  });
 });
