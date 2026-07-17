@@ -148,4 +148,15 @@ describe("CeloFlashTournament — Fee Withdrawal & Accounting", function () {
       );
     });
   });
+
+  describe("withdrawFees — native CELO", function () {
+    let id;
+    let expectedFees;
+
+    beforeEach(async function () {
+      id = await createTournament({ isNative: true });
+      await joinAll(id, players, true);
+      expectedFees = FEE_PER_ENTRY * 5n;
+    });
+  });
 });
