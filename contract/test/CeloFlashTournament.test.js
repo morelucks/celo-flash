@@ -321,4 +321,25 @@ describe("CeloFlashTournament — Fee Withdrawal & Accounting", function () {
       expect(await ethers.provider.getBalance(await tournament.getAddress())).to.equal(0);
     });
   });
+
+  describe("Accounting invariants", function () {
+    it("After 5 USDm entries + fee withdrawal: contract balance == remaining prize pool only", async function () {
+      const id = await createTournament();
+      await joinAll(id, players, false);
+
+      const expectedPrizePool = SEED_AMOUNT + PRIZE_PER_ENTRY * 5n;
+      const expectedFees = FEE_PER_ENTRY * 5n;
+      const contractAddress = await tournament.getAddress();
+
+      // Before withdrawal: balance == prize pool + accumulated fees
+      const t = await tournament.getTournament(id);
+      expect(t.prizePool).to.equal(expectedPrizePool);
+      expect(await usdm.balanceOf(contractAddress)).to.equal(expectedPrizePool + expectedFees);
+
+      await tournament.withdrawFees();
+
+      // After withdrawal: balance == remaining prize pool only
+      expect(await usdm.balanceOf(contractAddress)).to.equal(expectedPrizePool);
+    });
+  });
 });
