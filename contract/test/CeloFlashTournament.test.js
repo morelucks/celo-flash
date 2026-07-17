@@ -105,5 +105,15 @@ describe("CeloFlashTournament — Fee Withdrawal & Accounting", function () {
       await joinAll(id, players, false);
       expectedFees = FEE_PER_ENTRY * 5n;
     });
+
+    it("Should transfer accumulated USDm fees to feeRecipient and reset to 0", async function () {
+      await expect(tournament.withdrawFees()).to.changeTokenBalances(
+        usdm,
+        [tournament, feeRecipient],
+        [-expectedFees, expectedFees]
+      );
+
+      expect(await tournament.accumulatedFees()).to.equal(0);
+    });
   });
 });
