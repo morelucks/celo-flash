@@ -205,5 +205,30 @@ describe("CeloFlashTournament — Fee Withdrawal & Accounting", function () {
       expect(await tournament.accumulatedFees()).to.equal(0);
       expect(await tournament.accumulatedNativeFees()).to.equal(0);
     });
+
+    it("Should emit one FeesWithdrawn event per asset type", async function () {
+      const tx = await tournament.withdrawFees();
+      const receipt = await tx.wait();
+
+      const feeEvents = receipt.logs
+        .map((log) => {
+          try {
+            return tournament.interface.parseLog(log);
+          } catch {
+            return null;
+          }
+        })
+        .filter((parsed) => parsed && parsed.name === "FeesWithdrawn");
+
+      expect(feeEvents.length).to.equal(2);
+
+      const usdmEvent = feeEvents.find((e) => e.args.isNative === false);
+      const nativeEvent = feeEvents.find((e) => e.args.isNative === true);
+
+      expect(usdmEvent.args.recipient).to.equal(feeRecipient.address);
+      expect(usdmEvent.args.amount).to.equal(expectedUsdmFees);
+      expect(nativeEvent.args.recipient).to.equal(feeRecipient.address);
+      expect(nativeEvent.args.amount).to.equal(expectedNativeFees);
+    });
   });
 });
