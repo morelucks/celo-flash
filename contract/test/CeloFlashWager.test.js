@@ -77,4 +77,10 @@ describe("CeloFlashWager — House Edge Withdrawal & Accounting", function () {
       expect(await wager.accumulatedHouseEdge()).to.equal(0);
     });
   });
+
+  describe("withdrawHouseEdge", function () {
+    beforeEach(async function () {
+      await placeAndResolve(players[0], SCORE_THRESHOLD + 50);
+    });
+  });
 });
