@@ -358,5 +358,47 @@ describe("CeloFlashTournament — Fee Withdrawal & Accounting", function () {
 
       expect(await ethers.provider.getBalance(contractAddress)).to.equal(expectedPrizePool);
     });
+
+    it("Should fully drain the contract after fee withdrawal + finalization + all prize claims", async function () {
+      const id = await createTournament();
+      await joinAll(id, players, false);
+
+      // Top-3 leaderboard: players[0] > players[1] > players[2]
+      const scores = [300, 200, 100];
+      for (let i = 0; i < 3; i++) {
+        const nonce = uniqueNonce();
+        const signature = await signScore(id, players[i].address, scores[i], nonce);
+        await tournament.connect(players[i]).submitScore(id, scores[i], nonce, signature);
+      }
+
+      await time.increase(DURATION + 1);
+      await tournament.finalizeTournament(id);
+      await tournament.withdrawFees();
+
+      const pool = SEED_AMOUNT + PRIZE_PER_ENTRY * 5n;
+      const secondPrize = (pool * 2500n) / BPS_DENOMINATOR;
+      const thirdPrize = (pool * 1500n) / BPS_DENOMINATOR;
+      const firstPrize = pool - secondPrize - thirdPrize; // 60% + rounding dust
+
+      await expect(tournament.connect(players[0]).claimPrize(id)).to.changeTokenBalance(
+        usdm,
+        players[0],
+        firstPrize
+      );
+      await expect(tournament.connect(players[1]).claimPrize(id)).to.changeTokenBalance(
+        usdm,
+        players[1],
+        secondPrize
+      );
+      await expect(tournament.connect(players[2]).claimPrize(id)).to.changeTokenBalance(
+        usdm,
+        players[2],
+        thirdPrize
+      );
+
+      // No funds leaked or stuck
+      expect(await usdm.balanceOf(await tournament.getAddress())).to.equal(0);
+      expect(await tournament.accumulatedFees()).to.equal(0);
+    });
   });
 });
