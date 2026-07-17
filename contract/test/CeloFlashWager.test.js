@@ -91,5 +91,19 @@ describe("CeloFlashWager — House Edge Withdrawal & Accounting", function () {
 
       expect(await wager.accumulatedHouseEdge()).to.equal(0);
     });
+
+    it("Should emit HouseEdgeWithdrawn with the correct amount", async function () {
+      await expect(wager.withdrawHouseEdge())
+        .to.emit(wager, "HouseEdgeWithdrawn")
+        .withArgs(treasury.address, EDGE_PER_WIN);
+    });
+
+    it("Should revert on a second withdrawal since the pool was reset", async function () {
+      await wager.withdrawHouseEdge();
+      await expect(wager.withdrawHouseEdge()).to.be.revertedWithCustomError(
+        wager,
+        "NoHouseEdgeToWithdraw"
+      );
+    });
   });
 });
