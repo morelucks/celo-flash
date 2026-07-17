@@ -44,4 +44,12 @@ describe("CeloFlashTournament — Fee Withdrawal & Accounting", function () {
       });
     return tournamentId;
   }
+
+  async function joinAll(tournamentId, joiners, isNative) {
+    for (const player of joiners) {
+      await tournament.connect(player).joinTournament(tournamentId, {
+        value: isNative ? ENTRY_FEE : 0n,
+      });
+    }
+  }
 });
