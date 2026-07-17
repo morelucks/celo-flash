@@ -52,4 +52,15 @@ describe("CeloFlashWager — House Edge Withdrawal & Accounting", function () {
     const edge = await wager.accumulatedHouseEdge();
     expect(balance).to.be.gte(liabilities + edge);
   }
+
+  beforeEach(async function () {
+    [owner, verifier, treasury, ...players] = await ethers.getSigners();
+    players = players.slice(0, 5);
+
+    const CeloFlashWager = await ethers.getContractFactory("CeloFlashWager");
+    wager = await CeloFlashWager.deploy(verifier.address, treasury.address, SCORE_THRESHOLD);
+    await wager.waitForDeployment();
+
+    await wager.fundHouse({ value: FUND_AMOUNT });
+  });
 });
