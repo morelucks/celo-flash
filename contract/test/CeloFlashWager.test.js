@@ -34,4 +34,15 @@ describe("CeloFlashWager — House Edge Withdrawal & Accounting", function () {
     );
     return verifier.signMessage(ethers.getBytes(messageHash));
   }
+
+  async function placeAndResolve(player, score) {
+    await wager.connect(player).placeWager({ value: WAGER_AMOUNT });
+    const wagerId = await wager.nextWagerId();
+
+    const nonce = uniqueNonce();
+    const signature = await signScore(wagerId, player.address, score, nonce);
+    await wager.connect(player).resolveWager(wagerId, score, nonce, signature);
+
+    return wagerId;
+  }
 });
