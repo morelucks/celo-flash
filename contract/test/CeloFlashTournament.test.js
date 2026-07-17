@@ -86,5 +86,13 @@ describe("CeloFlashTournament — Fee Withdrawal & Accounting", function () {
       expect(await tournament.accumulatedFees()).to.equal(FEE_PER_ENTRY * 5n);
       expect(await tournament.accumulatedNativeFees()).to.equal(0);
     });
+
+    it("Should accumulate 5% of each native CELO entry into accumulatedNativeFees", async function () {
+      const id = await createTournament({ isNative: true });
+      await joinAll(id, players, true);
+
+      expect(await tournament.accumulatedNativeFees()).to.equal(FEE_PER_ENTRY * 5n);
+      expect(await tournament.accumulatedFees()).to.equal(0);
+    });
   });
 });
