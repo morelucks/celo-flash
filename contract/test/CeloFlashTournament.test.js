@@ -231,4 +231,16 @@ describe("CeloFlashTournament — Fee Withdrawal & Accounting", function () {
       expect(nativeEvent.args.amount).to.equal(expectedNativeFees);
     });
   });
+
+  describe("withdrawFees — reverts", function () {
+    it("Should revert with NoFeesToWithdraw when both fee pools are 0", async function () {
+      expect(await tournament.accumulatedFees()).to.equal(0);
+      expect(await tournament.accumulatedNativeFees()).to.equal(0);
+
+      await expect(tournament.withdrawFees()).to.be.revertedWithCustomError(
+        tournament,
+        "NoFeesToWithdraw"
+      );
+    });
+  });
 });
