@@ -188,5 +188,22 @@ describe("CeloFlashTournament — Fee Withdrawal & Accounting", function () {
       await joinAll(nativeId, players.slice(0, 3), true);
       expectedNativeFees = FEE_PER_ENTRY * 3n;
     });
+
+    it("Should withdraw both pools in a single call", async function () {
+      const tx = tournament.withdrawFees();
+
+      await expect(tx).to.changeTokenBalances(
+        usdm,
+        [tournament, feeRecipient],
+        [-expectedUsdmFees, expectedUsdmFees]
+      );
+      await expect(tx).to.changeEtherBalances(
+        [tournament, feeRecipient],
+        [-expectedNativeFees, expectedNativeFees]
+      );
+
+      expect(await tournament.accumulatedFees()).to.equal(0);
+      expect(await tournament.accumulatedNativeFees()).to.equal(0);
+    });
   });
 });
