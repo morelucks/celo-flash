@@ -167,5 +167,11 @@ describe("CeloFlashTournament — Fee Withdrawal & Accounting", function () {
 
       expect(await tournament.accumulatedNativeFees()).to.equal(0);
     });
+
+    it("Should emit FeesWithdrawn with isNative = true", async function () {
+      await expect(tournament.withdrawFees())
+        .to.emit(tournament, "FeesWithdrawn")
+        .withArgs(feeRecipient.address, expectedFees, true);
+    });
   });
 });
