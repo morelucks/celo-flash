@@ -8,4 +8,8 @@ describe("CeloFlashWager — House Edge Withdrawal & Accounting", function () {
   const WAGER_AMOUNT = ethers.parseEther("1");
   const WIN_MULTIPLIER_BPS = 20_000n;
   const HOUSE_EDGE_BPS = 500n;
+  const BPS_DENOMINATOR = 10_000n;
+
+  // 2x gross payout, 5% house edge on the gross payout
+  const GROSS_PAYOUT = (WAGER_AMOUNT * WIN_MULTIPLIER_BPS) / BPS_DENOMINATOR;
 });
