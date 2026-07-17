@@ -243,4 +243,21 @@ describe("CeloFlashTournament — Fee Withdrawal & Accounting", function () {
       );
     });
   });
+
+  describe("Cancelled tournament fee accounting", function () {
+    it("Should reduce accumulatedFees by the refunded protocol portion only", async function () {
+      const cancelledId = await createTournament();
+      await joinAll(cancelledId, players.slice(0, 3), false);
+
+      const survivingId = await createTournament();
+      await joinAll(survivingId, players.slice(3, 5), false);
+
+      expect(await tournament.accumulatedFees()).to.equal(FEE_PER_ENTRY * 5n);
+
+      await tournament.connect(creator).cancelTournament(cancelledId);
+
+      // Only the 3 cancelled entries' protocol portion is returned to the pool
+      expect(await tournament.accumulatedFees()).to.equal(FEE_PER_ENTRY * 2n);
+    });
+  });
 });
