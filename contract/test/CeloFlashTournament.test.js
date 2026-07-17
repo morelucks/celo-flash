@@ -158,5 +158,14 @@ describe("CeloFlashTournament — Fee Withdrawal & Accounting", function () {
       await joinAll(id, players, true);
       expectedFees = FEE_PER_ENTRY * 5n;
     });
+
+    it("Should natively transfer accumulated CELO fees to feeRecipient and reset to 0", async function () {
+      await expect(tournament.withdrawFees()).to.changeEtherBalances(
+        [tournament, feeRecipient],
+        [-expectedFees, expectedFees]
+      );
+
+      expect(await tournament.accumulatedNativeFees()).to.equal(0);
+    });
   });
 });
