@@ -167,5 +167,47 @@ describe("CeloFlashWager — House Edge Withdrawal & Accounting", function () {
       expect(await wager.getHouseReserve()).to.equal(FUND_AMOUNT + WAGER_AMOUNT);
       await expectSolvent();
     });
+
+    it("Should maintain contract.balance >= totalPendingLiabilities + accumulatedHouseEdge throughout mixed activity", async function () {
+      // Pending wagers lock liabilities
+      await wager.connect(players[0]).placeWager({ value: WAGER_AMOUNT });
+      await wager.connect(players[1]).placeWager({ value: WAGER_AMOUNT });
+      expect(await wager.totalPendingLiabilities()).to.equal(GROSS_PAYOUT * 2n);
+      await expectSolvent();
+
+      // players[0] wins
+      const wonId = await wager.getActiveWager(players[0].address);
+      const winNonce = uniqueNonce();
+      const winSignature = await signScore(wonId, players[0].address, SCORE_THRESHOLD, winNonce);
+      await wager.connect(players[0]).resolveWager(wonId, SCORE_THRESHOLD, winNonce, winSignature);
+      await expectSolvent();
+
+      // players[1] loses
+      const lostId = await wager.getActiveWager(players[1].address);
+      const loseNonce = uniqueNonce();
+      const loseSignature = await signScore(lostId, players[1].address, 0, loseNonce);
+      await wager.connect(players[1]).resolveWager(lostId, 0, loseNonce, loseSignature);
+      await expectSolvent();
+
+      // players[2]'s wager expires and is refunded
+      await wager.connect(players[2]).placeWager({ value: WAGER_AMOUNT });
+      const expiredId = await wager.getActiveWager(players[2].address);
+      await time.increase(3600 + 1);
+      await expect(wager.expireWager(expiredId)).to.changeEtherBalance(
+        players[2],
+        WAGER_AMOUNT
+      );
+      await expectSolvent();
+
+      // Winner claims, then the edge is withdrawn
+      await wager.connect(players[0]).claimWinnings(wonId);
+      await expectSolvent();
+
+      await wager.withdrawHouseEdge();
+      await expectSolvent();
+
+      expect(await wager.totalPendingLiabilities()).to.equal(0);
+      expect(await wager.accumulatedHouseEdge()).to.equal(0);
+    });
   });
 });
