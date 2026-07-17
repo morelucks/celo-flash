@@ -14,4 +14,24 @@ describe("CeloFlashWager — House Edge Withdrawal & Accounting", function () {
   const GROSS_PAYOUT = (WAGER_AMOUNT * WIN_MULTIPLIER_BPS) / BPS_DENOMINATOR;
   const EDGE_PER_WIN = (GROSS_PAYOUT * HOUSE_EDGE_BPS) / BPS_DENOMINATOR;
   const NET_PAYOUT = GROSS_PAYOUT - EDGE_PER_WIN;
+
+  let wager;
+  let owner;
+  let verifier;
+  let treasury;
+  let players;
+
+  let nonceCounter = 0;
+
+  function uniqueNonce() {
+    return ethers.encodeBytes32String(`nonce-${nonceCounter++}`);
+  }
+
+  async function signScore(wagerId, playerAddress, score, nonce) {
+    const messageHash = ethers.solidityPackedKeccak256(
+      ["uint256", "address", "uint256", "bytes32"],
+      [wagerId, playerAddress, score, nonce]
+    );
+    return verifier.signMessage(ethers.getBytes(messageHash));
+  }
 });
