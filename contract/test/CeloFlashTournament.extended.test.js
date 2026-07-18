@@ -313,4 +313,22 @@ describe("CeloFlashTournament — Extended Fee & Accounting Coverage", function 
     );
     expect(await usdm.balanceOf(addr)).to.equal(0);
   });
+
+  it("keeps the pool intact when a tournament ends with no scores", async function () {
+    const addr = await tournament.getAddress();
+    const id = await createTournament();
+    await joinAll(id, players.slice(0, 3), false);
+
+    await time.increase(DURATION + 1);
+    await tournament.finalizeTournament(id);
+
+    const pool = SEED_AMOUNT + PRIZE_PER_ENTRY * 3n;
+    const t = await tournament.getTournament(id);
+    expect(t.prizePool).to.equal(pool);
+
+    await tournament.withdrawFees();
+    expect(await tournament.accumulatedFees()).to.equal(0);
+    // The undistributed pool remains in the contract; only fees were swept.
+    expect(await usdm.balanceOf(addr)).to.equal(pool);
+  });
 });
