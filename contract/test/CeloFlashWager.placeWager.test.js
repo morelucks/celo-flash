@@ -38,4 +38,13 @@ describe("CeloFlashWager — placeWager", function () {
     );
     return verifier.signMessage(ethers.getBytes(h));
   }
+
+  async function placeAndResolve(player, score) {
+    await wager.connect(player).placeWager({ value: WAGER_AMOUNT });
+    const wagerId = await wager.nextWagerId();
+    const nonce = uniqueNonce();
+    const sig = await signScore(wagerId, player.address, score, nonce);
+    await wager.connect(player).resolveWager(wagerId, score, nonce, sig);
+    return wagerId;
+  }
 });
