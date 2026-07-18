@@ -103,4 +103,10 @@ describe("CeloFlashWager — placeWager", function () {
     await wager.connect(players[0]).placeWager({ value: WAGER_AMOUNT });
     expect(await wager.getActiveWager(players[0].address)).to.equal(1);
   });
+
+  it("emits WagerPlaced with the correct args", async function () {
+    await expect(wager.connect(players[0]).placeWager({ value: WAGER_AMOUNT }))
+      .to.emit(wager, "WagerPlaced")
+      .withArgs(1, players[0].address, WAGER_AMOUNT, GROSS_PAYOUT);
+  });
 });
