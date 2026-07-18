@@ -229,4 +229,16 @@ describe("CeloFlashTournament — Extended Fee & Accounting Coverage", function 
     ).to.changeTokenBalances(usdm, [tournament, feeRecipient], [-expectedFees, expectedFees]);
     expect(await tournament.accumulatedFees()).to.equal(0);
   });
+
+  it("keeps prize pools untouched when withdrawing fees", async function () {
+    const id = await createTournament();
+    await joinAll(id, players, false);
+
+    const before = await tournament.getTournament(id);
+    await tournament.withdrawFees();
+    const after = await tournament.getTournament(id);
+
+    expect(after.prizePool).to.equal(before.prizePool);
+    expect(after.prizePool).to.equal(SEED_AMOUNT + PRIZE_PER_ENTRY * 5n);
+  });
 });
