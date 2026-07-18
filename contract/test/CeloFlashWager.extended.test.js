@@ -191,4 +191,16 @@ describe("CeloFlashWager — Extended House Edge & Accounting Coverage", functio
       wager.connect(players[0]).claimWinnings(wonId)
     ).to.be.revertedWithCustomError(wager, "WagerNotWon");
   });
+
+  it("reverts placeWager when the house reserve is insufficient", async function () {
+    const Factory = await ethers.getContractFactory("CeloFlashWager");
+    const bare = await Factory.deploy(verifier.address, treasury.address, SCORE_THRESHOLD);
+    await bare.waitForDeployment();
+
+    // No house funding: the first stake self-covers, the second exceeds the reserve.
+    await bare.connect(players[0]).placeWager({ value: MIN_WAGER });
+    await expect(
+      bare.connect(players[1]).placeWager({ value: MIN_WAGER })
+    ).to.be.revertedWithCustomError(bare, "InsufficientHouseReserve");
+  });
 });
