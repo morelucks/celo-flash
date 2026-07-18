@@ -166,4 +166,10 @@ describe("CeloFlashWager — placeWager", function () {
       wager.connect(players[0]).placeWager({ value: 0 })
     ).to.be.revertedWithCustomError(wager, "WagerTooLow");
   });
+
+  it("reverts just below MIN_WAGER with WagerTooLow", async function () {
+    await expect(
+      wager.connect(players[0]).placeWager({ value: MIN_WAGER - 1n })
+    ).to.be.revertedWithCustomError(wager, "WagerTooLow");
+  });
 });
