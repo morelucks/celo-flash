@@ -158,4 +158,16 @@ describe("CeloFlashWager — Extended House Edge & Accounting Coverage", functio
       "WagerNotExpired"
     );
   });
+
+  it("keeps edge at zero across multiple lost wagers", async function () {
+    for (let i = 0; i < 3; i++) {
+      await placeAndResolve(players[i], SCORE_THRESHOLD - 1);
+    }
+    expect(await wager.accumulatedHouseEdge()).to.equal(0);
+    expect(await wager.getHouseReserve()).to.equal(FUND_AMOUNT + WAGER_AMOUNT * 3n);
+    await expect(wager.withdrawHouseEdge()).to.be.revertedWithCustomError(
+      wager,
+      "NoHouseEdgeToWithdraw"
+    );
+  });
 });
