@@ -147,4 +147,10 @@ describe("CeloFlashWager — placeWager", function () {
     await wager.connect(players[1]).placeWager({ value: WAGER_AMOUNT });
     expect(await wager.totalPendingLiabilities()).to.equal(GROSS_PAYOUT * 2n);
   });
+
+  it("increments totalWagersPlaced", async function () {
+    expect(await wager.totalWagersPlaced()).to.equal(0);
+    await wager.connect(players[0]).placeWager({ value: WAGER_AMOUNT });
+    expect(await wager.totalWagersPlaced()).to.equal(1);
+  });
 });
