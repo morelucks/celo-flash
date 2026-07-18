@@ -66,4 +66,22 @@ describe("CeloFlashWager — Extended House Edge & Accounting Coverage", functio
     );
     expect(await wager.accumulatedHouseEdge()).to.equal(0);
   });
+
+  it("sweeps only edge accrued since the previous withdrawal", async function () {
+    await placeAndResolve(players[0], SCORE_THRESHOLD + 10);
+    await expect(wager.withdrawHouseEdge()).to.changeEtherBalances(
+      [wager, treasury],
+      [-EDGE_PER_WIN, EDGE_PER_WIN]
+    );
+    expect(await wager.accumulatedHouseEdge()).to.equal(0);
+
+    await placeAndResolve(players[1], SCORE_THRESHOLD + 10);
+    expect(await wager.accumulatedHouseEdge()).to.equal(EDGE_PER_WIN);
+    await expect(wager.withdrawHouseEdge()).to.changeEtherBalances(
+      [wager, treasury],
+      [-EDGE_PER_WIN, EDGE_PER_WIN]
+    );
+    expect(await wager.accumulatedHouseEdge()).to.equal(0);
+    await expectSolvent();
+  });
 });
