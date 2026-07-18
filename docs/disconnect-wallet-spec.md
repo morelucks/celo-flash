@@ -12,3 +12,4 @@ This document describes the design, flow, and user experience for disconnecting 
 10. When a wallet is connected, the Me screen shows a red 'Disconnect Wallet' action button.
 11. Clicking the Disconnect Wallet button on the Me screen triggers the same confirmation modal.
 12. GameState is updated to set the userAddress back to null on disconnect.
+13. Clicking buttons in the confirmation modal plays the default 'click' sound if enabled.
