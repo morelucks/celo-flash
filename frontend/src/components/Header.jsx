@@ -1,13 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useGameState } from '../context/GameStateContext';
 import { useWallet } from '../hooks/useWallet';
 import { playSound } from '../utils/audio';
-
 import { isMiniPay } from '../utils/minipay';
+import ConfirmDisconnectModal from './ConfirmDisconnectModal';
 
 export default function Header({ onOpenSwap }) {
   const { points, cash, soundEnabled, setSoundEnabled, userAddress } = useGameState();
   const { connectWallet, disconnectWallet } = useWallet();
+  const [showConfirmDisconnect, setShowConfirmDisconnect] = useState(false);
 
   const handleSoundToggle = () => {
     const nextSound = !soundEnabled;
@@ -26,7 +27,7 @@ export default function Header({ onOpenSwap }) {
   const handleDisconnect = (e) => {
     e.stopPropagation();
     playSound('click', soundEnabled);
-    disconnectWallet();
+    setShowConfirmDisconnect(true);
   };
 
   const isRunningInMiniPay = isMiniPay();
@@ -93,6 +94,13 @@ export default function Header({ onOpenSwap }) {
           </button>
         </div>
       </div>
+
+      <ConfirmDisconnectModal 
+        isOpen={showConfirmDisconnect}
+        onClose={() => setShowConfirmDisconnect(false)}
+        onConfirm={disconnectWallet}
+        soundEnabled={soundEnabled}
+      />
     </>
   );
 }
