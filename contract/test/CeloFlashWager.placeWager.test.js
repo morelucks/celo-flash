@@ -121,4 +121,10 @@ describe("CeloFlashWager — placeWager", function () {
     const w = await wager.getWager(1);
     expect(w.potentialPayout).to.equal(MIN_WAGER * 2n);
   });
+
+  it("pays exactly 2x on a maximum-size stake", async function () {
+    await wager.connect(players[0]).placeWager({ value: MAX_WAGER });
+    const w = await wager.getWager(1);
+    expect(w.potentialPayout).to.equal(MAX_WAGER * 2n);
+  });
 });
