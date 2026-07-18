@@ -343,4 +343,21 @@ describe("CeloFlashTournament — Extended Fee & Accounting Coverage", function 
       tournament.connect(players[0]).setFeeRecipient(players[0].address)
     ).to.be.revertedWithCustomError(tournament, "OwnableUnauthorizedAccount");
   });
+
+  it("leaves accumulatedFees unchanged on finalization", async function () {
+    const id = await createTournament();
+    await joinAll(id, players.slice(0, 3), false);
+
+    const scores = [300, 200, 100];
+    for (let i = 0; i < 3; i++) {
+      const nonce = uniqueNonce();
+      const sig = await signScore(id, players[i].address, scores[i], nonce);
+      await tournament.connect(players[i]).submitScore(id, scores[i], nonce, sig);
+    }
+
+    await time.increase(DURATION + 1);
+    await tournament.finalizeTournament(id);
+
+    expect(await tournament.accumulatedFees()).to.equal(FEE_PER_ENTRY * 3n);
+  });
 });
