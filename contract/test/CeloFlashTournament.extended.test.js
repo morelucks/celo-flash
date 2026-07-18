@@ -192,4 +192,30 @@ describe("CeloFlashTournament — Extended Fee & Accounting Coverage", function 
     }
     expect(await usdm.balanceOf(addr)).to.equal(SEED_AMOUNT + PRIZE_PER_ENTRY * 2n);
   });
+
+  it("withdraws only surviving fees after a native cancellation", async function () {
+    const surviving = await createTournament({ isNative: true });
+    await joinAll(surviving, players.slice(0, 2), true);
+    const cancelled = await createTournament({ isNative: true });
+    await joinAll(cancelled, players.slice(2, 5), true);
+
+    expect(await tournament.accumulatedNativeFees()).to.equal(FEE_PER_ENTRY * 5n);
+
+    await tournament.connect(creator).cancelTournament(cancelled);
+    const remainingFees = FEE_PER_ENTRY * 2n;
+    expect(await tournament.accumulatedNativeFees()).to.equal(remainingFees);
+
+    await expect(tournament.withdrawFees()).to.changeEtherBalances(
+      [tournament, feeRecipient],
+      [-remainingFees, remainingFees]
+    );
+    expect(await tournament.accumulatedNativeFees()).to.equal(0);
+
+    for (const p of players.slice(2, 5)) {
+      await expect(tournament.connect(p).claimPrize(cancelled)).to.changeEtherBalance(
+        p,
+        ENTRY_FEE
+      );
+    }
+  });
 });
