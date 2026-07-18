@@ -101,4 +101,18 @@ describe("CeloFlashTournament — Extended Fee & Accounting Coverage", function 
     );
     expect(await tournament.accumulatedFees()).to.equal(0);
   });
+
+  it("routes native fees to a rotated feeRecipient", async function () {
+    const id = await createTournament({ isNative: true });
+    await joinAll(id, players, true);
+    const expectedFees = FEE_PER_ENTRY * 5n;
+
+    await tournament.connect(owner).setFeeRecipient(players[0].address);
+
+    await expect(tournament.withdrawFees()).to.changeEtherBalances(
+      [feeRecipient, players[0]],
+      [0n, expectedFees]
+    );
+    expect(await tournament.accumulatedNativeFees()).to.equal(0);
+  });
 });
