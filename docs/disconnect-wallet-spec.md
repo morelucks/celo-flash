@@ -27,3 +27,4 @@ This document describes the design, flow, and user experience for disconnecting 
 25. Port 5173 is the default local development server port.
 26. Privy React Auth version 3.35.1 is active in dependencies.
 27. Code formatting conforms to the repository's oxlint rules.
+28. Commits are structured to maintain a clean git history for PR review.
