@@ -66,4 +66,12 @@ describe("CeloFlashWager — placeWager", function () {
     expect(w.potentialPayout).to.equal(GROSS_PAYOUT);
     expect(w.potentialPayout).to.equal(WAGER_AMOUNT * 2n);
   });
+
+  it("records createdAt as the block timestamp", async function () {
+    const tx = await wager.connect(players[0]).placeWager({ value: WAGER_AMOUNT });
+    const rc = await tx.wait();
+    const block = await ethers.provider.getBlock(rc.blockNumber);
+    const w = await wager.getWager(1);
+    expect(w.createdAt).to.equal(block.timestamp);
+  });
 });
