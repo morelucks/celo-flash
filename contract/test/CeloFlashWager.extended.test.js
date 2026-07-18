@@ -137,4 +137,10 @@ describe("CeloFlashWager — Extended House Edge & Accounting Coverage", functio
       .withArgs(owner.address, extra);
     expect(await wager.getHouseReserve()).to.equal(FUND_AMOUNT + extra);
   });
+
+  it("reverts setTreasury on the zero address", async function () {
+    await expect(
+      wager.connect(owner).setTreasury(ethers.ZeroAddress)
+    ).to.be.revertedWithCustomError(wager, "InvalidAddress");
+  });
 });
