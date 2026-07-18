@@ -337,4 +337,10 @@ describe("CeloFlashTournament — Extended Fee & Accounting Coverage", function 
       tournament.connect(owner).setFeeRecipient(ethers.ZeroAddress)
     ).to.be.revertedWithCustomError(tournament, "InvalidAddress");
   });
+
+  it("reverts setFeeRecipient for a non-owner", async function () {
+    await expect(
+      tournament.connect(players[0]).setFeeRecipient(players[0].address)
+    ).to.be.revertedWithCustomError(tournament, "OwnableUnauthorizedAccount");
+  });
 });
