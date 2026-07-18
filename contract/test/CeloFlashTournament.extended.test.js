@@ -139,4 +139,27 @@ describe("CeloFlashTournament — Extended Fee & Accounting Coverage", function 
     expect(await usdm.balanceOf(addr)).to.equal(pool1 + pool2);
     expect(await tournament.accumulatedFees()).to.equal(0);
   });
+
+  it("drains native fees pooled across multiple tournaments", async function () {
+    const addr = await tournament.getAddress();
+    const first = await createTournament({ isNative: true });
+    await joinAll(first, players, true);
+    const second = await createTournament({ isNative: true });
+    await joinAll(second, players.slice(0, 3), true);
+
+    const pool1 = SEED_AMOUNT + PRIZE_PER_ENTRY * 5n;
+    const pool2 = SEED_AMOUNT + PRIZE_PER_ENTRY * 3n;
+    const combinedFees = FEE_PER_ENTRY * 8n;
+
+    expect(await tournament.accumulatedNativeFees()).to.equal(combinedFees);
+    expect(await ethers.provider.getBalance(addr)).to.equal(pool1 + pool2 + combinedFees);
+
+    await expect(tournament.withdrawFees()).to.changeEtherBalances(
+      [tournament, feeRecipient],
+      [-combinedFees, combinedFees]
+    );
+
+    expect(await ethers.provider.getBalance(addr)).to.equal(pool1 + pool2);
+    expect(await tournament.accumulatedNativeFees()).to.equal(0);
+  });
 });
