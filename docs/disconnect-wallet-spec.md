@@ -24,3 +24,4 @@ This document describes the design, flow, and user experience for disconnecting 
 22. Audio library click sound triggers are managed via the centralized audio utility.
 23. Active tab state is managed globally by GameStateContext.
 24. Allowed origins are configured in the Privy Developer Console.
+25. Port 5173 is the default local development server port.
