@@ -109,4 +109,10 @@ describe("CeloFlashWager — placeWager", function () {
       .to.emit(wager, "WagerPlaced")
       .withArgs(1, players[0].address, WAGER_AMOUNT, GROSS_PAYOUT);
   });
+
+  it("credits the stake to the contract balance", async function () {
+    await expect(
+      wager.connect(players[0]).placeWager({ value: WAGER_AMOUNT })
+    ).to.changeEtherBalance(wager, WAGER_AMOUNT);
+  });
 });
