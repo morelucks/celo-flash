@@ -82,6 +82,13 @@ export const GameStateProvider = ({ children }) => {
     });
   }, [totalSaved]);
 
+  // Expose setter for local testing and automation
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      window.setUserAddress = setUserAddress;
+    }
+  }, [setUserAddress]);
+
   // Keep track of the last loaded address and initialization state to prevent overwriting
   const [lastLoadedAddress, setLastLoadedAddress] = useState(null);
   const [isStateInitialized, setIsStateInitialized] = useState(false);
