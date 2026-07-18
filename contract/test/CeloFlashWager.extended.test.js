@@ -149,4 +149,13 @@ describe("CeloFlashWager — Extended House Edge & Accounting Coverage", functio
       wager.connect(players[0]).setTreasury(players[0].address)
     ).to.be.revertedWithCustomError(wager, "OwnableUnauthorizedAccount");
   });
+
+  it("reverts expireWager before the expiry window", async function () {
+    await wager.connect(players[0]).placeWager({ value: WAGER_AMOUNT });
+    const id = await wager.getActiveWager(players[0].address);
+    await expect(wager.expireWager(id)).to.be.revertedWithCustomError(
+      wager,
+      "WagerNotExpired"
+    );
+  });
 });
