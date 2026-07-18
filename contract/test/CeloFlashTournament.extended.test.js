@@ -218,4 +218,15 @@ describe("CeloFlashTournament — Extended Fee & Accounting Coverage", function 
       );
     }
   });
+
+  it("lets a non-owner trigger withdrawFees to the recipient", async function () {
+    const id = await createTournament();
+    await joinAll(id, players, false);
+    const expectedFees = FEE_PER_ENTRY * 5n;
+
+    await expect(
+      tournament.connect(players[1]).withdrawFees()
+    ).to.changeTokenBalances(usdm, [tournament, feeRecipient], [-expectedFees, expectedFees]);
+    expect(await tournament.accumulatedFees()).to.equal(0);
+  });
 });
