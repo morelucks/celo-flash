@@ -331,4 +331,10 @@ describe("CeloFlashTournament — Extended Fee & Accounting Coverage", function 
     // The undistributed pool remains in the contract; only fees were swept.
     expect(await usdm.balanceOf(addr)).to.equal(pool);
   });
+
+  it("reverts setFeeRecipient on the zero address", async function () {
+    await expect(
+      tournament.connect(owner).setFeeRecipient(ethers.ZeroAddress)
+    ).to.be.revertedWithCustomError(tournament, "InvalidAddress");
+  });
 });
