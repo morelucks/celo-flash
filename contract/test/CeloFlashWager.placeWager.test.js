@@ -287,4 +287,10 @@ describe("CeloFlashWager — placeWager", function () {
       .to.emit(wager, "HouseFunded")
       .withArgs(owner.address, extra);
   });
+
+  it("grows the reserve on fundHouse", async function () {
+    const extra = ethers.parseEther("5");
+    await wager.connect(owner).fundHouse({ value: extra });
+    expect(await wager.getHouseReserve()).to.equal(FUND_AMOUNT + extra);
+  });
 });
