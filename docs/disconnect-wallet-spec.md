@@ -7,3 +7,4 @@ This document describes the design, flow, and user experience for disconnecting 
 5. Users must confirm they want to disconnect to prevent accidental loss of active sessions.
 6. The Header displays the connected wallet address and a close (✕) button.
 7. Clicking the close button opens a custom, sleek confirmation modal.
+8. The cancel button inside the confirmation modal keeps the wallet connected.
