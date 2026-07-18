@@ -273,4 +273,11 @@ describe("CeloFlashWager — placeWager", function () {
     await placeAndResolve(players[0], SCORE_THRESHOLD + 10);
     expect(await wager.getActiveWager(players[0].address)).to.equal(0);
   });
+
+  it("reverts placeWager while paused", async function () {
+    await wager.connect(owner).pause();
+    await expect(
+      wager.connect(players[0]).placeWager({ value: WAGER_AMOUNT })
+    ).to.be.revertedWithCustomError(wager, "EnforcedPause");
+  });
 });
