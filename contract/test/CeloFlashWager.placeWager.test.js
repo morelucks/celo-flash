@@ -135,4 +135,10 @@ describe("CeloFlashWager — placeWager", function () {
     expect(w.potentialPayout).to.equal((stake * WIN_MULTIPLIER_BPS) / BPS_DENOMINATOR);
     expect(w.potentialPayout).to.equal(stake * 2n);
   });
+
+  it("raises totalPendingLiabilities by the potential payout", async function () {
+    expect(await wager.totalPendingLiabilities()).to.equal(0);
+    await wager.connect(players[0]).placeWager({ value: WAGER_AMOUNT });
+    expect(await wager.totalPendingLiabilities()).to.equal(GROSS_PAYOUT);
+  });
 });
