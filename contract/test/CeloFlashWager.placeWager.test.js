@@ -80,4 +80,10 @@ describe("CeloFlashWager — placeWager", function () {
     const w = await wager.getWager(1);
     expect(w.score).to.equal(0);
   });
+
+  it("marks a new wager as Pending", async function () {
+    await wager.connect(players[0]).placeWager({ value: WAGER_AMOUNT });
+    const w = await wager.getWager(1);
+    expect(w.status).to.equal(PENDING);
+  });
 });
