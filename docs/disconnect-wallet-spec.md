@@ -19,3 +19,4 @@ This document describes the design, flow, and user experience for disconnecting 
 17. In-app browsers that block popups are handled gracefully via standard redirects.
 18. Future revisions can include passkey-based social accounts and quick-reconnect.
 19. The application operates primarily on Celo Mainnet (Chain ID 42220).
+20. Public forno RPC URL is used as the default provider for network requests.
