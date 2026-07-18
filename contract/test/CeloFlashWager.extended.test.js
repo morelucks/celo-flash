@@ -203,4 +203,17 @@ describe("CeloFlashWager — Extended House Edge & Accounting Coverage", functio
       bare.connect(players[1]).placeWager({ value: MIN_WAGER })
     ).to.be.revertedWithCustomError(bare, "InsufficientHouseReserve");
   });
+
+  it("excludes edge and liabilities from getHouseReserve", async function () {
+    await wager.connect(players[0]).placeWager({ value: WAGER_AMOUNT });
+    expect(await wager.totalPendingLiabilities()).to.equal(GROSS_PAYOUT);
+
+    await placeAndResolve(players[1], SCORE_THRESHOLD + 10);
+    expect(await wager.accumulatedHouseEdge()).to.equal(EDGE_PER_WIN);
+
+    const addr = await wager.getAddress();
+    const balance = await ethers.provider.getBalance(addr);
+    const expected = balance - GROSS_PAYOUT - EDGE_PER_WIN;
+    expect(await wager.getHouseReserve()).to.equal(expected);
+  });
 });
