@@ -197,4 +197,11 @@ describe("CeloFlashWager — placeWager", function () {
       wager.connect(players[0]).placeWager({ value: WAGER_AMOUNT })
     ).to.be.revertedWithCustomError(wager, "ActiveWagerExists");
   });
+
+  it("allows different players to hold pending wagers simultaneously", async function () {
+    await wager.connect(players[0]).placeWager({ value: WAGER_AMOUNT });
+    await wager.connect(players[1]).placeWager({ value: WAGER_AMOUNT });
+    expect(await wager.getActiveWager(players[0].address)).to.equal(1);
+    expect(await wager.getActiveWager(players[1].address)).to.equal(2);
+  });
 });
