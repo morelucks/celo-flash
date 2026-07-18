@@ -74,4 +74,10 @@ describe("CeloFlashWager — placeWager", function () {
     const w = await wager.getWager(1);
     expect(w.createdAt).to.equal(block.timestamp);
   });
+
+  it("initializes the score to zero", async function () {
+    await wager.connect(players[0]).placeWager({ value: WAGER_AMOUNT });
+    const w = await wager.getWager(1);
+    expect(w.score).to.equal(0);
+  });
 });
