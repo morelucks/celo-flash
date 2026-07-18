@@ -183,4 +183,12 @@ describe("CeloFlashWager — Extended House Edge & Accounting Coverage", functio
     expect(await wager.accumulatedHouseEdge()).to.equal(EDGE_PER_WIN);
     await expectSolvent();
   });
+
+  it("reverts a second claim on an already-claimed wager", async function () {
+    const wonId = await placeAndResolve(players[0], SCORE_THRESHOLD + 10);
+    await wager.connect(players[0]).claimWinnings(wonId);
+    await expect(
+      wager.connect(players[0]).claimWinnings(wonId)
+    ).to.be.revertedWithCustomError(wager, "WagerNotWon");
+  });
 });
