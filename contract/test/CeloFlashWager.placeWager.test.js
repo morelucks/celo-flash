@@ -53,4 +53,10 @@ describe("CeloFlashWager — placeWager", function () {
     const w = await wager.getWager(1);
     expect(w.player).to.equal(players[0].address);
   });
+
+  it("stores the staked amount on a valid wager", async function () {
+    await wager.connect(players[0]).placeWager({ value: WAGER_AMOUNT });
+    const w = await wager.getWager(1);
+    expect(w.amount).to.equal(WAGER_AMOUNT);
+  });
 });
