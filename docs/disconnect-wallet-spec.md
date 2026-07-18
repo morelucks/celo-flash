@@ -6,3 +6,4 @@ This document describes the design, flow, and user experience for disconnecting 
 4. Disconnect functions are unified in the useWallet hook, wrapping Privy's logout.
 5. Users must confirm they want to disconnect to prevent accidental loss of active sessions.
 6. The Header displays the connected wallet address and a close (✕) button.
+7. Clicking the close button opens a custom, sleek confirmation modal.
