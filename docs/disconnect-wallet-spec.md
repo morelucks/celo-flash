@@ -15,3 +15,4 @@ This document describes the design, flow, and user experience for disconnecting 
 13. Clicking buttons in the confirmation modal plays the default 'click' sound if enabled.
 14. Modals use the app's predefined dark theme overlay and visual aesthetics.
 15. Developer state setter window.setUserAddress is exposed for testing connection states.
+16. Automation tests verify that the modal opens and closes correctly on both screens.
