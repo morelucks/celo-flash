@@ -280,4 +280,37 @@ describe("CeloFlashTournament — Extended Fee & Accounting Coverage", function 
     );
     expect(await usdm.balanceOf(addr)).to.equal(0);
   });
+
+  it("drains the contract for a two-participant 70/30 split", async function () {
+    const addr = await tournament.getAddress();
+    const id = await createTournament();
+    await joinAll(id, players.slice(0, 2), false);
+
+    const scores = [400, 200];
+    for (let i = 0; i < 2; i++) {
+      const nonce = uniqueNonce();
+      const sig = await signScore(id, players[i].address, scores[i], nonce);
+      await tournament.connect(players[i]).submitScore(id, scores[i], nonce, sig);
+    }
+
+    await time.increase(DURATION + 1);
+    await tournament.finalizeTournament(id);
+    await tournament.withdrawFees();
+
+    const pool = SEED_AMOUNT + PRIZE_PER_ENTRY * 2n;
+    const first = (pool * 7000n) / BPS_DENOMINATOR;
+    const second = pool - first;
+
+    await expect(tournament.connect(players[0]).claimPrize(id)).to.changeTokenBalance(
+      usdm,
+      players[0],
+      first
+    );
+    await expect(tournament.connect(players[1]).claimPrize(id)).to.changeTokenBalance(
+      usdm,
+      players[1],
+      second
+    );
+    expect(await usdm.balanceOf(addr)).to.equal(0);
+  });
 });
