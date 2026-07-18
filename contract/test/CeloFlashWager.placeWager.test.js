@@ -303,4 +303,10 @@ describe("CeloFlashWager — placeWager", function () {
       .withArgs(owner.address, extra);
     expect(await wager.getHouseReserve()).to.equal(FUND_AMOUNT + extra);
   });
+
+  it("reverts fundHouse on a zero deposit", async function () {
+    await expect(
+      wager.connect(owner).fundHouse({ value: 0 })
+    ).to.be.revertedWithCustomError(wager, "WagerTooLow");
+  });
 });
