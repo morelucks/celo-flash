@@ -280,4 +280,11 @@ describe("CeloFlashWager — placeWager", function () {
       wager.connect(players[0]).placeWager({ value: WAGER_AMOUNT })
     ).to.be.revertedWithCustomError(wager, "EnforcedPause");
   });
+
+  it("funds the house and emits HouseFunded", async function () {
+    const extra = ethers.parseEther("5");
+    await expect(wager.connect(owner).fundHouse({ value: extra }))
+      .to.emit(wager, "HouseFunded")
+      .withArgs(owner.address, extra);
+  });
 });
