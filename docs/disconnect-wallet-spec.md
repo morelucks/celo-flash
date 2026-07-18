@@ -10,3 +10,4 @@ This document describes the design, flow, and user experience for disconnecting 
 8. The cancel button inside the confirmation modal keeps the wallet connected.
 9. The disconnect button executes the wallet disconnect flow and clears address state.
 10. When a wallet is connected, the Me screen shows a red 'Disconnect Wallet' action button.
+11. Clicking the Disconnect Wallet button on the Me screen triggers the same confirmation modal.
