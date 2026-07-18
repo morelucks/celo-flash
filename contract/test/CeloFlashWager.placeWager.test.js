@@ -28,4 +28,14 @@ describe("CeloFlashWager — placeWager", function () {
 
     await wager.fundHouse({ value: FUND_AMOUNT });
   });
+
+  const uniqueNonce = () => ethers.encodeBytes32String(`pw-nonce-${nonceCounter++}`);
+
+  async function signScore(wagerId, addr, score, nonce) {
+    const h = ethers.solidityPackedKeccak256(
+      ["uint256", "address", "uint256", "bytes32"],
+      [wagerId, addr, score, nonce]
+    );
+    return verifier.signMessage(ethers.getBytes(h));
+  }
 });
