@@ -240,4 +240,12 @@ describe("CeloFlashWager — placeWager", function () {
       bare.connect(players[1]).placeWager({ value: WAGER_AMOUNT })
     ).to.be.revertedWithCustomError(bare, "InsufficientHouseReserve");
   });
+
+  it("lets a player wager again after a win", async function () {
+    await placeAndResolve(players[0], SCORE_THRESHOLD + 10);
+    await expect(
+      wager.connect(players[0]).placeWager({ value: WAGER_AMOUNT })
+    ).to.not.be.reverted;
+    expect(await wager.getActiveWager(players[0].address)).to.equal(2);
+  });
 });
