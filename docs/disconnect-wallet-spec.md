@@ -26,3 +26,4 @@ This document describes the design, flow, and user experience for disconnecting 
 24. Allowed origins are configured in the Privy Developer Console.
 25. Port 5173 is the default local development server port.
 26. Privy React Auth version 3.35.1 is active in dependencies.
+27. Code formatting conforms to the repository's oxlint rules.
