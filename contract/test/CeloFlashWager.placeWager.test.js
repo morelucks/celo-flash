@@ -160,4 +160,10 @@ describe("CeloFlashWager — placeWager", function () {
     await wager.connect(players[2]).placeWager({ value: WAGER_AMOUNT });
     expect(await wager.totalWagersPlaced()).to.equal(3);
   });
+
+  it("reverts a zero-value wager with WagerTooLow", async function () {
+    await expect(
+      wager.connect(players[0]).placeWager({ value: 0 })
+    ).to.be.revertedWithCustomError(wager, "WagerTooLow");
+  });
 });
