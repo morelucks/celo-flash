@@ -112,4 +112,12 @@ describe("CeloFlashWager — Extended House Edge & Accounting Coverage", functio
     await expectSolvent();
     expect(await wager.totalPendingLiabilities()).to.equal(0);
   });
+
+  it("grows the reserve and emits HouseFunded on fundHouse", async function () {
+    const extra = ethers.parseEther("5");
+    await expect(wager.fundHouse({ value: extra }))
+      .to.emit(wager, "HouseFunded")
+      .withArgs(owner.address, extra);
+    expect(await wager.getHouseReserve()).to.equal(FUND_AMOUNT + extra);
+  });
 });
