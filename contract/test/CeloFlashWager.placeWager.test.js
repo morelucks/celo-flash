@@ -178,4 +178,10 @@ describe("CeloFlashWager — placeWager", function () {
     const w = await wager.getWager(1);
     expect(w.amount).to.equal(MIN_WAGER);
   });
+
+  it("reverts just above MAX_WAGER with WagerTooHigh", async function () {
+    await expect(
+      wager.connect(players[0]).placeWager({ value: MAX_WAGER + 1n })
+    ).to.be.revertedWithCustomError(wager, "WagerTooHigh");
+  });
 });
