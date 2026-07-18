@@ -21,3 +21,4 @@ This document describes the design, flow, and user experience for disconnecting 
 19. The application operates primarily on Celo Mainnet (Chain ID 42220).
 20. Public forno RPC URL is used as the default provider for network requests.
 21. Layout elements adhere to mobile safe-area insets at the bottom.
+22. Audio library click sound triggers are managed via the centralized audio utility.
