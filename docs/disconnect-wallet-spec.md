@@ -23,3 +23,4 @@ This document describes the design, flow, and user experience for disconnecting 
 21. Layout elements adhere to mobile safe-area insets at the bottom.
 22. Audio library click sound triggers are managed via the centralized audio utility.
 23. Active tab state is managed globally by GameStateContext.
+24. Allowed origins are configured in the Privy Developer Console.
