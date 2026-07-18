@@ -127,4 +127,14 @@ describe("CeloFlashWager — Extended House Edge & Accounting Coverage", functio
       "WagerTooLow"
     );
   });
+
+  it("accepts direct CELO via receive and emits HouseFunded", async function () {
+    const extra = ethers.parseEther("3");
+    await expect(
+      owner.sendTransaction({ to: await wager.getAddress(), value: extra })
+    )
+      .to.emit(wager, "HouseFunded")
+      .withArgs(owner.address, extra);
+    expect(await wager.getHouseReserve()).to.equal(FUND_AMOUNT + extra);
+  });
 });
