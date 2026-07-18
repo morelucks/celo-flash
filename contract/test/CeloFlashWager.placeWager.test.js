@@ -215,4 +215,17 @@ describe("CeloFlashWager — placeWager", function () {
       bare.connect(players[1]).placeWager({ value: WAGER_AMOUNT })
     ).to.be.revertedWithCustomError(bare, "InsufficientHouseReserve");
   });
+
+  it("accepts a wager when the reserve exactly covers the risk", async function () {
+    const Factory = await ethers.getContractFactory("CeloFlashWager");
+    const bare = await Factory.deploy(verifier.address, treasury.address, SCORE_THRESHOLD);
+    await bare.waitForDeployment();
+    await bare.fundHouse({ value: WAGER_AMOUNT });
+
+    await bare.connect(players[0]).placeWager({ value: WAGER_AMOUNT });
+    await expect(
+      bare.connect(players[1]).placeWager({ value: WAGER_AMOUNT })
+    ).to.not.be.reverted;
+    expect(await bare.getActiveWager(players[1].address)).to.equal(2);
+  });
 });
