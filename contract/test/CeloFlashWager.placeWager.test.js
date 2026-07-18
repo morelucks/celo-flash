@@ -115,4 +115,10 @@ describe("CeloFlashWager — placeWager", function () {
       wager.connect(players[0]).placeWager({ value: WAGER_AMOUNT })
     ).to.changeEtherBalance(wager, WAGER_AMOUNT);
   });
+
+  it("pays exactly 2x on a minimum-size stake", async function () {
+    await wager.connect(players[0]).placeWager({ value: MIN_WAGER });
+    const w = await wager.getWager(1);
+    expect(w.potentialPayout).to.equal(MIN_WAGER * 2n);
+  });
 });
