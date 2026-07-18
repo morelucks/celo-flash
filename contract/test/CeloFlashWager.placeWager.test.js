@@ -190,4 +190,11 @@ describe("CeloFlashWager — placeWager", function () {
     const w = await wager.getWager(1);
     expect(w.amount).to.equal(MAX_WAGER);
   });
+
+  it("reverts a second pending wager with ActiveWagerExists", async function () {
+    await wager.connect(players[0]).placeWager({ value: WAGER_AMOUNT });
+    await expect(
+      wager.connect(players[0]).placeWager({ value: WAGER_AMOUNT })
+    ).to.be.revertedWithCustomError(wager, "ActiveWagerExists");
+  });
 });
