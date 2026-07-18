@@ -84,4 +84,32 @@ describe("CeloFlashWager — Extended House Edge & Accounting Coverage", functio
     expect(await wager.accumulatedHouseEdge()).to.equal(0);
     await expectSolvent();
   });
+
+  it("withdraws edge without touching a pending wager's liability", async function () {
+    await wager.connect(players[0]).placeWager({ value: WAGER_AMOUNT });
+    const pendingId = await wager.getActiveWager(players[0].address);
+    expect(await wager.totalPendingLiabilities()).to.equal(GROSS_PAYOUT);
+
+    const wonId = await placeAndResolve(players[1], SCORE_THRESHOLD + 10);
+    expect(await wager.accumulatedHouseEdge()).to.equal(EDGE_PER_WIN);
+
+    await wager.withdrawHouseEdge();
+    expect(await wager.accumulatedHouseEdge()).to.equal(0);
+    expect(await wager.totalPendingLiabilities()).to.equal(GROSS_PAYOUT);
+    await expectSolvent();
+
+    await expect(wager.connect(players[1]).claimWinnings(wonId)).to.changeEtherBalance(
+      players[1],
+      NET_PAYOUT
+    );
+    await expectSolvent();
+
+    await time.increase(3600 + 1);
+    await expect(wager.expireWager(pendingId)).to.changeEtherBalance(
+      players[0],
+      WAGER_AMOUNT
+    );
+    await expectSolvent();
+    expect(await wager.totalPendingLiabilities()).to.equal(0);
+  });
 });
