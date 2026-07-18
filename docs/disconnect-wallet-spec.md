@@ -14,3 +14,4 @@ This document describes the design, flow, and user experience for disconnecting 
 12. GameState is updated to set the userAddress back to null on disconnect.
 13. Clicking buttons in the confirmation modal plays the default 'click' sound if enabled.
 14. Modals use the app's predefined dark theme overlay and visual aesthetics.
+15. Developer state setter window.setUserAddress is exposed for testing connection states.
