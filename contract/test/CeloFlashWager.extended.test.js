@@ -170,4 +170,17 @@ describe("CeloFlashWager — Extended House Edge & Accounting Coverage", functio
       "NoHouseEdgeToWithdraw"
     );
   });
+
+  it("leaves accumulated edge unchanged when a wager expires", async function () {
+    await placeAndResolve(players[0], SCORE_THRESHOLD + 10);
+    expect(await wager.accumulatedHouseEdge()).to.equal(EDGE_PER_WIN);
+
+    await wager.connect(players[1]).placeWager({ value: WAGER_AMOUNT });
+    const id = await wager.getActiveWager(players[1].address);
+    await time.increase(3600 + 1);
+    await wager.expireWager(id);
+
+    expect(await wager.accumulatedHouseEdge()).to.equal(EDGE_PER_WIN);
+    await expectSolvent();
+  });
 });
