@@ -17,3 +17,4 @@ This document describes the design, flow, and user experience for disconnecting 
 15. Developer state setter window.setUserAddress is exposed for testing connection states.
 16. Automation tests verify that the modal opens and closes correctly on both screens.
 17. In-app browsers that block popups are handled gracefully via standard redirects.
+18. Future revisions can include passkey-based social accounts and quick-reconnect.
