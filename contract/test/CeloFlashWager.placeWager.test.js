@@ -172,4 +172,10 @@ describe("CeloFlashWager — placeWager", function () {
       wager.connect(players[0]).placeWager({ value: MIN_WAGER - 1n })
     ).to.be.revertedWithCustomError(wager, "WagerTooLow");
   });
+
+  it("accepts a stake at exactly MIN_WAGER", async function () {
+    await wager.connect(players[0]).placeWager({ value: MIN_WAGER });
+    const w = await wager.getWager(1);
+    expect(w.amount).to.equal(MIN_WAGER);
+  });
 });
