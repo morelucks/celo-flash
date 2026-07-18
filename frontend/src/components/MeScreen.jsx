@@ -4,12 +4,19 @@ import { useWallet } from '../hooks/useWallet';
 import { playSound } from '../utils/audio';
 import avatarUrl from '../assets/avatar.png';
 import UsernameModal from './UsernameModal';
+import ConfirmDisconnectModal from './ConfirmDisconnectModal';
 
 export default function MeScreen() {
   const { cash, points, gamesPlayed, setCurrentTab, soundEnabled, userAddress, userName, setUserName, farcasterUser } = useGameState();
-  const { connectWallet } = useWallet();
+  const { connectWallet, disconnectWallet } = useWallet();
   const [statsTab, setStatsTab] = useState('usage');
   const [showUsernameModal, setShowUsernameModal] = useState(false);
+  const [showConfirmDisconnect, setShowConfirmDisconnect] = useState(false);
+
+  const handleDisconnectClick = () => {
+    playSound('click', soundEnabled);
+    setShowConfirmDisconnect(true);
+  };
 
   const formatAddress = (address) => {
     if (!address) return 'Not Connected';
@@ -135,7 +142,12 @@ export default function MeScreen() {
 
       {/* Quick Actions */}
       <div className="profile-actions">
-        {!userAddress && (
+        {userAddress ? (
+          <button className="profile-action-row" onClick={handleDisconnectClick} style={{ color: '#ef4444' }}>
+            <span>Disconnect Wallet</span>
+            <span className="arrow-right" style={{ color: '#ef4444' }}>→</span>
+          </button>
+        ) : (
           <button className="profile-action-row" onClick={handleConnectWallet}>
             <span>Connect Wallet</span>
             <span className="arrow-right">→</span>
@@ -278,6 +290,14 @@ export default function MeScreen() {
         onClose={() => setShowUsernameModal(false)}
         onSave={handleSaveUsername}
         currentUsername={userName}
+        soundEnabled={soundEnabled}
+      />
+
+      {/* Confirm Disconnect Modal */}
+      <ConfirmDisconnectModal
+        isOpen={showConfirmDisconnect}
+        onClose={() => setShowConfirmDisconnect(false)}
+        onConfirm={disconnectWallet}
         soundEnabled={soundEnabled}
       />
     </div>
