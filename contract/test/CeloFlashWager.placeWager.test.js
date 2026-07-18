@@ -153,4 +153,11 @@ describe("CeloFlashWager — placeWager", function () {
     await wager.connect(players[0]).placeWager({ value: WAGER_AMOUNT });
     expect(await wager.totalWagersPlaced()).to.equal(1);
   });
+
+  it("keeps totalWagersPlaced counting across wagers", async function () {
+    await wager.connect(players[0]).placeWager({ value: WAGER_AMOUNT });
+    await wager.connect(players[1]).placeWager({ value: WAGER_AMOUNT });
+    await wager.connect(players[2]).placeWager({ value: WAGER_AMOUNT });
+    expect(await wager.totalWagersPlaced()).to.equal(3);
+  });
 });
