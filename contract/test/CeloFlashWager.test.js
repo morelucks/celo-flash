@@ -232,6 +232,17 @@ describe("CeloFlashWager — expireWager (time-based expiry & refunds)", functio
   let treasury;
   let players;
 
+  let nonceCounter = 0;
+  const uniqueNonce = () => ethers.encodeBytes32String(`exp-nonce-${nonceCounter++}`);
+
+  async function signScore(wagerId, playerAddress, score, nonce) {
+    const messageHash = ethers.solidityPackedKeccak256(
+      ["uint256", "address", "uint256", "bytes32"],
+      [wagerId, playerAddress, score, nonce]
+    );
+    return verifier.signMessage(ethers.getBytes(messageHash));
+  }
+
   beforeEach(async function () {
     [owner, verifier, treasury, ...players] = await ethers.getSigners();
     players = players.slice(0, 5);
