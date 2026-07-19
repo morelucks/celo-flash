@@ -216,6 +216,15 @@ describe("CeloFlashWager — expireWager (time-based expiry & refunds)", functio
   const SCORE_THRESHOLD = 100;
   const FUND_AMOUNT = ethers.parseEther("100");
   const WAGER_AMOUNT = ethers.parseEther("1");
+  const MIN_WAGER = ethers.parseEther("0.001");
+  const MAX_WAGER = ethers.parseEther("10");
+
+  const WIN_MULTIPLIER_BPS = 20_000n;
+  const BPS_DENOMINATOR = 10_000n;
+  const WAGER_EXPIRY = 3600; // 1 hour, matches WAGER_EXPIRY in the contract
+
+  // 2x the stake — the liability the house locks per pending wager
+  const GROSS_PAYOUT = (WAGER_AMOUNT * WIN_MULTIPLIER_BPS) / BPS_DENOMINATOR;
 
   let wager;
   let owner;
