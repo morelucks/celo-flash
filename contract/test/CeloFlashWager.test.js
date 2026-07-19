@@ -279,6 +279,19 @@ describe("CeloFlashWager — expireWager (time-based expiry & refunds)", functio
 
   // ── expireWager test cases ──
 
+  it("still counts an expired wager in totalWagersPlaced", async function () {
+    const placedBefore = await wager.totalWagersPlaced();
+
+    const wagerId = await placePending(players[0]);
+    expect(await wager.totalWagersPlaced()).to.equal(placedBefore + 1n);
+
+    await time.increase(WAGER_EXPIRY + 1);
+    await wager.expireWager(wagerId);
+
+    // Expiry is a refund, not an un-count: the placement total is unchanged.
+    expect(await wager.totalWagersPlaced()).to.equal(placedBefore + 1n);
+  });
+
   it("moves exactly the stake from the contract to the player", async function () {
     const wagerId = await placePending(players[0]);
     await time.increase(WAGER_EXPIRY + 1);
