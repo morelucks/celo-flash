@@ -279,6 +279,19 @@ describe("CeloFlashWager — expireWager (time-based expiry & refunds)", functio
 
   // ── expireWager test cases ──
 
+  it("still allows expiry cleanup while the contract is paused", async function () {
+    const wagerId = await placePending(players[0]);
+    await time.increase(WAGER_EXPIRY + 1);
+
+    // expireWager carries no whenNotPaused guard — cleanup must survive a pause.
+    await wager.connect(owner).pause();
+
+    await expect(wager.expireWager(wagerId)).to.changeEtherBalance(
+      players[0],
+      WAGER_AMOUNT
+    );
+  });
+
   it("full flow: after time.increase(3601) the wager expires, refunds, and settles state", async function () {
     const wagerId = await placePending(players[0]);
 
