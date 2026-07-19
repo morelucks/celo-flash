@@ -279,6 +279,15 @@ describe("CeloFlashWager — expireWager (time-based expiry & refunds)", functio
 
   // ── expireWager test cases ──
 
+  it("is permissionless: the owner may also expire a stale wager", async function () {
+    const wagerId = await placePending(players[0]);
+    await time.increase(WAGER_EXPIRY + 1);
+
+    await expect(
+      wager.connect(owner).expireWager(wagerId)
+    ).to.changeEtherBalance(players[0], WAGER_AMOUNT);
+  });
+
   it("is permissionless: a different player can expire and the original player is refunded", async function () {
     const wagerId = await placePending(players[0]);
     await time.increase(WAGER_EXPIRY + 1);
