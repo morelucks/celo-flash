@@ -284,10 +284,11 @@ describe("CeloFlashWager — expireWager (time-based expiry & refunds)", functio
 
     await time.increase(3601); // 1 hour + 1 second, per the acceptance criteria
 
-    await expect(wager.expireWager(wagerId))
+    const tx = wager.expireWager(wagerId);
+    await expect(tx).to.changeEtherBalance(players[0], WAGER_AMOUNT);
+    await expect(tx)
       .to.emit(wager, "WagerExpired")
-      .withArgs(wagerId, players[0].address)
-      .and.to.changeEtherBalance(players[0], WAGER_AMOUNT);
+      .withArgs(wagerId, players[0].address);
 
     const stored = await wager.getWager(wagerId);
     expect(stored.status).to.equal(3); // Expired
