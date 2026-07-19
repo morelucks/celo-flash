@@ -279,6 +279,20 @@ describe("CeloFlashWager — expireWager (time-based expiry & refunds)", functio
 
   // ── expireWager test cases ──
 
+  it("expiring one of two pending wagers only releases that wager's liability", async function () {
+    const idA = await placePending(players[0]);
+    const idB = await placePending(players[1]);
+    expect(await wager.totalPendingLiabilities()).to.equal(GROSS_PAYOUT * 2n);
+
+    await time.increase(WAGER_EXPIRY + 1);
+    await wager.expireWager(idA);
+
+    // Only A's liability is released; B is still pending.
+    expect(await wager.totalPendingLiabilities()).to.equal(GROSS_PAYOUT);
+    const bStored = await wager.getWager(idB);
+    expect(bStored.status).to.equal(0); // WagerStatus.Pending
+  });
+
   it("keeps the contract solvent after refunding an expired wager", async function () {
     const wagerId = await placePending(players[0]);
     await time.increase(WAGER_EXPIRY + 1);
