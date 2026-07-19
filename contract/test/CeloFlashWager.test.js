@@ -279,6 +279,21 @@ describe("CeloFlashWager — expireWager (time-based expiry & refunds)", functio
 
   // ── expireWager test cases ──
 
+  it("full flow: after time.increase(3601) the wager expires, refunds, and settles state", async function () {
+    const wagerId = await placePending(players[0]);
+
+    await time.increase(3601); // 1 hour + 1 second, per the acceptance criteria
+
+    await expect(wager.expireWager(wagerId))
+      .to.emit(wager, "WagerExpired")
+      .withArgs(wagerId, players[0].address)
+      .and.to.changeEtherBalance(players[0], WAGER_AMOUNT);
+
+    const stored = await wager.getWager(wagerId);
+    expect(stored.status).to.equal(3); // Expired
+    expect(await wager.totalPendingLiabilities()).to.equal(0);
+  });
+
   it("does not count an expired wager as a win", async function () {
     const wonBefore = await wager.totalWagersWon();
 
