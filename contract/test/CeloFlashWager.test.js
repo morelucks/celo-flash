@@ -211,3 +211,28 @@ describe("CeloFlashWager — House Edge Withdrawal & Accounting", function () {
     });
   });
 });
+
+describe("CeloFlashWager — expireWager (time-based expiry & refunds)", function () {
+  const SCORE_THRESHOLD = 100;
+  const FUND_AMOUNT = ethers.parseEther("100");
+  const WAGER_AMOUNT = ethers.parseEther("1");
+
+  let wager;
+  let owner;
+  let verifier;
+  let treasury;
+  let players;
+
+  beforeEach(async function () {
+    [owner, verifier, treasury, ...players] = await ethers.getSigners();
+    players = players.slice(0, 5);
+
+    const CeloFlashWager = await ethers.getContractFactory("CeloFlashWager");
+    wager = await CeloFlashWager.deploy(verifier.address, treasury.address, SCORE_THRESHOLD);
+    await wager.waitForDeployment();
+
+    await wager.fundHouse({ value: FUND_AMOUNT });
+  });
+
+  // ── expireWager test cases ──
+});
