@@ -279,6 +279,21 @@ describe("CeloFlashWager — expireWager (time-based expiry & refunds)", functio
 
   // ── expireWager test cases ──
 
+  it("refunds exactly msg.value, never the 2x potentialPayout", async function () {
+    const wagerId = await placePending(players[0]);
+    const stored = await wager.getWager(wagerId);
+    expect(stored.potentialPayout).to.equal(GROSS_PAYOUT);
+    expect(stored.potentialPayout).to.not.equal(WAGER_AMOUNT);
+
+    await time.increase(WAGER_EXPIRY + 1);
+
+    // Player gets back only the stake, not the doubled payout.
+    await expect(wager.expireWager(wagerId)).to.changeEtherBalance(
+      players[0],
+      WAGER_AMOUNT
+    );
+  });
+
   it("refunds the player their exact original stake after 1 hour + 1 second", async function () {
     const wagerId = await placePending(players[0]);
 
