@@ -279,6 +279,19 @@ describe("CeloFlashWager — expireWager (time-based expiry & refunds)", functio
 
   // ── expireWager test cases ──
 
+  it("leaves accumulatedHouseEdge untouched when a wager expires", async function () {
+    // A prior win seeds some house edge.
+    await placeAndResolve(players[0], SCORE_THRESHOLD + 5);
+    const edgeBefore = await wager.accumulatedHouseEdge();
+    expect(edgeBefore).to.be.gt(0);
+
+    const wagerId = await placePending(players[1]);
+    await time.increase(WAGER_EXPIRY + 1);
+    await wager.expireWager(wagerId);
+
+    expect(await wager.accumulatedHouseEdge()).to.equal(edgeBefore);
+  });
+
   it("refunds the exact stake for a maximum-sized wager", async function () {
     await wager.connect(players[0]).placeWager({ value: MAX_WAGER });
     const wagerId = await wager.nextWagerId();
