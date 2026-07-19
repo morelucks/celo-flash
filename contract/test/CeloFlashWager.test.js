@@ -254,5 +254,28 @@ describe("CeloFlashWager — expireWager (time-based expiry & refunds)", functio
     await wager.fundHouse({ value: FUND_AMOUNT });
   });
 
+  // Place a pending wager and return its id.
+  async function placePending(player, amount = WAGER_AMOUNT) {
+    await wager.connect(player).placeWager({ value: amount });
+    return wager.nextWagerId();
+  }
+
+  // Place a wager then resolve it with the given score (won or lost).
+  async function placeAndResolve(player, score) {
+    const wagerId = await placePending(player);
+    const nonce = uniqueNonce();
+    const signature = await signScore(wagerId, player.address, score, nonce);
+    await wager.connect(player).resolveWager(wagerId, score, nonce, signature);
+    return wagerId;
+  }
+
+  // Assert the contract stays solvent: balance covers liabilities + edge.
+  async function expectSolvent() {
+    const balance = await ethers.provider.getBalance(await wager.getAddress());
+    const liabilities = await wager.totalPendingLiabilities();
+    const edge = await wager.accumulatedHouseEdge();
+    expect(balance).to.be.gte(liabilities + edge);
+  }
+
   // ── expireWager test cases ──
 });
