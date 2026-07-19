@@ -279,6 +279,18 @@ describe("CeloFlashWager — expireWager (time-based expiry & refunds)", functio
 
   // ── expireWager test cases ──
 
+  it("succeeds at exactly createdAt + WAGER_EXPIRY (boundary is inclusive)", async function () {
+    const wagerId = await placePending(players[0]);
+    const { createdAt } = await wager.getWager(wagerId);
+
+    // block.timestamp == createdAt + WAGER_EXPIRY is NOT < the deadline, so it passes.
+    await time.setNextBlockTimestamp(Number(createdAt) + WAGER_EXPIRY);
+
+    await expect(wager.expireWager(wagerId))
+      .to.emit(wager, "WagerExpired")
+      .withArgs(wagerId, players[0].address);
+  });
+
   it("reverts with WagerNotExpired immediately after placing (no time passed)", async function () {
     const wagerId = await placePending(players[0]);
 
