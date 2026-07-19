@@ -279,6 +279,16 @@ describe("CeloFlashWager — expireWager (time-based expiry & refunds)", functio
 
   // ── expireWager test cases ──
 
+  it("reduces the contract balance by exactly the refunded stake", async function () {
+    const wagerId = await placePending(players[0]);
+    await time.increase(WAGER_EXPIRY + 1);
+
+    await expect(wager.expireWager(wagerId)).to.changeEtherBalance(
+      wager,
+      -WAGER_AMOUNT
+    );
+  });
+
   it("reports no active wager for the player once it is expired", async function () {
     const wagerId = await placePending(players[0]);
     expect(await wager.getActiveWager(players[0].address)).to.equal(wagerId);
