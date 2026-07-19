@@ -279,6 +279,11 @@ describe("CeloFlashWager — expireWager (time-based expiry & refunds)", functio
 
   // ── expireWager test cases ──
 
+  it("exposes WAGER_EXPIRY as exactly 1 hour (3600 seconds)", async function () {
+    expect(await wager.WAGER_EXPIRY()).to.equal(WAGER_EXPIRY);
+    expect(await wager.WAGER_EXPIRY()).to.equal(3600);
+  });
+
   it("expires several stale wagers independently, refunding each player", async function () {
     const idA = await placePending(players[0]);
     const idB = await placePending(players[1]);
