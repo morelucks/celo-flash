@@ -279,6 +279,17 @@ describe("CeloFlashWager — expireWager (time-based expiry & refunds)", functio
 
   // ── expireWager test cases ──
 
+  it("reverts WagerNotPending when expiring an already-expired wager", async function () {
+    const wagerId = await placePending(players[0]);
+    await time.increase(WAGER_EXPIRY + 1);
+    await wager.expireWager(wagerId);
+
+    await expect(wager.expireWager(wagerId)).to.be.revertedWithCustomError(
+      wager,
+      "WagerNotPending"
+    );
+  });
+
   it("succeeds at exactly createdAt + WAGER_EXPIRY (boundary is inclusive)", async function () {
     const wagerId = await placePending(players[0]);
     const { createdAt } = await wager.getWager(wagerId);
