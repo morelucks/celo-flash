@@ -279,6 +279,14 @@ describe("CeloFlashWager — expireWager (time-based expiry & refunds)", functio
 
   // ── expireWager test cases ──
 
+  it("keeps the contract solvent after refunding an expired wager", async function () {
+    const wagerId = await placePending(players[0]);
+    await time.increase(WAGER_EXPIRY + 1);
+    await wager.expireWager(wagerId);
+
+    await expectSolvent();
+  });
+
   it("leaves accumulatedHouseEdge untouched when a wager expires", async function () {
     // A prior win seeds some house edge.
     await placeAndResolve(players[0], SCORE_THRESHOLD + 5);
