@@ -279,6 +279,21 @@ describe("CeloFlashWager — expireWager (time-based expiry & refunds)", functio
 
   // ── expireWager test cases ──
 
+  it("restores the house reserve to its funded baseline after a lone wager expires", async function () {
+    expect(await wager.getHouseReserve()).to.equal(FUND_AMOUNT);
+
+    const wagerId = await placePending(players[0]);
+    // Locking the liability temporarily shrinks the free reserve.
+    expect(await wager.getHouseReserve()).to.equal(FUND_AMOUNT - (GROSS_PAYOUT - WAGER_AMOUNT));
+
+    await time.increase(WAGER_EXPIRY + 1);
+    await wager.expireWager(wagerId);
+
+    // Refund returns the stake and clears the liability — back to square one.
+    expect(await wager.getHouseReserve()).to.equal(FUND_AMOUNT);
+    expect(await wager.totalPendingLiabilities()).to.equal(0);
+  });
+
   it("expiring one player's wager does not disturb another player's winning resolution", async function () {
     const staleId = await placePending(players[0]);
     const liveId = await placePending(players[1]);
