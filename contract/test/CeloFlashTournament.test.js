@@ -1120,6 +1120,18 @@ describe("CeloFlashTournament — joinTournament Extended Coverage", function ()
 
       expect(await prizePool(id)).to.equal(ethers.parseEther("47.5"));
     });
+    it("Should accumulate exactly 5 CELO from the 100 CELO max native entry", async function () {
+      const entryFee = ethers.parseEther("100");
+      const id = await createTournament({ isNative: true, entryFee, seed: 0n });
+
+      await tournament.connect(alice).joinTournament(id, { value: entryFee });
+
+      expect(await tournament.accumulatedNativeFees()).to.equal(ethers.parseEther("5"));
+      expect(await prizePool(id)).to.equal(ethers.parseEther("95"));
+    });
+  });
+
+  describe("Free tournaments — multiple joiners", function () {
     // __EXTENDED_TESTS_END__
   });
 });
