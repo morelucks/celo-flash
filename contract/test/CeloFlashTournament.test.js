@@ -1322,6 +1322,13 @@ describe("CeloFlashTournament — joinTournament Extended Coverage", function ()
       expect(await tournament.hasJoined(id, bob.address)).to.equal(false);
       expect(await tournament.hasJoined(id, carol.address)).to.equal(false);
     });
+    it("Should revert InvalidValueSent when native value is attached to a USDm join", async function () {
+      const id = await createTournament();
+
+      await expect(
+        tournament.connect(alice).joinTournament(id, { value: 1n })
+      ).to.be.revertedWithCustomError(tournament, "InvalidValueSent");
+    });
     // __EXTENDED_TESTS_END__
   });
 });
