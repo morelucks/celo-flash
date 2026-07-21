@@ -1076,6 +1076,15 @@ describe("CeloFlashTournament — joinTournament Extended Coverage", function ()
   });
 
   describe("Balance movements", function () {
+    it("Should hold seed plus the full native entry fee in the contract balance", async function () {
+      const id = await createTournament({ isNative: true });
+
+      await tournament.connect(alice).joinTournament(id, { value: ENTRY_FEE });
+
+      expect(await ethers.provider.getBalance(await tournament.getAddress())).to.equal(
+        SEED_AMOUNT + ENTRY_FEE
+      );
+    });
     // __EXTENDED_TESTS_END__
   });
 });
