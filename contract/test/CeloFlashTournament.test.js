@@ -1156,6 +1156,16 @@ describe("CeloFlashTournament — joinTournament Extended Coverage", function ()
   });
 
   describe("Duplicate join side effects", function () {
+    it("Should let a different player join after the first has joined", async function () {
+      const id = await createTournament();
+      await tournament.connect(alice).joinTournament(id);
+
+      await tournament.connect(bob).joinTournament(id);
+
+      expect(await tournament.hasJoined(id, alice.address)).to.equal(true);
+      expect(await tournament.hasJoined(id, bob.address)).to.equal(true);
+      expect(await participantCount(id)).to.equal(2n);
+    });
     // __EXTENDED_TESTS_END__
   });
 });
