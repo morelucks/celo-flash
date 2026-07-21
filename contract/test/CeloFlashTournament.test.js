@@ -766,4 +766,15 @@ describe("CeloFlashTournament — joinTournament Flow", function () {
     });
   });
 
+  describe("Inactive tournament", function () {
+    it("Should revert with TournamentNotActive once the tournament has ended", async function () {
+      const id = await createTournament();
+      await time.increase(DURATION + 1);
+
+      await expect(
+        tournament.connect(alice).joinTournament(id)
+      ).to.be.revertedWithCustomError(tournament, "TournamentNotActive");
+    });
+
+  });
 });
