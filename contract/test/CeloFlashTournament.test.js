@@ -513,5 +513,14 @@ describe("CeloFlashTournament — joinTournament Flow", function () {
       expect(await tournament.hasJoined(id, alice.address)).to.equal(true);
     });
 
+    it("Should increment participantCount by one", async function () {
+      const id = await createTournament();
+      expect(await participantCount(id)).to.equal(0n);
+
+      await tournament.connect(alice).joinTournament(id);
+
+      expect(await participantCount(id)).to.equal(1n);
+    });
+
   });
 });
