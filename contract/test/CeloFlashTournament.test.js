@@ -720,5 +720,13 @@ describe("CeloFlashTournament — joinTournament Flow", function () {
       ).to.be.revertedWithCustomError(tournament, "InvalidValueSent");
     });
 
+    it("Should revert with InvalidValueSent when msg.value exceeds the entry fee", async function () {
+      const id = await createTournament({ isNative: true });
+
+      await expect(
+        tournament.connect(alice).joinTournament(id, { value: ENTRY_FEE + 1n })
+      ).to.be.revertedWithCustomError(tournament, "InvalidValueSent");
+    });
+
   });
 });
