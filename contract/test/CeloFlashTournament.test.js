@@ -1054,6 +1054,16 @@ describe("CeloFlashTournament — joinTournament Extended Coverage", function ()
   });
 
   describe("End-time boundary", function () {
+    it("Should revert with TournamentNotActive at the exact endTime", async function () {
+      const id = await createTournament();
+      const endTime = await endTimeOf(id);
+
+      await time.increaseTo(endTime);
+
+      await expect(
+        tournament.connect(alice).joinTournament(id)
+      ).to.be.revertedWithCustomError(tournament, "TournamentNotActive");
+    });
     // __EXTENDED_TESTS_END__
   });
 });
