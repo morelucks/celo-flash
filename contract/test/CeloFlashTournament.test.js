@@ -1104,6 +1104,14 @@ describe("CeloFlashTournament — joinTournament Extended Coverage", function ()
 
       expect(await tournament.accumulatedFees()).to.equal(ethers.parseEther("0.0005"));
     });
+    it("Should take exactly 2.5 USDm from a 50 USDm entry", async function () {
+      const entryFee = ethers.parseEther("50");
+      const id = await createTournament({ entryFee, seed: 0n });
+
+      await tournament.connect(alice).joinTournament(id);
+
+      expect(await tournament.accumulatedFees()).to.equal(ethers.parseEther("2.5"));
+    });
     // __EXTENDED_TESTS_END__
   });
 });
