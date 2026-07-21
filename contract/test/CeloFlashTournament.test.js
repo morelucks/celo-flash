@@ -551,5 +551,13 @@ describe("CeloFlashTournament — joinTournament Flow", function () {
       expect(await prizePool(id)).to.equal(before + PRIZE_PER_ENTRY);
     });
 
+    it("Should grow accumulatedFees by the protocol fee", async function () {
+      const id = await createTournament();
+
+      await tournament.connect(alice).joinTournament(id);
+
+      expect(await tournament.accumulatedFees()).to.equal(FEE_PER_ENTRY);
+    });
+
   });
 });
