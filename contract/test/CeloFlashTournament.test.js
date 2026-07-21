@@ -875,3 +875,87 @@ describe("CeloFlashTournament — joinTournament Flow", function () {
     });
   });
 });
+
+describe("CeloFlashTournament — joinTournament Extended Coverage", function () {
+  const ENTRY_FEE = ethers.parseEther("10");
+  const SEED_AMOUNT = ethers.parseEther("20");
+  const DURATION = 3600; // 1 hour (MIN_DURATION)
+  const PROTOCOL_FEE_BPS = 500n;
+  const BPS_DENOMINATOR = 10_000n;
+
+  const protocolFeeFor = (fee) => (fee * PROTOCOL_FEE_BPS) / BPS_DENOMINATOR;
+  const FEE_PER_ENTRY = protocolFeeFor(ENTRY_FEE);
+  const PRIZE_PER_ENTRY = ENTRY_FEE - FEE_PER_ENTRY;
+
+  let tournament;
+  let usdm;
+  let owner;
+  let verifier;
+  let feeRecipient;
+  let creator;
+  let alice;
+  let bob;
+  let carol;
+  let extras;
+
+  async function createTournament({
+    isNative = false,
+    seed = SEED_AMOUNT,
+    entryFee = ENTRY_FEE,
+  } = {}) {
+    const id = await tournament.nextTournamentId();
+    await tournament
+      .connect(creator)
+      .createTournament("Extended", entryFee, seed, DURATION, isNative, {
+        value: isNative ? seed : 0n,
+      });
+    return id;
+  }
+
+  async function participantCount(id) {
+    return (await tournament.tournaments(id)).participantCount;
+  }
+
+  async function prizePool(id) {
+    return (await tournament.tournaments(id)).prizePool;
+  }
+
+  async function endTimeOf(id) {
+    return (await tournament.tournaments(id)).endTime;
+  }
+
+  beforeEach(async function () {
+    [owner, verifier, feeRecipient, creator, alice, bob, carol, ...extras] =
+      await ethers.getSigners();
+
+    const MockERC20 = await ethers.getContractFactory("MockERC20");
+    usdm = await MockERC20.deploy("Mock USDm", "USDm", 18);
+    await usdm.waitForDeployment();
+
+    const CeloFlashTournament = await ethers.getContractFactory("CeloFlashTournament");
+    tournament = await CeloFlashTournament.deploy(
+      await usdm.getAddress(),
+      verifier.address,
+      feeRecipient.address
+    );
+    await tournament.waitForDeployment();
+
+    for (const acct of [creator, alice, bob, carol]) {
+      await usdm.mint(acct.address, ethers.parseEther("1000"));
+      await usdm
+        .connect(acct)
+        .approve(await tournament.getAddress(), ethers.MaxUint256);
+    }
+  });
+
+  describe("View accessors after joining", function () {
+    it("Should report hasJoined as false for a player who never joined", async function () {
+      const id = await createTournament();
+
+      await tournament.connect(alice).joinTournament(id);
+
+      expect(await tournament.hasJoined(id, bob.address)).to.equal(false);
+    });
+    // __EXTENDED_TESTS_END__
+  });
+});
