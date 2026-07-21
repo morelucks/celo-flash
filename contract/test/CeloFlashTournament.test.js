@@ -805,5 +805,16 @@ describe("CeloFlashTournament — joinTournament Flow", function () {
       ).to.be.revertedWithCustomError(tournament, "MaxParticipantsReached");
     });
 
+    it("Should still accept a join when one slot below the cap", async function () {
+      const id = await createTournament();
+      await tournament.connect(alice).joinTournament(id);
+
+      await forceParticipantCount(id, MAX_PARTICIPANTS - 1n);
+
+      await tournament.connect(bob).joinTournament(id);
+
+      expect(await participantCount(id)).to.equal(MAX_PARTICIPANTS);
+    });
   });
+
 });
