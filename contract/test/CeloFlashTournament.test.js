@@ -1290,6 +1290,15 @@ describe("CeloFlashTournament — joinTournament Extended Coverage", function ()
   });
 
   describe("Lifecycle guards", function () {
+    it("Should revert a join on a finalized tournament with TournamentNotActive", async function () {
+      const id = await createTournament();
+      await time.increase(DURATION + 1);
+      await tournament.finalizeTournament(id);
+
+      await expect(
+        tournament.connect(alice).joinTournament(id)
+      ).to.be.revertedWithCustomError(tournament, "TournamentNotActive");
+    });
     // __EXTENDED_TESTS_END__
   });
 });
