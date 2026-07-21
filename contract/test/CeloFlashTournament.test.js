@@ -613,4 +613,16 @@ describe("CeloFlashTournament — joinTournament Flow", function () {
     });
   });
 
+  describe("Multiple participants — USDm", function () {
+    it("Should count every distinct player that joins", async function () {
+      const id = await createTournament();
+
+      await tournament.connect(alice).joinTournament(id);
+      await tournament.connect(bob).joinTournament(id);
+      await tournament.connect(carol).joinTournament(id);
+
+      expect(await participantCount(id)).to.equal(3n);
+    });
+
+  });
 });
