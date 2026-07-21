@@ -1304,6 +1304,15 @@ describe("CeloFlashTournament — joinTournament Extended Coverage", function ()
         alice.sendTransaction({ to: await tournament.getAddress(), value: 1n })
       ).to.be.reverted;
     });
+    it("Should not transfer anything to feeRecipient on a join (fees only accrue)", async function () {
+      const id = await createTournament();
+
+      await expect(
+        tournament.connect(alice).joinTournament(id)
+      ).to.changeTokenBalance(usdm, feeRecipient, 0n);
+
+      expect(await tournament.accumulatedFees()).to.equal(FEE_PER_ENTRY);
+    });
     // __EXTENDED_TESTS_END__
   });
 });
