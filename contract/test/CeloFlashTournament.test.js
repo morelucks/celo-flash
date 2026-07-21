@@ -1276,6 +1276,20 @@ describe("CeloFlashTournament — joinTournament Extended Coverage", function ()
       expect(await tournament.accumulatedFees()).to.equal(FEE_PER_ENTRY);
       expect(await tournament.accumulatedNativeFees()).to.equal(FEE_PER_ENTRY);
     });
+    it("Should hold prizePool + accumulatedFees == seed + total entry fees", async function () {
+      const id = await createTournament();
+
+      await tournament.connect(alice).joinTournament(id);
+      await tournament.connect(bob).joinTournament(id);
+      await tournament.connect(carol).joinTournament(id);
+
+      const pool = await prizePool(id);
+      const fees = await tournament.accumulatedFees();
+      expect(pool + fees).to.equal(SEED_AMOUNT + ENTRY_FEE * 3n);
+    });
+  });
+
+  describe("Lifecycle guards", function () {
     // __EXTENDED_TESTS_END__
   });
 });
