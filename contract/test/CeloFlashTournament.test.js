@@ -1205,6 +1205,16 @@ describe("CeloFlashTournament — joinTournament Extended Coverage", function ()
       expect(events[0].args.player).to.equal(alice.address);
       expect(events[0].args.entryFee).to.equal(ENTRY_FEE);
     });
+    it("Should emit TournamentJoined with entryFee = 0 for a free tournament", async function () {
+      const id = await createTournament({ entryFee: 0n, seed: 0n });
+
+      await expect(tournament.connect(alice).joinTournament(id))
+        .to.emit(tournament, "TournamentJoined")
+        .withArgs(id, alice.address, 0n);
+    });
+  });
+
+  describe("ERC20 preconditions", function () {
     // __EXTENDED_TESTS_END__
   });
 });
