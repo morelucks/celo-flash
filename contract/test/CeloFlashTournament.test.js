@@ -1014,6 +1014,18 @@ describe("CeloFlashTournament — joinTournament Extended Coverage", function ()
 
       expect(await prizePool(idB)).to.equal(poolBBefore);
     });
+    it("Should sum accumulatedFees across two separate USDm tournaments", async function () {
+      const idA = await createTournament();
+      const idB = await createTournament();
+
+      await tournament.connect(alice).joinTournament(idA);
+      await tournament.connect(bob).joinTournament(idB);
+
+      expect(await tournament.accumulatedFees()).to.equal(FEE_PER_ENTRY * 2n);
+    });
+  });
+
+  describe("Pausable behavior", function () {
     // __EXTENDED_TESTS_END__
   });
 });
