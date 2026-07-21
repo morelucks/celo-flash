@@ -875,3 +875,468 @@ describe("CeloFlashTournament — joinTournament Flow", function () {
     });
   });
 });
+
+describe("CeloFlashTournament — joinTournament Extended Coverage", function () {
+  const ENTRY_FEE = ethers.parseEther("10");
+  const SEED_AMOUNT = ethers.parseEther("20");
+  const DURATION = 3600; // 1 hour (MIN_DURATION)
+  const PROTOCOL_FEE_BPS = 500n;
+  const BPS_DENOMINATOR = 10_000n;
+
+  const protocolFeeFor = (fee) => (fee * PROTOCOL_FEE_BPS) / BPS_DENOMINATOR;
+  const FEE_PER_ENTRY = protocolFeeFor(ENTRY_FEE);
+  const PRIZE_PER_ENTRY = ENTRY_FEE - FEE_PER_ENTRY;
+
+  let tournament;
+  let usdm;
+  let owner;
+  let verifier;
+  let feeRecipient;
+  let creator;
+  let alice;
+  let bob;
+  let carol;
+  let extras;
+
+  async function createTournament({
+    isNative = false,
+    seed = SEED_AMOUNT,
+    entryFee = ENTRY_FEE,
+  } = {}) {
+    const id = await tournament.nextTournamentId();
+    await tournament
+      .connect(creator)
+      .createTournament("Extended", entryFee, seed, DURATION, isNative, {
+        value: isNative ? seed : 0n,
+      });
+    return id;
+  }
+
+  async function participantCount(id) {
+    return (await tournament.tournaments(id)).participantCount;
+  }
+
+  async function prizePool(id) {
+    return (await tournament.tournaments(id)).prizePool;
+  }
+
+  async function endTimeOf(id) {
+    return (await tournament.tournaments(id)).endTime;
+  }
+
+  beforeEach(async function () {
+    [owner, verifier, feeRecipient, creator, alice, bob, carol, ...extras] =
+      await ethers.getSigners();
+
+    const MockERC20 = await ethers.getContractFactory("MockERC20");
+    usdm = await MockERC20.deploy("Mock USDm", "USDm", 18);
+    await usdm.waitForDeployment();
+
+    const CeloFlashTournament = await ethers.getContractFactory("CeloFlashTournament");
+    tournament = await CeloFlashTournament.deploy(
+      await usdm.getAddress(),
+      verifier.address,
+      feeRecipient.address
+    );
+    await tournament.waitForDeployment();
+
+    for (const acct of [creator, alice, bob, carol]) {
+      await usdm.mint(acct.address, ethers.parseEther("1000"));
+      await usdm
+        .connect(acct)
+        .approve(await tournament.getAddress(), ethers.MaxUint256);
+    }
+  });
+
+  describe("View accessors after joining", function () {
+    it("Should report hasJoined as false for a player who never joined", async function () {
+      const id = await createTournament();
+
+      await tournament.connect(alice).joinTournament(id);
+
+      expect(await tournament.hasJoined(id, bob.address)).to.equal(false);
+    });
+    it("Should return true from isPlayerJoined after a player joins", async function () {
+      const id = await createTournament();
+
+      await tournament.connect(alice).joinTournament(id);
+
+      expect(await tournament.isPlayerJoined(id, alice.address)).to.equal(true);
+    });
+    it("Should return false from isPlayerJoined before a player joins", async function () {
+      const id = await createTournament();
+
+      expect(await tournament.isPlayerJoined(id, alice.address)).to.equal(false);
+    });
+    it("Should reflect the incremented participantCount via getTournament", async function () {
+      const id = await createTournament();
+
+      await tournament.connect(alice).joinTournament(id);
+
+      const t = await tournament.getTournament(id);
+      expect(t.participantCount).to.equal(1n);
+    });
+    it("Should reflect the updated prizePool via getTournament after a join", async function () {
+      const id = await createTournament();
+
+      await tournament.connect(alice).joinTournament(id);
+
+      const t = await tournament.getTournament(id);
+      expect(t.prizePool).to.equal(SEED_AMOUNT + PRIZE_PER_ENTRY);
+    });
+  });
+
+  describe("Cross-tournament isolation", function () {
+    it("Should leave hasJoined false on tournament B when only A is joined", async function () {
+      const idA = await createTournament();
+      const idB = await createTournament();
+
+      await tournament.connect(alice).joinTournament(idA);
+
+      expect(await tournament.hasJoined(idA, alice.address)).to.equal(true);
+      expect(await tournament.hasJoined(idB, alice.address)).to.equal(false);
+    });
+    it("Should leave tournament B participantCount at zero when only A is joined", async function () {
+      const idA = await createTournament();
+      const idB = await createTournament();
+
+      await tournament.connect(alice).joinTournament(idA);
+
+      expect(await participantCount(idA)).to.equal(1n);
+      expect(await participantCount(idB)).to.equal(0n);
+    });
+    it("Should not change an unrelated tournament's prizePool on a join", async function () {
+      const idA = await createTournament();
+      const idB = await createTournament();
+      const poolBBefore = await prizePool(idB);
+
+      await tournament.connect(alice).joinTournament(idA);
+
+      expect(await prizePool(idB)).to.equal(poolBBefore);
+    });
+    it("Should sum accumulatedFees across two separate USDm tournaments", async function () {
+      const idA = await createTournament();
+      const idB = await createTournament();
+
+      await tournament.connect(alice).joinTournament(idA);
+      await tournament.connect(bob).joinTournament(idB);
+
+      expect(await tournament.accumulatedFees()).to.equal(FEE_PER_ENTRY * 2n);
+    });
+  });
+
+  describe("Pausable behavior", function () {
+    it("Should revert a USDm join when the contract is paused", async function () {
+      const id = await createTournament();
+      await tournament.connect(owner).pause();
+
+      await expect(
+        tournament.connect(alice).joinTournament(id)
+      ).to.be.revertedWithCustomError(tournament, "EnforcedPause");
+    });
+    it("Should revert a native join when the contract is paused", async function () {
+      const id = await createTournament({ isNative: true });
+      await tournament.connect(owner).pause();
+
+      await expect(
+        tournament.connect(alice).joinTournament(id, { value: ENTRY_FEE })
+      ).to.be.revertedWithCustomError(tournament, "EnforcedPause");
+    });
+    it("Should allow a join again after the contract is unpaused", async function () {
+      const id = await createTournament();
+      await tournament.connect(owner).pause();
+      await tournament.connect(owner).unpause();
+
+      await tournament.connect(alice).joinTournament(id);
+
+      expect(await tournament.hasJoined(id, alice.address)).to.equal(true);
+    });
+  });
+
+  describe("End-time boundary", function () {
+    it("Should revert with TournamentNotActive at the exact endTime", async function () {
+      const id = await createTournament();
+      const endTime = await endTimeOf(id);
+
+      await time.increaseTo(endTime);
+
+      await expect(
+        tournament.connect(alice).joinTournament(id)
+      ).to.be.revertedWithCustomError(tournament, "TournamentNotActive");
+    });
+    it("Should allow a join one second before endTime", async function () {
+      const id = await createTournament();
+      const endTime = await endTimeOf(id);
+
+      await time.setNextBlockTimestamp(endTime - 1n);
+      await tournament.connect(alice).joinTournament(id);
+
+      expect(await tournament.hasJoined(id, alice.address)).to.equal(true);
+    });
+  });
+
+  describe("Balance movements", function () {
+    it("Should hold seed plus the full native entry fee in the contract balance", async function () {
+      const id = await createTournament({ isNative: true });
+
+      await tournament.connect(alice).joinTournament(id, { value: ENTRY_FEE });
+
+      expect(await ethers.provider.getBalance(await tournament.getAddress())).to.equal(
+        SEED_AMOUNT + ENTRY_FEE
+      );
+    });
+    it("Should decrease the player's USDm balance by exactly the entry fee", async function () {
+      const id = await createTournament();
+      const before = await usdm.balanceOf(alice.address);
+
+      await tournament.connect(alice).joinTournament(id);
+
+      expect(await usdm.balanceOf(alice.address)).to.equal(before - ENTRY_FEE);
+    });
+  });
+
+  describe("Protocol fee math — additional 1e18 amounts", function () {
+    it("Should take exactly 0.0005 USDm from a 0.01 USDm entry", async function () {
+      const entryFee = ethers.parseEther("0.01");
+      const id = await createTournament({ entryFee, seed: 0n });
+
+      await tournament.connect(alice).joinTournament(id);
+
+      expect(await tournament.accumulatedFees()).to.equal(ethers.parseEther("0.0005"));
+    });
+    it("Should take exactly 2.5 USDm from a 50 USDm entry", async function () {
+      const entryFee = ethers.parseEther("50");
+      const id = await createTournament({ entryFee, seed: 0n });
+
+      await tournament.connect(alice).joinTournament(id);
+
+      expect(await tournament.accumulatedFees()).to.equal(ethers.parseEther("2.5"));
+    });
+    it("Should route 47.5 USDm (95%) of a 50 USDm entry into the prize pool", async function () {
+      const entryFee = ethers.parseEther("50");
+      const id = await createTournament({ entryFee, seed: 0n });
+
+      await tournament.connect(alice).joinTournament(id);
+
+      expect(await prizePool(id)).to.equal(ethers.parseEther("47.5"));
+    });
+    it("Should accumulate exactly 5 CELO from the 100 CELO max native entry", async function () {
+      const entryFee = ethers.parseEther("100");
+      const id = await createTournament({ isNative: true, entryFee, seed: 0n });
+
+      await tournament.connect(alice).joinTournament(id, { value: entryFee });
+
+      expect(await tournament.accumulatedNativeFees()).to.equal(ethers.parseEther("5"));
+      expect(await prizePool(id)).to.equal(ethers.parseEther("95"));
+    });
+  });
+
+  describe("Free tournaments — multiple joiners", function () {
+    it("Should keep pools at zero across three free USDm joins", async function () {
+      const id = await createTournament({ entryFee: 0n, seed: 0n });
+
+      await tournament.connect(alice).joinTournament(id);
+      await tournament.connect(bob).joinTournament(id);
+      await tournament.connect(carol).joinTournament(id);
+
+      expect(await participantCount(id)).to.equal(3n);
+      expect(await prizePool(id)).to.equal(0n);
+      expect(await tournament.accumulatedFees()).to.equal(0n);
+      expect(await tournament.accumulatedNativeFees()).to.equal(0n);
+    });
+    it("Should track participantCount across multiple free native joins", async function () {
+      const id = await createTournament({ isNative: true, entryFee: 0n, seed: 0n });
+
+      await tournament.connect(alice).joinTournament(id, { value: 0n });
+      await tournament.connect(bob).joinTournament(id, { value: 0n });
+
+      expect(await participantCount(id)).to.equal(2n);
+      expect(await ethers.provider.getBalance(await tournament.getAddress())).to.equal(0n);
+    });
+  });
+
+  describe("Duplicate join side effects", function () {
+    it("Should let a different player join after the first has joined", async function () {
+      const id = await createTournament();
+      await tournament.connect(alice).joinTournament(id);
+
+      await tournament.connect(bob).joinTournament(id);
+
+      expect(await tournament.hasJoined(id, alice.address)).to.equal(true);
+      expect(await tournament.hasJoined(id, bob.address)).to.equal(true);
+      expect(await participantCount(id)).to.equal(2n);
+    });
+    it("Should leave accumulatedFees unchanged when a duplicate join reverts", async function () {
+      const id = await createTournament();
+      await tournament.connect(alice).joinTournament(id);
+      const feesAfterFirst = await tournament.accumulatedFees();
+
+      await expect(
+        tournament.connect(alice).joinTournament(id)
+      ).to.be.revertedWithCustomError(tournament, "AlreadyJoined");
+
+      expect(await tournament.accumulatedFees()).to.equal(feesAfterFirst);
+    });
+    it("Should move no USDm when a duplicate join reverts", async function () {
+      const id = await createTournament();
+      await tournament.connect(alice).joinTournament(id);
+      const aliceBefore = await usdm.balanceOf(alice.address);
+      const contractBefore = await usdm.balanceOf(await tournament.getAddress());
+
+      await expect(
+        tournament.connect(alice).joinTournament(id)
+      ).to.be.revertedWithCustomError(tournament, "AlreadyJoined");
+
+      expect(await usdm.balanceOf(alice.address)).to.equal(aliceBefore);
+      expect(await usdm.balanceOf(await tournament.getAddress())).to.equal(contractBefore);
+    });
+  });
+
+  describe("Event emission details", function () {
+    it("Should be queryable by the indexed tournamentId topic", async function () {
+      const id = await createTournament();
+      await tournament.connect(alice).joinTournament(id);
+
+      const events = await tournament.queryFilter(
+        tournament.filters.TournamentJoined(id)
+      );
+
+      expect(events.length).to.equal(1);
+      expect(events[0].args.player).to.equal(alice.address);
+      expect(events[0].args.entryFee).to.equal(ENTRY_FEE);
+    });
+    it("Should emit TournamentJoined with entryFee = 0 for a free tournament", async function () {
+      const id = await createTournament({ entryFee: 0n, seed: 0n });
+
+      await expect(tournament.connect(alice).joinTournament(id))
+        .to.emit(tournament, "TournamentJoined")
+        .withArgs(id, alice.address, 0n);
+    });
+  });
+
+  describe("ERC20 preconditions", function () {
+    it("Should revert a USDm join when the player has not approved the contract", async function () {
+      const dave = extras[0];
+      await usdm.mint(dave.address, ethers.parseEther("1000"));
+      const id = await createTournament();
+
+      await expect(tournament.connect(dave).joinTournament(id)).to.be.reverted;
+      expect(await tournament.hasJoined(id, dave.address)).to.equal(false);
+    });
+    it("Should revert a USDm join when the player has insufficient balance", async function () {
+      const eve = extras[1];
+      await usdm
+        .connect(eve)
+        .approve(await tournament.getAddress(), ethers.MaxUint256);
+      const id = await createTournament();
+
+      await expect(tournament.connect(eve).joinTournament(id)).to.be.reverted;
+      expect(await tournament.hasJoined(id, eve.address)).to.equal(false);
+    });
+  });
+
+  describe("Volume and invariants", function () {
+    it("Should reach participantCount 10 after ten distinct native joins", async function () {
+      const id = await createTournament({ isNative: true });
+      const joiners = [alice, bob, carol, ...extras.slice(0, 7)];
+
+      for (const player of joiners) {
+        await tournament.connect(player).joinTournament(id, { value: ENTRY_FEE });
+      }
+
+      expect(await participantCount(id)).to.equal(10n);
+    });
+    it("Should grow prizePool to seed plus ten prize contributions", async function () {
+      const id = await createTournament({ isNative: true });
+      const joiners = [alice, bob, carol, ...extras.slice(0, 7)];
+
+      for (const player of joiners) {
+        await tournament.connect(player).joinTournament(id, { value: ENTRY_FEE });
+      }
+
+      expect(await prizePool(id)).to.equal(SEED_AMOUNT + PRIZE_PER_ENTRY * 10n);
+    });
+    it("Should accumulate ten protocol fees after ten native joins", async function () {
+      const id = await createTournament({ isNative: true });
+      const joiners = [alice, bob, carol, ...extras.slice(0, 7)];
+
+      for (const player of joiners) {
+        await tournament.connect(player).joinTournament(id, { value: ENTRY_FEE });
+      }
+
+      expect(await tournament.accumulatedNativeFees()).to.equal(FEE_PER_ENTRY * 10n);
+    });
+    it("Should keep USDm and native fee pools isolated across asset types", async function () {
+      const usdmId = await createTournament();
+      const nativeId = await createTournament({ isNative: true });
+
+      await tournament.connect(alice).joinTournament(usdmId);
+      await tournament.connect(bob).joinTournament(nativeId, { value: ENTRY_FEE });
+
+      expect(await tournament.accumulatedFees()).to.equal(FEE_PER_ENTRY);
+      expect(await tournament.accumulatedNativeFees()).to.equal(FEE_PER_ENTRY);
+    });
+    it("Should hold prizePool + accumulatedFees == seed + total entry fees", async function () {
+      const id = await createTournament();
+
+      await tournament.connect(alice).joinTournament(id);
+      await tournament.connect(bob).joinTournament(id);
+      await tournament.connect(carol).joinTournament(id);
+
+      const pool = await prizePool(id);
+      const fees = await tournament.accumulatedFees();
+      expect(pool + fees).to.equal(SEED_AMOUNT + ENTRY_FEE * 3n);
+    });
+  });
+
+  describe("Lifecycle guards", function () {
+    it("Should revert a join on a finalized tournament with TournamentNotActive", async function () {
+      const id = await createTournament();
+      await time.increase(DURATION + 1);
+      await tournament.finalizeTournament(id);
+
+      await expect(
+        tournament.connect(alice).joinTournament(id)
+      ).to.be.revertedWithCustomError(tournament, "TournamentNotActive");
+    });
+    it("Should revert a direct native transfer so CELO must route through joinTournament", async function () {
+      await expect(
+        alice.sendTransaction({ to: await tournament.getAddress(), value: 1n })
+      ).to.be.reverted;
+    });
+    it("Should not transfer anything to feeRecipient on a join (fees only accrue)", async function () {
+      const id = await createTournament();
+
+      await expect(
+        tournament.connect(alice).joinTournament(id)
+      ).to.changeTokenBalance(usdm, feeRecipient, 0n);
+
+      expect(await tournament.accumulatedFees()).to.equal(FEE_PER_ENTRY);
+    });
+    it("Should track hasJoined independently per player in a native tournament", async function () {
+      const id = await createTournament({ isNative: true });
+
+      await tournament.connect(alice).joinTournament(id, { value: ENTRY_FEE });
+
+      expect(await tournament.hasJoined(id, alice.address)).to.equal(true);
+      expect(await tournament.hasJoined(id, bob.address)).to.equal(false);
+      expect(await tournament.hasJoined(id, carol.address)).to.equal(false);
+    });
+    it("Should revert InvalidValueSent when native value is attached to a USDm join", async function () {
+      const id = await createTournament();
+
+      await expect(
+        tournament.connect(alice).joinTournament(id, { value: 1n })
+      ).to.be.revertedWithCustomError(tournament, "InvalidValueSent");
+    });
+    it("Should allow joining in the same block window the tournament starts", async function () {
+      const id = await createTournament();
+      const t = await tournament.getTournament(id);
+      expect(t.startTime).to.be.lte(await time.latest());
+
+      await tournament.connect(alice).joinTournament(id);
+
+      expect(await participantCount(id)).to.equal(1n);
+    });
+  });
+});
