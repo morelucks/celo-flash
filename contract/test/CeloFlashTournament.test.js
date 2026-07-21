@@ -505,4 +505,13 @@ describe("CeloFlashTournament — joinTournament Flow", function () {
     }
   });
 
+  describe("Successful join — USDm", function () {
+    it("Should set hasJoined[id][player] to true", async function () {
+      const id = await createTournament();
+      await tournament.connect(alice).joinTournament(id);
+
+      expect(await tournament.hasJoined(id, alice.address)).to.equal(true);
+    });
+
+  });
 });
