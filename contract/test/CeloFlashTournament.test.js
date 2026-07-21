@@ -700,5 +700,15 @@ describe("CeloFlashTournament — joinTournament Flow", function () {
       expect(await tournament.accumulatedFees()).to.equal(0n);
     });
 
+    it("Should emit TournamentJoined for a native join", async function () {
+      const id = await createTournament({ isNative: true });
+
+      await expect(
+        tournament.connect(alice).joinTournament(id, { value: ENTRY_FEE })
+      )
+        .to.emit(tournament, "TournamentJoined")
+        .withArgs(id, alice.address, ENTRY_FEE);
+    });
   });
+
 });
