@@ -737,4 +737,15 @@ describe("CeloFlashTournament — joinTournament Flow", function () {
     });
   });
 
+  describe("Duplicate join prevention", function () {
+    it("Should revert with AlreadyJoined on a second USDm join", async function () {
+      const id = await createTournament();
+      await tournament.connect(alice).joinTournament(id);
+
+      await expect(
+        tournament.connect(alice).joinTournament(id)
+      ).to.be.revertedWithCustomError(tournament, "AlreadyJoined");
+    });
+
+  });
 });
