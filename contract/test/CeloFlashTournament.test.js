@@ -728,5 +728,13 @@ describe("CeloFlashTournament — joinTournament Flow", function () {
       ).to.be.revertedWithCustomError(tournament, "InvalidValueSent");
     });
 
+    it("Should revert with InvalidValueSent when no value is sent for a paid native tournament", async function () {
+      const id = await createTournament({ isNative: true });
+
+      await expect(
+        tournament.connect(alice).joinTournament(id, { value: 0n })
+      ).to.be.revertedWithCustomError(tournament, "InvalidValueSent");
+    });
   });
+
 });
