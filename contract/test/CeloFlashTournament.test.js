@@ -1236,6 +1236,16 @@ describe("CeloFlashTournament — joinTournament Extended Coverage", function ()
   });
 
   describe("Volume and invariants", function () {
+    it("Should reach participantCount 10 after ten distinct native joins", async function () {
+      const id = await createTournament({ isNative: true });
+      const joiners = [alice, bob, carol, ...extras.slice(0, 7)];
+
+      for (const player of joiners) {
+        await tournament.connect(player).joinTournament(id, { value: ENTRY_FEE });
+      }
+
+      expect(await participantCount(id)).to.equal(10n);
+    });
     // __EXTENDED_TESTS_END__
   });
 });
