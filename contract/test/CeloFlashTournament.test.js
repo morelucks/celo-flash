@@ -1085,6 +1085,17 @@ describe("CeloFlashTournament — joinTournament Extended Coverage", function ()
         SEED_AMOUNT + ENTRY_FEE
       );
     });
+    it("Should decrease the player's USDm balance by exactly the entry fee", async function () {
+      const id = await createTournament();
+      const before = await usdm.balanceOf(alice.address);
+
+      await tournament.connect(alice).joinTournament(id);
+
+      expect(await usdm.balanceOf(alice.address)).to.equal(before - ENTRY_FEE);
+    });
+  });
+
+  describe("Protocol fee math — additional 1e18 amounts", function () {
     // __EXTENDED_TESTS_END__
   });
 });
