@@ -530,5 +530,17 @@ describe("CeloFlashTournament — joinTournament Flow", function () {
         .withArgs(id, alice.address, ENTRY_FEE);
     });
 
+    it("Should transfer the full entry fee in USDm from player to contract", async function () {
+      const id = await createTournament();
+
+      await expect(
+        tournament.connect(alice).joinTournament(id)
+      ).to.changeTokenBalances(
+        usdm,
+        [alice, tournament],
+        [-ENTRY_FEE, ENTRY_FEE]
+      );
+    });
+
   });
 });
