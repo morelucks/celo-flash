@@ -1193,6 +1193,18 @@ describe("CeloFlashTournament — joinTournament Extended Coverage", function ()
   });
 
   describe("Event emission details", function () {
+    it("Should be queryable by the indexed tournamentId topic", async function () {
+      const id = await createTournament();
+      await tournament.connect(alice).joinTournament(id);
+
+      const events = await tournament.queryFilter(
+        tournament.filters.TournamentJoined(id)
+      );
+
+      expect(events.length).to.equal(1);
+      expect(events[0].args.player).to.equal(alice.address);
+      expect(events[0].args.entryFee).to.equal(ENTRY_FEE);
+    });
     // __EXTENDED_TESTS_END__
   });
 });
