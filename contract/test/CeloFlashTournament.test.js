@@ -987,6 +987,15 @@ describe("CeloFlashTournament — joinTournament Extended Coverage", function ()
   });
 
   describe("Cross-tournament isolation", function () {
+    it("Should leave hasJoined false on tournament B when only A is joined", async function () {
+      const idA = await createTournament();
+      const idB = await createTournament();
+
+      await tournament.connect(alice).joinTournament(idA);
+
+      expect(await tournament.hasJoined(idA, alice.address)).to.equal(true);
+      expect(await tournament.hasJoined(idB, alice.address)).to.equal(false);
+    });
     // __EXTENDED_TESTS_END__
   });
 });
