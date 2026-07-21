@@ -675,5 +675,13 @@ describe("CeloFlashTournament — joinTournament Flow", function () {
       ).to.changeEtherBalances([alice, tournament], [-ENTRY_FEE, ENTRY_FEE]);
     });
 
+    it("Should grow accumulatedNativeFees by the protocol fee", async function () {
+      const id = await createTournament({ isNative: true });
+
+      await tournament.connect(alice).joinTournament(id, { value: ENTRY_FEE });
+
+      expect(await tournament.accumulatedNativeFees()).to.equal(FEE_PER_ENTRY);
+    });
+
   });
 });
