@@ -866,5 +866,12 @@ describe("CeloFlashTournament — joinTournament Flow", function () {
       expect(await participantCount(id)).to.equal(1n);
     });
 
+    it("Should revert with InvalidValueSent when value is sent to a free native tournament", async function () {
+      const id = await createTournament({ isNative: true, entryFee: 0n, seed: 0n });
+
+      await expect(
+        tournament.connect(alice).joinTournament(id, { value: 1n })
+      ).to.be.revertedWithCustomError(tournament, "InvalidValueSent");
+    });
   });
 });
