@@ -1223,6 +1223,19 @@ describe("CeloFlashTournament — joinTournament Extended Coverage", function ()
       await expect(tournament.connect(dave).joinTournament(id)).to.be.reverted;
       expect(await tournament.hasJoined(id, dave.address)).to.equal(false);
     });
+    it("Should revert a USDm join when the player has insufficient balance", async function () {
+      const eve = extras[1];
+      await usdm
+        .connect(eve)
+        .approve(await tournament.getAddress(), ethers.MaxUint256);
+      const id = await createTournament();
+
+      await expect(tournament.connect(eve).joinTournament(id)).to.be.reverted;
+      expect(await tournament.hasJoined(id, eve.address)).to.equal(false);
+    });
+  });
+
+  describe("Volume and invariants", function () {
     // __EXTENDED_TESTS_END__
   });
 });
