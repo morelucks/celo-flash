@@ -817,4 +817,16 @@ describe("CeloFlashTournament — joinTournament Flow", function () {
     });
   });
 
+  describe("Free tournament (entryFee = 0) — USDm", function () {
+    it("Should join without moving any USDm", async function () {
+      const id = await createTournament({ entryFee: 0n, seed: 0n });
+
+      await expect(
+        tournament.connect(alice).joinTournament(id)
+      ).to.changeTokenBalances(usdm, [alice, tournament], [0n, 0n]);
+
+      expect(await tournament.hasJoined(id, alice.address)).to.equal(true);
+    });
+
+  });
 });
