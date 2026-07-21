@@ -1266,6 +1266,16 @@ describe("CeloFlashTournament — joinTournament Extended Coverage", function ()
 
       expect(await tournament.accumulatedNativeFees()).to.equal(FEE_PER_ENTRY * 10n);
     });
+    it("Should keep USDm and native fee pools isolated across asset types", async function () {
+      const usdmId = await createTournament();
+      const nativeId = await createTournament({ isNative: true });
+
+      await tournament.connect(alice).joinTournament(usdmId);
+      await tournament.connect(bob).joinTournament(nativeId, { value: ENTRY_FEE });
+
+      expect(await tournament.accumulatedFees()).to.equal(FEE_PER_ENTRY);
+      expect(await tournament.accumulatedNativeFees()).to.equal(FEE_PER_ENTRY);
+    });
     // __EXTENDED_TESTS_END__
   });
 });
