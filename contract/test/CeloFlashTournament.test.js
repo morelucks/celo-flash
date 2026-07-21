@@ -1299,6 +1299,11 @@ describe("CeloFlashTournament — joinTournament Extended Coverage", function ()
         tournament.connect(alice).joinTournament(id)
       ).to.be.revertedWithCustomError(tournament, "TournamentNotActive");
     });
+    it("Should revert a direct native transfer so CELO must route through joinTournament", async function () {
+      await expect(
+        alice.sendTransaction({ to: await tournament.getAddress(), value: 1n })
+      ).to.be.reverted;
+    });
     // __EXTENDED_TESTS_END__
   });
 });
