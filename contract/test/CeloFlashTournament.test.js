@@ -1132,6 +1132,18 @@ describe("CeloFlashTournament — joinTournament Extended Coverage", function ()
   });
 
   describe("Free tournaments — multiple joiners", function () {
+    it("Should keep pools at zero across three free USDm joins", async function () {
+      const id = await createTournament({ entryFee: 0n, seed: 0n });
+
+      await tournament.connect(alice).joinTournament(id);
+      await tournament.connect(bob).joinTournament(id);
+      await tournament.connect(carol).joinTournament(id);
+
+      expect(await participantCount(id)).to.equal(3n);
+      expect(await prizePool(id)).to.equal(0n);
+      expect(await tournament.accumulatedFees()).to.equal(0n);
+      expect(await tournament.accumulatedNativeFees()).to.equal(0n);
+    });
     // __EXTENDED_TESTS_END__
   });
 });
