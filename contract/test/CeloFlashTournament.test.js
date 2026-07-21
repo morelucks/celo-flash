@@ -1313,6 +1313,15 @@ describe("CeloFlashTournament — joinTournament Extended Coverage", function ()
 
       expect(await tournament.accumulatedFees()).to.equal(FEE_PER_ENTRY);
     });
+    it("Should track hasJoined independently per player in a native tournament", async function () {
+      const id = await createTournament({ isNative: true });
+
+      await tournament.connect(alice).joinTournament(id, { value: ENTRY_FEE });
+
+      expect(await tournament.hasJoined(id, alice.address)).to.equal(true);
+      expect(await tournament.hasJoined(id, bob.address)).to.equal(false);
+      expect(await tournament.hasJoined(id, carol.address)).to.equal(false);
+    });
     // __EXTENDED_TESTS_END__
   });
 });
