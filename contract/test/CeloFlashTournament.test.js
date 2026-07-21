@@ -657,4 +657,15 @@ describe("CeloFlashTournament — joinTournament Flow", function () {
     });
   });
 
+  describe("Successful join — Native CELO", function () {
+    it("Should set hasJoined and increment participantCount", async function () {
+      const id = await createTournament({ isNative: true });
+
+      await tournament.connect(alice).joinTournament(id, { value: ENTRY_FEE });
+
+      expect(await tournament.hasJoined(id, alice.address)).to.equal(true);
+      expect(await participantCount(id)).to.equal(1n);
+    });
+
+  });
 });
