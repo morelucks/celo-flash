@@ -747,5 +747,14 @@ describe("CeloFlashTournament — joinTournament Flow", function () {
       ).to.be.revertedWithCustomError(tournament, "AlreadyJoined");
     });
 
+    it("Should revert with AlreadyJoined on a second native join", async function () {
+      const id = await createTournament({ isNative: true });
+      await tournament.connect(alice).joinTournament(id, { value: ENTRY_FEE });
+
+      await expect(
+        tournament.connect(alice).joinTournament(id, { value: ENTRY_FEE })
+      ).to.be.revertedWithCustomError(tournament, "AlreadyJoined");
+    });
+
   });
 });
