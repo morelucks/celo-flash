@@ -522,5 +522,13 @@ describe("CeloFlashTournament — joinTournament Flow", function () {
       expect(await participantCount(id)).to.equal(1n);
     });
 
+    it("Should emit TournamentJoined with the entry fee", async function () {
+      const id = await createTournament();
+
+      await expect(tournament.connect(alice).joinTournament(id))
+        .to.emit(tournament, "TournamentJoined")
+        .withArgs(id, alice.address, ENTRY_FEE);
+    });
+
   });
 });
