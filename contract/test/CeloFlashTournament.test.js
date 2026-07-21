@@ -624,5 +624,15 @@ describe("CeloFlashTournament — joinTournament Flow", function () {
       expect(await participantCount(id)).to.equal(3n);
     });
 
+    it("Should accumulate the seed plus each prize contribution in prizePool", async function () {
+      const id = await createTournament();
+
+      await tournament.connect(alice).joinTournament(id);
+      await tournament.connect(bob).joinTournament(id);
+      await tournament.connect(carol).joinTournament(id);
+
+      expect(await prizePool(id)).to.equal(SEED_AMOUNT + PRIZE_PER_ENTRY * 3n);
+    });
+
   });
 });
