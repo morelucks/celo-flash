@@ -596,5 +596,21 @@ describe("CeloFlashTournament — joinTournament Flow", function () {
       expect(await prizePool(id)).to.equal(entryFee - ethers.parseEther("0.05"));
     });
 
+    it("Should match (entryFee * 500) / 10000 across a range of 1e18 amounts", async function () {
+      for (const label of ["1", "10", "37", "99.5", "100"]) {
+        const entryFee = ethers.parseEther(label);
+        const id = await createTournament({ entryFee, seed: 0n });
+        const expectedFee = (entryFee * 500n) / 10000n;
+
+        await tournament.connect(alice).joinTournament(id);
+
+        expect(await tournament.accumulatedFees()).to.equal(expectedFee);
+        expect(await prizePool(id)).to.equal(entryFee - expectedFee);
+
+        // Reset the fee pool between iterations by withdrawing it.
+        await tournament.withdrawFees();
+      }
+    });
   });
+
 });
