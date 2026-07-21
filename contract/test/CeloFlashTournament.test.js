@@ -1144,6 +1144,18 @@ describe("CeloFlashTournament — joinTournament Extended Coverage", function ()
       expect(await tournament.accumulatedFees()).to.equal(0n);
       expect(await tournament.accumulatedNativeFees()).to.equal(0n);
     });
+    it("Should track participantCount across multiple free native joins", async function () {
+      const id = await createTournament({ isNative: true, entryFee: 0n, seed: 0n });
+
+      await tournament.connect(alice).joinTournament(id, { value: 0n });
+      await tournament.connect(bob).joinTournament(id, { value: 0n });
+
+      expect(await participantCount(id)).to.equal(2n);
+      expect(await ethers.provider.getBalance(await tournament.getAddress())).to.equal(0n);
+    });
+  });
+
+  describe("Duplicate join side effects", function () {
     // __EXTENDED_TESTS_END__
   });
 });
