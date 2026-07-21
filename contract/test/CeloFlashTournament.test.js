@@ -856,4 +856,15 @@ describe("CeloFlashTournament — joinTournament Flow", function () {
     });
   });
 
+  describe("Free tournament (entryFee = 0) — Native", function () {
+    it("Should join a free native tournament with zero value", async function () {
+      const id = await createTournament({ isNative: true, entryFee: 0n, seed: 0n });
+
+      await tournament.connect(alice).joinTournament(id, { value: 0n });
+
+      expect(await tournament.hasJoined(id, alice.address)).to.equal(true);
+      expect(await participantCount(id)).to.equal(1n);
+    });
+
+  });
 });
