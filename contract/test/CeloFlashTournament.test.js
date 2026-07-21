@@ -956,6 +956,13 @@ describe("CeloFlashTournament — joinTournament Extended Coverage", function ()
 
       expect(await tournament.hasJoined(id, bob.address)).to.equal(false);
     });
+    it("Should return true from isPlayerJoined after a player joins", async function () {
+      const id = await createTournament();
+
+      await tournament.connect(alice).joinTournament(id);
+
+      expect(await tournament.isPlayerJoined(id, alice.address)).to.equal(true);
+    });
     // __EXTENDED_TESTS_END__
   });
 });
