@@ -1215,6 +1215,14 @@ describe("CeloFlashTournament — joinTournament Extended Coverage", function ()
   });
 
   describe("ERC20 preconditions", function () {
+    it("Should revert a USDm join when the player has not approved the contract", async function () {
+      const dave = extras[0];
+      await usdm.mint(dave.address, ethers.parseEther("1000"));
+      const id = await createTournament();
+
+      await expect(tournament.connect(dave).joinTournament(id)).to.be.reverted;
+      expect(await tournament.hasJoined(id, dave.address)).to.equal(false);
+    });
     // __EXTENDED_TESTS_END__
   });
 });
