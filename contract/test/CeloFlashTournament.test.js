@@ -440,6 +440,47 @@ describe("CeloFlashTournament — joinTournament Flow", function () {
     return id;
   }
 
+  // Read participantCount straight from the tournament struct.
+  async function participantCount(id) {
+    return (await tournament.tournaments(id)).participantCount;
+  }
+
+  async function prizePool(id) {
+    return (await tournament.tournaments(id)).prizePool;
+  }
+
+  // Locate and overwrite tournaments[id].participantCount in storage so the
+  // MAX_PARTICIPANTS branch can be exercised without 1,000 real joins.
+  async function forceParticipantCount(id, count) {
+    const addr = await tournament.getAddress();
+    const coder = ethers.AbiCoder.defaultAbiCoder();
+
+    // participantCount is the 9th field (struct-relative slot 8) of Tournament.
+    // Scan candidate base slots for the `tournaments` mapping using the current
+    // (non-zero) participantCount as a fingerprint, so this stays robust to
+    // storage-layout shifts from the inherited contracts.
+    const known = await participantCount(id);
+    if (known === 0n) throw new Error("need a non-zero participantCount to locate the slot");
+
+    let baseSlot = -1;
+    for (let s = 0; s < 64; s++) {
+      const base = BigInt(ethers.keccak256(coder.encode(["uint256", "uint256"], [id, s])));
+      const raw = await ethers.provider.getStorage(addr, ethers.toBeHex(base + 8n, 32));
+      if (BigInt(raw) === known) {
+        baseSlot = s;
+        break;
+      }
+    }
+    if (baseSlot === -1) throw new Error("could not locate participantCount storage slot");
+
+    const base = BigInt(ethers.keccak256(coder.encode(["uint256", "uint256"], [id, baseSlot])));
+    await ethers.provider.send("hardhat_setStorageAt", [
+      addr,
+      ethers.toBeHex(base + 8n, 32),
+      ethers.toBeHex(BigInt(count), 32),
+    ]);
+  }
+
   beforeEach(async function () {
     [owner, verifier, feeRecipient, creator, alice, bob, carol] =
       await ethers.getSigners();
