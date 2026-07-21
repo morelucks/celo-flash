@@ -1064,6 +1064,18 @@ describe("CeloFlashTournament — joinTournament Extended Coverage", function ()
         tournament.connect(alice).joinTournament(id)
       ).to.be.revertedWithCustomError(tournament, "TournamentNotActive");
     });
+    it("Should allow a join one second before endTime", async function () {
+      const id = await createTournament();
+      const endTime = await endTimeOf(id);
+
+      await time.setNextBlockTimestamp(endTime - 1n);
+      await tournament.connect(alice).joinTournament(id);
+
+      expect(await tournament.hasJoined(id, alice.address)).to.equal(true);
+    });
+  });
+
+  describe("Balance movements", function () {
     // __EXTENDED_TESTS_END__
   });
 });
