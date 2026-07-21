@@ -644,5 +644,17 @@ describe("CeloFlashTournament — joinTournament Flow", function () {
       expect(await tournament.accumulatedFees()).to.equal(FEE_PER_ENTRY * 3n);
     });
 
+    it("Should hold the seed plus every entry fee in the contract balance", async function () {
+      const id = await createTournament();
+
+      await tournament.connect(alice).joinTournament(id);
+      await tournament.connect(bob).joinTournament(id);
+      await tournament.connect(carol).joinTournament(id);
+
+      expect(await usdm.balanceOf(await tournament.getAddress())).to.equal(
+        SEED_AMOUNT + ENTRY_FEE * 3n
+      );
+    });
   });
+
 });
