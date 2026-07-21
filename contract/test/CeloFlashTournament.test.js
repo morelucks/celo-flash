@@ -587,5 +587,14 @@ describe("CeloFlashTournament — joinTournament Flow", function () {
       expect(await tournament.accumulatedFees()).to.equal(ethers.parseEther("5"));
     });
 
+    it("Should route entryFee minus protocolFee into the prize pool for a 1e18 entry", async function () {
+      const entryFee = ethers.parseEther("1");
+      const id = await createTournament({ entryFee, seed: 0n });
+
+      await tournament.connect(alice).joinTournament(id);
+
+      expect(await prizePool(id)).to.equal(entryFee - ethers.parseEther("0.05"));
+    });
+
   });
 });
