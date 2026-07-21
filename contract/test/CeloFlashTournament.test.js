@@ -559,5 +559,13 @@ describe("CeloFlashTournament — joinTournament Flow", function () {
       expect(await tournament.accumulatedFees()).to.equal(FEE_PER_ENTRY);
     });
 
+    it("Should leave accumulatedNativeFees untouched for USDm joins", async function () {
+      const id = await createTournament();
+
+      await tournament.connect(alice).joinTournament(id);
+
+      expect(await tournament.accumulatedNativeFees()).to.equal(0n);
+    });
   });
+
 });
