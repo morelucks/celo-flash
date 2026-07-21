@@ -1246,6 +1246,16 @@ describe("CeloFlashTournament — joinTournament Extended Coverage", function ()
 
       expect(await participantCount(id)).to.equal(10n);
     });
+    it("Should grow prizePool to seed plus ten prize contributions", async function () {
+      const id = await createTournament({ isNative: true });
+      const joiners = [alice, bob, carol, ...extras.slice(0, 7)];
+
+      for (const player of joiners) {
+        await tournament.connect(player).joinTournament(id, { value: ENTRY_FEE });
+      }
+
+      expect(await prizePool(id)).to.equal(SEED_AMOUNT + PRIZE_PER_ENTRY * 10n);
+    });
     // __EXTENDED_TESTS_END__
   });
 });
