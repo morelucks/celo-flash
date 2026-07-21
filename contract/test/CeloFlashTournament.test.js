@@ -402,3 +402,66 @@ describe("CeloFlashTournament — Fee Withdrawal & Accounting", function () {
     });
   });
 });
+
+describe("CeloFlashTournament — joinTournament Flow", function () {
+  const ENTRY_FEE = ethers.parseEther("10");
+  const SEED_AMOUNT = ethers.parseEther("20");
+  const DURATION = 3600; // 1 hour (MIN_DURATION)
+  const PROTOCOL_FEE_BPS = 500n;
+  const BPS_DENOMINATOR = 10_000n;
+  const MAX_PARTICIPANTS = 1_000n;
+
+  // protocolFee = (entryFee * 500) / 10000
+  const protocolFeeFor = (fee) => (fee * PROTOCOL_FEE_BPS) / BPS_DENOMINATOR;
+  const FEE_PER_ENTRY = protocolFeeFor(ENTRY_FEE);
+  const PRIZE_PER_ENTRY = ENTRY_FEE - FEE_PER_ENTRY;
+
+  let tournament;
+  let usdm;
+  let owner;
+  let verifier;
+  let feeRecipient;
+  let creator;
+  let alice;
+  let bob;
+  let carol;
+
+  async function createTournament({
+    isNative = false,
+    seed = SEED_AMOUNT,
+    entryFee = ENTRY_FEE,
+  } = {}) {
+    const id = await tournament.nextTournamentId();
+    await tournament
+      .connect(creator)
+      .createTournament("Join Flow", entryFee, seed, DURATION, isNative, {
+        value: isNative ? seed : 0n,
+      });
+    return id;
+  }
+
+  beforeEach(async function () {
+    [owner, verifier, feeRecipient, creator, alice, bob, carol] =
+      await ethers.getSigners();
+
+    const MockERC20 = await ethers.getContractFactory("MockERC20");
+    usdm = await MockERC20.deploy("Mock USDm", "USDm", 18);
+    await usdm.waitForDeployment();
+
+    const CeloFlashTournament = await ethers.getContractFactory("CeloFlashTournament");
+    tournament = await CeloFlashTournament.deploy(
+      await usdm.getAddress(),
+      verifier.address,
+      feeRecipient.address
+    );
+    await tournament.waitForDeployment();
+
+    for (const acct of [creator, alice, bob, carol]) {
+      await usdm.mint(acct.address, ethers.parseEther("1000"));
+      await usdm
+        .connect(acct)
+        .approve(await tournament.getAddress(), ethers.MaxUint256);
+    }
+  });
+
+});
