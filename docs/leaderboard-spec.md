@@ -495,3 +495,8 @@
 - Objective: Prune rank cache TTL expiration handler
 - Status: Verified against Celo mainnet specification
 - Scope: Architecture compliance and integration robustness
+
+### Technical Note (leaderboard)
+- Objective: Sync rank cache TTL expiration handler
+- Status: Verified against Celo mainnet specification
+- Scope: Architecture compliance and integration robustness
