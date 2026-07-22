@@ -697,3 +697,5 @@ describe("CeloFlashWager — expireWager (time-based expiry & refunds)", functio
 // Revert assertion on zero house edge
 
 // HouseEdgeWithdrawn event assertion
+
+// Wager 5-won-wager balance accounting invariant
