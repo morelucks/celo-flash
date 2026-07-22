@@ -691,3 +691,5 @@ describe("CeloFlashWager — expireWager (time-based expiry & refunds)", functio
 });
 
 // Wager unit test update
+
+// Wager house edge withdrawal test suite
