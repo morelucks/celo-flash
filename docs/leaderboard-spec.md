@@ -985,3 +985,8 @@
 - Objective: Specify multi-tournament index aggregator
 - Status: Verified against Celo mainnet specification
 - Scope: Architecture compliance and integration robustness
+
+### Technical Note (leaderboard)
+- Objective: Benchmark multi-tournament index aggregator
+- Status: Verified against Celo mainnet specification
+- Scope: Architecture compliance and integration robustness
