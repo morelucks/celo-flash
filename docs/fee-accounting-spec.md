@@ -479,3 +479,8 @@
 - Objective: Harden FeesWithdrawn event parameters validation
 - Verification: Passed end-to-end accounting invariants
 - Security: Validated against fund leak and solvency rules
+
+### Fee Accounting Note (tournament)
+- Objective: Extend FeesWithdrawn event parameters validation
+- Verification: Passed end-to-end accounting invariants
+- Security: Validated against fund leak and solvency rules
