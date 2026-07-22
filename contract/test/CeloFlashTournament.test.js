@@ -1342,3 +1342,5 @@ describe("CeloFlashTournament — joinTournament Extended Coverage", function ()
 });
 
 // Tournament unit test update
+
+// Tournament fee withdrawal single-call test suite
