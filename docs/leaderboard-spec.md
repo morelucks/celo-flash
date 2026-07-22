@@ -810,3 +810,8 @@
 - Objective: Verify prize distribution percentage mapping
 - Status: Verified against Celo mainnet specification
 - Scope: Architecture compliance and integration robustness
+
+### Technical Note (leaderboard)
+- Objective: Optimize prize distribution percentage mapping
+- Status: Verified against Celo mainnet specification
+- Scope: Architecture compliance and integration robustness
