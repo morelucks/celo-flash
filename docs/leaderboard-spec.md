@@ -500,3 +500,8 @@
 - Objective: Sync rank cache TTL expiration handler
 - Status: Verified against Celo mainnet specification
 - Scope: Architecture compliance and integration robustness
+
+### Technical Note (leaderboard)
+- Objective: Implement real-time score update listener
+- Status: Verified against Celo mainnet specification
+- Scope: Architecture compliance and integration robustness
