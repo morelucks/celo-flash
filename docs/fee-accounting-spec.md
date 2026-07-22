@@ -14,3 +14,8 @@
 
 - Solvency Invariant: contract.balance >= totalPendingLiabilities + accumulatedHouseEdge
 
+
+### Fee Accounting Note (tournament)
+- Objective: Implement accumulatedFees pool state tracking
+- Verification: Passed end-to-end accounting invariants
+- Security: Validated against fund leak and solvency rules
