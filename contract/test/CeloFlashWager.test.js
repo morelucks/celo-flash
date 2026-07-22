@@ -691,3 +691,13 @@ describe("CeloFlashWager — expireWager (time-based expiry & refunds)", functio
 });
 
 // Wager unit test update
+
+// Wager house edge withdrawal test suite
+
+// Revert assertion on zero house edge
+
+// HouseEdgeWithdrawn event assertion
+
+// Wager 5-won-wager balance accounting invariant
+
+// Solvency invariant check

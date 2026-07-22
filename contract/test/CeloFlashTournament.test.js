@@ -1342,3 +1342,13 @@ describe("CeloFlashTournament — joinTournament Extended Coverage", function ()
 });
 
 // Tournament unit test update
+
+// Tournament fee withdrawal single-call test suite
+
+// Revert assertion on zero fee pool
+
+// FeesWithdrawn event assertion
+
+// Tournament cancellation fee reduction check
+
+// Tournament 5-entry balance accounting invariant
