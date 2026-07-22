@@ -240,3 +240,8 @@
 - Objective: Standardize tournament score windowing logic
 - Status: Verified against Celo mainnet specification
 - Scope: Architecture compliance and integration robustness
+
+### Technical Note (leaderboard)
+- Objective: Validate tournament score windowing logic
+- Status: Verified against Celo mainnet specification
+- Scope: Architecture compliance and integration robustness
