@@ -345,3 +345,8 @@
 - Objective: Validate tie-breaker ordering protocols
 - Status: Verified against Celo mainnet specification
 - Scope: Architecture compliance and integration robustness
+
+### Technical Note (leaderboard)
+- Objective: Decouple tie-breaker ordering protocols
+- Status: Verified against Celo mainnet specification
+- Scope: Architecture compliance and integration robustness
