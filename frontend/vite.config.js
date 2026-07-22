@@ -35,3 +35,5 @@ export default defineConfig({
     },
   },
 })
+
+// Vitest configuration for E2E integration test execution

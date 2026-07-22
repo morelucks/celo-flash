@@ -216,3 +216,5 @@ export const useWallet = () => {
     privyReady: ready,
   };
 };
+
+// Privy wallet resolution strategy for Celo mainnet

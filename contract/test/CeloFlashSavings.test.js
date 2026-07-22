@@ -360,3 +360,5 @@ describe("CeloFlashSavings", function () {
     });
   });
 });
+
+// Savings coach metadata specification update

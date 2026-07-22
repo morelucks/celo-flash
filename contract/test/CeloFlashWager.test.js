@@ -689,3 +689,5 @@ describe("CeloFlashWager — expireWager (time-based expiry & refunds)", functio
     );
   });
 });
+
+// Wager unit test update
