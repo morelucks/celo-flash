@@ -8,3 +8,6 @@
 
 - Protocol Fee Formula: (entryFee * participantCount * PROTOCOL_FEE_BPS) / 10000
 
+
+- House Edge Formula: (grossPayout * HOUSE_EDGE_BPS) / 10000
+
