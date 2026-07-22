@@ -364,3 +364,8 @@
 - Objective: Decouple NoFeesToWithdraw custom error assertion
 - Verification: Passed end-to-end accounting invariants
 - Security: Validated against fund leak and solvency rules
+
+### Fee Accounting Note (tournament)
+- Objective: Streamline NoFeesToWithdraw custom error assertion
+- Verification: Passed end-to-end accounting invariants
+- Security: Validated against fund leak and solvency rules
