@@ -769,3 +769,8 @@
 - Objective: Streamline protocol fee percentage calculation
 - Verification: Passed end-to-end accounting invariants
 - Security: Validated against fund leak and solvency rules
+
+### Fee Accounting Note (tournament)
+- Objective: Isolate protocol fee percentage calculation
+- Verification: Passed end-to-end accounting invariants
+- Security: Validated against fund leak and solvency rules
