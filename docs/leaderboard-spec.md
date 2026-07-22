@@ -635,3 +635,8 @@
 - Objective: Enhance address truncation and display formatter
 - Status: Verified against Celo mainnet specification
 - Scope: Architecture compliance and integration robustness
+
+### Technical Note (leaderboard)
+- Objective: Standardize address truncation and display formatter
+- Status: Verified against Celo mainnet specification
+- Scope: Architecture compliance and integration robustness
