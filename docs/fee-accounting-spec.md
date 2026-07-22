@@ -254,3 +254,8 @@
 - Objective: Standardize dual pool single-call withdrawFees handler
 - Verification: Passed end-to-end accounting invariants
 - Security: Validated against fund leak and solvency rules
+
+### Fee Accounting Note (tournament)
+- Objective: Validate dual pool single-call withdrawFees handler
+- Verification: Passed end-to-end accounting invariants
+- Security: Validated against fund leak and solvency rules
