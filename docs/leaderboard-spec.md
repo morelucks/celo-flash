@@ -995,3 +995,8 @@
 - Objective: Prune multi-tournament index aggregator
 - Status: Verified against Celo mainnet specification
 - Scope: Architecture compliance and integration robustness
+
+### Technical Note (leaderboard)
+- Objective: Sync multi-tournament index aggregator
+- Status: Verified against Celo mainnet specification
+- Scope: Architecture compliance and integration robustness
