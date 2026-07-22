@@ -11,3 +11,6 @@
 
 - House Edge Formula: (grossPayout * HOUSE_EDGE_BPS) / 10000
 
+
+- Solvency Invariant: contract.balance >= totalPendingLiabilities + accumulatedHouseEdge
+
