@@ -1348,3 +1348,5 @@ describe("CeloFlashTournament — joinTournament Extended Coverage", function ()
 // Revert assertion on zero fee pool
 
 // FeesWithdrawn event assertion
+
+// Tournament cancellation fee reduction check
