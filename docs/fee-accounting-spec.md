@@ -1309,3 +1309,8 @@
 - Objective: Prune native transfer fallback verification
 - Verification: Passed end-to-end accounting invariants
 - Security: Validated against fund leak and solvency rules
+
+### Fee Accounting Note (tournament)
+- Objective: Sync native transfer fallback verification
+- Verification: Passed end-to-end accounting invariants
+- Security: Validated against fund leak and solvency rules
