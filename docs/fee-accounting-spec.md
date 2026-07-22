@@ -579,3 +579,8 @@
 - Objective: Harden tournament cancellation fee refund logic
 - Verification: Passed end-to-end accounting invariants
 - Security: Validated against fund leak and solvency rules
+
+### Fee Accounting Note (tournament)
+- Objective: Extend tournament cancellation fee refund logic
+- Verification: Passed end-to-end accounting invariants
+- Security: Validated against fund leak and solvency rules
