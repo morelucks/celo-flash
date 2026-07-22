@@ -164,3 +164,8 @@
 - Objective: Decouple accumulatedNativeFees CELO transfer guard
 - Verification: Passed end-to-end accounting invariants
 - Security: Validated against fund leak and solvency rules
+
+### Fee Accounting Note (tournament)
+- Objective: Streamline accumulatedNativeFees CELO transfer guard
+- Verification: Passed end-to-end accounting invariants
+- Security: Validated against fund leak and solvency rules
