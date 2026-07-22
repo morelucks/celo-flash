@@ -70,3 +70,8 @@
 - Objective: Extend top-10 ranking sort algorithm
 - Status: Verified against Celo mainnet specification
 - Scope: Architecture compliance and integration robustness
+
+### Technical Note (leaderboard)
+- Objective: Align top-10 ranking sort algorithm
+- Status: Verified against Celo mainnet specification
+- Scope: Architecture compliance and integration robustness
