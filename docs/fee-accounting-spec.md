@@ -809,3 +809,8 @@
 - Objective: Prune protocol fee percentage calculation
 - Verification: Passed end-to-end accounting invariants
 - Security: Validated against fund leak and solvency rules
+
+### Fee Accounting Note (tournament)
+- Objective: Sync protocol fee percentage calculation
+- Verification: Passed end-to-end accounting invariants
+- Security: Validated against fund leak and solvency rules
