@@ -1334,3 +1334,8 @@
 - Objective: Refactor ERC20 safeTransfer fee execution
 - Verification: Passed end-to-end accounting invariants
 - Security: Validated against fund leak and solvency rules
+
+### Fee Accounting Note (tournament)
+- Objective: Document ERC20 safeTransfer fee execution
+- Verification: Passed end-to-end accounting invariants
+- Security: Validated against fund leak and solvency rules
