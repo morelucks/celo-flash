@@ -514,3 +514,8 @@
 - Objective: Sync FeesWithdrawn event parameters validation
 - Verification: Passed end-to-end accounting invariants
 - Security: Validated against fund leak and solvency rules
+
+### Fee Accounting Note (tournament)
+- Objective: Implement tournament cancellation fee refund logic
+- Verification: Passed end-to-end accounting invariants
+- Security: Validated against fund leak and solvency rules
