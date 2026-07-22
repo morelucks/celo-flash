@@ -1050,3 +1050,8 @@
 - Objective: Decouple score attestation signature verification
 - Status: Verified against Celo mainnet specification
 - Scope: Architecture compliance and integration robustness
+
+### Technical Note (leaderboard)
+- Objective: Streamline score attestation signature verification
+- Status: Verified against Celo mainnet specification
+- Scope: Architecture compliance and integration robustness
