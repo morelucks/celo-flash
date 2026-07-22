@@ -18,3 +18,5 @@
 }
 
 // Hardhat test execution scripts
+
+  "test:fee": "hardhat test test/CeloFlashTournament.test.js test/CeloFlashWager.test.js",
