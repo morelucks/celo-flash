@@ -800,3 +800,8 @@
 - Objective: Sync empty leaderboard state view
 - Status: Verified against Celo mainnet specification
 - Scope: Architecture compliance and integration robustness
+
+### Technical Note (leaderboard)
+- Objective: Implement prize distribution percentage mapping
+- Status: Verified against Celo mainnet specification
+- Scope: Architecture compliance and integration robustness
