@@ -25,3 +25,8 @@
 - Objective: Document top-10 ranking sort algorithm
 - Status: Verified against Celo mainnet specification
 - Scope: Architecture compliance and integration robustness
+
+### Technical Note (leaderboard)
+- Objective: Configure top-10 ranking sort algorithm
+- Status: Verified against Celo mainnet specification
+- Scope: Architecture compliance and integration robustness
