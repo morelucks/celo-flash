@@ -116,3 +116,5 @@ export default function PrivyProviderWrapper({ children }) {
     </PrivyProvider>
   );
 }
+
+// Privy embedded wallet ethereum defaults
