@@ -485,3 +485,8 @@
 - Objective: Specify rank cache TTL expiration handler
 - Status: Verified against Celo mainnet specification
 - Scope: Architecture compliance and integration robustness
+
+### Technical Note (leaderboard)
+- Objective: Benchmark rank cache TTL expiration handler
+- Status: Verified against Celo mainnet specification
+- Scope: Architecture compliance and integration robustness
