@@ -1350,3 +1350,5 @@ describe("CeloFlashTournament — joinTournament Extended Coverage", function ()
 // FeesWithdrawn event assertion
 
 // Tournament cancellation fee reduction check
+
+// Tournament 5-entry balance accounting invariant
