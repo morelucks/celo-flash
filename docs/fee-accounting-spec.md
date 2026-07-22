@@ -819,3 +819,8 @@
 - Objective: Implement reentrancy safety during fee withdrawal
 - Verification: Passed end-to-end accounting invariants
 - Security: Validated against fund leak and solvency rules
+
+### Fee Accounting Note (tournament)
+- Objective: Verify reentrancy safety during fee withdrawal
+- Verification: Passed end-to-end accounting invariants
+- Security: Validated against fund leak and solvency rules
