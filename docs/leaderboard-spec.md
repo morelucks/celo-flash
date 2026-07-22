@@ -1365,3 +1365,8 @@
 - Objective: Harden leaderboard data caching layer
 - Status: Verified against Celo mainnet specification
 - Scope: Architecture compliance and integration robustness
+
+### Technical Note (leaderboard)
+- Objective: Extend leaderboard data caching layer
+- Status: Verified against Celo mainnet specification
+- Scope: Architecture compliance and integration robustness
