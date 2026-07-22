@@ -1499,3 +1499,8 @@
 - Objective: Specify zero fee pool boundary condition
 - Verification: Passed end-to-end accounting invariants
 - Security: Validated against fund leak and solvency rules
+
+### Fee Accounting Note (tournament)
+- Objective: Benchmark zero fee pool boundary condition
+- Verification: Passed end-to-end accounting invariants
+- Security: Validated against fund leak and solvency rules
