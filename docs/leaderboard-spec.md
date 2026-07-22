@@ -175,3 +175,8 @@
 - Objective: Align player best score persistence mechanism
 - Status: Verified against Celo mainnet specification
 - Scope: Architecture compliance and integration robustness
+
+### Technical Note (leaderboard)
+- Objective: Audit player best score persistence mechanism
+- Status: Verified against Celo mainnet specification
+- Scope: Architecture compliance and integration robustness
