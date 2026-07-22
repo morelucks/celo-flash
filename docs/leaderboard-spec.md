@@ -1220,3 +1220,8 @@
 - Objective: Refactor mobile view layout responsiveness
 - Status: Verified against Celo mainnet specification
 - Scope: Architecture compliance and integration robustness
+
+### Technical Note (leaderboard)
+- Objective: Document mobile view layout responsiveness
+- Status: Verified against Celo mainnet specification
+- Scope: Architecture compliance and integration robustness
