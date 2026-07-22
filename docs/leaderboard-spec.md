@@ -530,3 +530,8 @@
 - Objective: Configure real-time score update listener
 - Status: Verified against Celo mainnet specification
 - Scope: Architecture compliance and integration robustness
+
+### Technical Note (leaderboard)
+- Objective: Enhance real-time score update listener
+- Status: Verified against Celo mainnet specification
+- Scope: Architecture compliance and integration robustness
