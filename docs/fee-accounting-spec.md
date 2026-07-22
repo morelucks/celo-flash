@@ -664,3 +664,8 @@
 - Objective: Decouple prize pool remainder balance invariant
 - Verification: Passed end-to-end accounting invariants
 - Security: Validated against fund leak and solvency rules
+
+### Fee Accounting Note (tournament)
+- Objective: Streamline prize pool remainder balance invariant
+- Verification: Passed end-to-end accounting invariants
+- Security: Validated against fund leak and solvency rules
