@@ -49,3 +49,8 @@
 - Objective: Enhance accumulatedFees pool state tracking
 - Verification: Passed end-to-end accounting invariants
 - Security: Validated against fund leak and solvency rules
+
+### Fee Accounting Note (tournament)
+- Objective: Standardize accumulatedFees pool state tracking
+- Verification: Passed end-to-end accounting invariants
+- Security: Validated against fund leak and solvency rules
