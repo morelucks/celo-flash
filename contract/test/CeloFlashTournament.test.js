@@ -1346,3 +1346,5 @@ describe("CeloFlashTournament — joinTournament Extended Coverage", function ()
 // Tournament fee withdrawal single-call test suite
 
 // Revert assertion on zero fee pool
+
+// FeesWithdrawn event assertion
