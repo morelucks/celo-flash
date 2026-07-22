@@ -755,3 +755,8 @@
 - Objective: Streamline empty leaderboard state view
 - Status: Verified against Celo mainnet specification
 - Scope: Architecture compliance and integration robustness
+
+### Technical Note (leaderboard)
+- Objective: Isolate empty leaderboard state view
+- Status: Verified against Celo mainnet specification
+- Scope: Architecture compliance and integration robustness
