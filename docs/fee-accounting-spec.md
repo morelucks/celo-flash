@@ -1029,3 +1029,8 @@
 - Objective: Optimize multi-tournament fee accumulation state
 - Verification: Passed end-to-end accounting invariants
 - Security: Validated against fund leak and solvency rules
+
+### Fee Accounting Note (tournament)
+- Objective: Refactor multi-tournament fee accumulation state
+- Verification: Passed end-to-end accounting invariants
+- Security: Validated against fund leak and solvency rules
