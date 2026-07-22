@@ -1194,3 +1194,8 @@
 - Objective: Audit cancelled seed refund isolation
 - Verification: Passed end-to-end accounting invariants
 - Security: Validated against fund leak and solvency rules
+
+### Fee Accounting Note (tournament)
+- Objective: Specify cancelled seed refund isolation
+- Verification: Passed end-to-end accounting invariants
+- Security: Validated against fund leak and solvency rules
