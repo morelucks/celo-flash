@@ -5,3 +5,6 @@
 
 - Verified withdrawFees and withdrawHouseEdge execution paths.
 
+
+- Protocol Fee Formula: (entryFee * participantCount * PROTOCOL_FEE_BPS) / 10000
+
