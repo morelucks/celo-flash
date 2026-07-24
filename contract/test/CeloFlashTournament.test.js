@@ -2587,6 +2587,41 @@ describe("CeloFlashTournament — claimPrize & cancelTournament", function () {
       expect(t.winner).to.equal(players[0].address);
       expect(t.winningScore).to.equal(300n);
     });
+    it("Should let winners claim in any order with unchanged amounts", async function () {
+      const id = await threeWinnerTournament();
+      const pool = poolFor(3);
+      const second = (pool * 2500n) / BPS_DENOMINATOR;
+      const third = (pool * 1500n) / BPS_DENOMINATOR;
+      const first = pool - second - third;
+
+      // Claim reverse order: 3rd, then 2nd, then 1st.
+      await expect(tournament.connect(players[2]).claimPrize(id)).to.changeTokenBalance(
+        usdm,
+        players[2],
+        third
+      );
+      await expect(tournament.connect(players[1]).claimPrize(id)).to.changeTokenBalance(
+        usdm,
+        players[1],
+        second
+      );
+      await expect(tournament.connect(players[0]).claimPrize(id)).to.changeTokenBalance(
+        usdm,
+        players[0],
+        first
+      );
+    });
+
+    it("Should not affect another winner's claimable when one winner claims", async function () {
+      const id = await threeWinnerTournament();
+      const pool = poolFor(3);
+      const second = (pool * 2500n) / BPS_DENOMINATOR;
+
+      await tournament.connect(players[0]).claimPrize(id);
+
+      // 2nd place claimable is untouched by 1st place's claim.
+      expect(await tournament.claimablePrize(id, players[1].address)).to.equal(second);
+    });
     // <<END:winner-state>>
   });
 
