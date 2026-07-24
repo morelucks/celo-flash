@@ -1352,3 +1352,43 @@ describe("CeloFlashTournament — joinTournament Extended Coverage", function ()
 // Tournament cancellation fee reduction check
 
 // Tournament 5-entry balance accounting invariant
+
+describe("CeloFlashTournament — createTournament (dual-asset)", function () {
+  const ENTRY_FEE = ethers.parseEther("10");
+  const SEED_AMOUNT = ethers.parseEther("20");
+  const DURATION = 3600; // 1 hour (MIN_DURATION)
+
+  // Contract-mirrored constants for boundary assertions.
+  const MAX_ENTRY_FEE = ethers.parseEther("100"); // 100e18
+  const MIN_DURATION = 3600; // 1 hour
+  const MAX_DURATION = 7 * 24 * 3600; // 7 days
+
+  let tournament;
+  let usdm;
+  let owner;
+  let verifier;
+  let feeRecipient;
+  let creator;
+  let other;
+
+  beforeEach(async function () {
+    [owner, verifier, feeRecipient, creator, other] = await ethers.getSigners();
+
+    const MockERC20 = await ethers.getContractFactory("MockERC20");
+    usdm = await MockERC20.deploy("Mock USDm", "USDm", 18);
+    await usdm.waitForDeployment();
+
+    const CeloFlashTournament = await ethers.getContractFactory("CeloFlashTournament");
+    tournament = await CeloFlashTournament.deploy(
+      await usdm.getAddress(),
+      verifier.address,
+      feeRecipient.address
+    );
+    await tournament.waitForDeployment();
+
+    await usdm.mint(creator.address, ethers.parseEther("1000"));
+    await usdm
+      .connect(creator)
+      .approve(await tournament.getAddress(), ethers.MaxUint256);
+  });
+});
