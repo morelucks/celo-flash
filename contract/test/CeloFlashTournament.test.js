@@ -2260,5 +2260,18 @@ describe("CeloFlashTournament — claimPrize & cancelTournament", function () {
     // <<END:active-claim>>
   });
 
+  describe("Cancelled — participant refunds (USDm)", function () {
+    it("Should refund a participant the full entry fee via stablecoin transfer", async function () {
+      const id = await cancelledTournament({ joiners: [players[0], players[1]] });
+
+      await expect(tournament.connect(players[0]).claimPrize(id)).to.changeTokenBalances(
+        usdm,
+        [tournament, players[0]],
+        [-ENTRY_FEE, ENTRY_FEE]
+      );
+    });
+    // <<END:cancelled-usdm>>
+  });
+
   // __CLAIM_TESTS_MARKER__
 });
