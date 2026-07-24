@@ -1467,6 +1467,17 @@ describe("CeloFlashTournament — createTournament (dual-asset)", function () {
       const t = await tournament.tournaments(0);
       expect(t.entryFee).to.equal(ENTRY_FEE);
     });
+    it("Should mark a freshly created tournament as Active", async function () {
+      await tournament
+        .connect(creator)
+        .createTournament("USDm Cup", ENTRY_FEE, SEED_AMOUNT, DURATION, false, {
+          value: 0n,
+        });
+
+      const t = await tournament.tournaments(0);
+      // TournamentStatus.Active == 0
+      expect(t.status).to.equal(0);
+    });
     // ===USDM_MARKER===
   });
 
