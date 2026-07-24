@@ -2048,6 +2048,31 @@ describe("CeloFlashTournament — claimPrize & cancelTournament", function () {
         third
       );
     });
+    it("Should pay 1st place 60% plus any rounding dust", async function () {
+      const id = await threeWinnerTournament();
+      const pool = poolFor(3);
+      const second = (pool * 2500n) / BPS_DENOMINATOR;
+      const third = (pool * 1500n) / BPS_DENOMINATOR;
+      const first = pool - second - third; // 60% + leftover dust
+
+      await expect(tournament.connect(players[0]).claimPrize(id)).to.changeTokenBalance(
+        usdm,
+        players[0],
+        first
+      );
+    });
+
+    it("Should drain the pool exactly once fees are withdrawn and all three winners claim", async function () {
+      const id = await threeWinnerTournament();
+      const contractAddr = await tournament.getAddress();
+
+      await tournament.withdrawFees();
+      for (const p of [players[0], players[1], players[2]]) {
+        await tournament.connect(p).claimPrize(id);
+      }
+
+      expect(await usdm.balanceOf(contractAddr)).to.equal(0n);
+    });
     // <<END:finalized-distribution-usdm>>
   });
 
