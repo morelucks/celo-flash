@@ -1391,4 +1391,22 @@ describe("CeloFlashTournament — createTournament (dual-asset)", function () {
       .connect(creator)
       .approve(await tournament.getAddress(), ethers.MaxUint256);
   });
+
+  describe("USDm mode — success", function () {
+    it("Should pull the seed from the creator via safeTransferFrom", async function () {
+      await expect(
+        tournament
+          .connect(creator)
+          .createTournament("USDm Cup", ENTRY_FEE, SEED_AMOUNT, DURATION, false, {
+            value: 0n,
+          })
+      ).to.changeTokenBalances(
+        usdm,
+        [creator, tournament],
+        [-SEED_AMOUNT, SEED_AMOUNT]
+      );
+    });
+  });
+
+  // ===INSERT_MARKER===
 });
