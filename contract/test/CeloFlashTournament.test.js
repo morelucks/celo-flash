@@ -2727,5 +2727,41 @@ describe("CeloFlashTournament — claimPrize & cancelTournament", function () {
     // <<END:misc-guards>>
   });
 
+  describe("Finalized — native distribution & event queries", function () {
+    it("Should split 70/30 to two native winners on claim", async function () {
+      const id = await finalizedTournament({
+        isNative: true,
+        scorers: [
+          { player: players[0], score: 300 },
+          { player: players[1], score: 200 },
+        ],
+      });
+      const pool = poolFor(2);
+      const first = (pool * 7000n) / BPS_DENOMINATOR;
+      const second = pool - first;
+
+      await expect(tournament.connect(players[0]).claimPrize(id)).to.changeEtherBalance(
+        players[0],
+        first
+      );
+      await expect(tournament.connect(players[1]).claimPrize(id)).to.changeEtherBalance(
+        players[1],
+        second
+      );
+    });
+
+    it("Should expose PrizeClaimed via an indexed tournamentId query", async function () {
+      const id = await finalizedTournament({ scorers: [{ player: players[0], score: 300 }] });
+      await tournament.connect(players[0]).claimPrize(id);
+
+      const events = await tournament.queryFilter(tournament.filters.PrizeClaimed(id));
+
+      expect(events.length).to.equal(1);
+      expect(events[0].args.player).to.equal(players[0].address);
+      expect(events[0].args.amount).to.equal(poolFor(1));
+    });
+    // <<END:native-dist>>
+  });
+
   // __CLAIM_TESTS_MARKER__
 });
