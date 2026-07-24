@@ -2458,6 +2458,26 @@ describe("CeloFlashTournament — claimPrize & cancelTournament", function () {
       // Only the surviving tournament's single entry fee remains.
       expect(await tournament.accumulatedFees()).to.equal(FEE_PER_ENTRY);
     });
+    it("Should set the tournament status to Cancelled", async function () {
+      const id = await createTournament();
+
+      await tournament.connect(creator).cancelTournament(id);
+
+      // TournamentStatus.Cancelled == 2
+      expect((await tournament.tournaments(id)).status).to.equal(2);
+    });
+
+    it("Should leave no funds stuck after seed refund plus every USDm refund", async function () {
+      const joiners = [players[0], players[1], players[2]];
+      const id = await createTournament();
+      for (const p of joiners) await join(id, p, false);
+
+      await tournament.connect(creator).cancelTournament(id);
+      for (const p of joiners) await tournament.connect(p).claimPrize(id);
+
+      expect(await usdm.balanceOf(await tournament.getAddress())).to.equal(0n);
+      expect(await tournament.accumulatedFees()).to.equal(0n);
+    });
     // <<END:cancel-accounting>>
   });
 
