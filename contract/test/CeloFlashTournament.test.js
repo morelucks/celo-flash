@@ -1529,6 +1529,17 @@ describe("CeloFlashTournament — createTournament (dual-asset)", function () {
         [-SEED_AMOUNT, SEED_AMOUNT]
       );
     });
+    it("Should set prizePool equal to the native seed amount", async function () {
+      await tournament
+        .connect(creator)
+        .createTournament("CELO Cup", ENTRY_FEE, SEED_AMOUNT, DURATION, true, {
+          value: SEED_AMOUNT,
+        });
+
+      const t = await tournament.tournaments(0);
+      expect(t.prizePool).to.equal(SEED_AMOUNT);
+      expect(t.seedAmount).to.equal(SEED_AMOUNT);
+    });
     // ===NATIVE_MARKER===
   });
 
