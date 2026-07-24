@@ -1986,6 +1986,16 @@ describe("CeloFlashTournament — claimPrize & cancelTournament", function () {
         expected
       );
     });
+    it("Should reduce the contract USDm balance by the amount paid to the winner", async function () {
+      const id = await finalizedTournament({ scorers: [{ player: players[0], score: 300 }] });
+      const expected = poolFor(1);
+
+      await expect(tournament.connect(players[0]).claimPrize(id)).to.changeTokenBalance(
+        usdm,
+        tournament,
+        -expected
+      );
+    });
     // <<END:finalized-winner-usdm>>
   });
 
