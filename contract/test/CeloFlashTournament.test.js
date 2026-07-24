@@ -1628,5 +1628,17 @@ describe("CeloFlashTournament — createTournament (dual-asset)", function () {
     });
   });
 
+  describe("Reverts — name validation", function () {
+    it("Should revert EmptyName when the name is an empty string", async function () {
+      await expect(
+        tournament
+          .connect(creator)
+          .createTournament("", ENTRY_FEE, SEED_AMOUNT, DURATION, false, {
+            value: 0n,
+          })
+      ).to.be.revertedWithCustomError(tournament, "EmptyName");
+    });
+  });
+
   // ===INSERT_MARKER===
 });
