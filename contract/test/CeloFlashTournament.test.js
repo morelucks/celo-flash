@@ -2518,5 +2518,25 @@ describe("CeloFlashTournament — claimPrize & cancelTournament", function () {
     // <<END:cancel-access>>
   });
 
+  describe("cancelTournament — lifecycle guards", function () {
+    it("Should revert TournamentAlreadyFinalized when cancelling a finalized tournament", async function () {
+      const id = await finalizedTournament({ scorers: [{ player: players[0], score: 300 }] });
+
+      await expect(
+        tournament.connect(creator).cancelTournament(id)
+      ).to.be.revertedWithCustomError(tournament, "TournamentAlreadyFinalized");
+    });
+
+    it("Should revert TournamentAlreadyFinalized when cancelling an already-cancelled tournament", async function () {
+      const id = await createTournament();
+      await tournament.connect(creator).cancelTournament(id);
+
+      await expect(
+        tournament.connect(creator).cancelTournament(id)
+      ).to.be.revertedWithCustomError(tournament, "TournamentAlreadyFinalized");
+    });
+    // <<END:cancel-lifecycle>>
+  });
+
   // __CLAIM_TESTS_MARKER__
 });
