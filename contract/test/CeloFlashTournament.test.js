@@ -2421,6 +2421,43 @@ describe("CeloFlashTournament — claimPrize & cancelTournament", function () {
         0n
       );
     });
+    it("Should reduce accumulatedFees by the cancelled entries' protocol portion (USDm)", async function () {
+      const id = await createTournament();
+      await join(id, players[0], false);
+      await join(id, players[1], false);
+      expect(await tournament.accumulatedFees()).to.equal(FEE_PER_ENTRY * 2n);
+
+      await tournament.connect(creator).cancelTournament(id);
+
+      expect(await tournament.accumulatedFees()).to.equal(0n);
+    });
+
+    it("Should reduce accumulatedNativeFees by the cancelled entries' protocol portion", async function () {
+      const id = await createTournament({ isNative: true });
+      await join(id, players[0], true);
+      await join(id, players[1], true);
+      expect(await tournament.accumulatedNativeFees()).to.equal(FEE_PER_ENTRY * 2n);
+
+      await tournament.connect(creator).cancelTournament(id);
+
+      expect(await tournament.accumulatedNativeFees()).to.equal(0n);
+    });
+
+    it("Should only claw back the cancelled tournament's own fees, not others'", async function () {
+      const cancelledId = await createTournament();
+      await join(cancelledId, players[0], false);
+      await join(cancelledId, players[1], false);
+
+      const survivingId = await createTournament();
+      await join(survivingId, players[2], false);
+
+      expect(await tournament.accumulatedFees()).to.equal(FEE_PER_ENTRY * 3n);
+
+      await tournament.connect(creator).cancelTournament(cancelledId);
+
+      // Only the surviving tournament's single entry fee remains.
+      expect(await tournament.accumulatedFees()).to.equal(FEE_PER_ENTRY);
+    });
     // <<END:cancel-accounting>>
   });
 
