@@ -2126,6 +2126,30 @@ describe("CeloFlashTournament — claimPrize & cancelTournament", function () {
         expected
       );
     });
+    it("Should reduce the contract native balance by the amount paid to the winner", async function () {
+      const id = await finalizedTournament({
+        isNative: true,
+        scorers: [{ player: players[0], score: 300 }],
+      });
+      const expected = poolFor(1);
+
+      await expect(tournament.connect(players[0]).claimPrize(id)).to.changeEtherBalance(
+        tournament,
+        -expected
+      );
+    });
+
+    it("Should emit PrizeClaimed for a native winner claim", async function () {
+      const id = await finalizedTournament({
+        isNative: true,
+        scorers: [{ player: players[0], score: 300 }],
+      });
+      const expected = poolFor(1);
+
+      await expect(tournament.connect(players[0]).claimPrize(id))
+        .to.emit(tournament, "PrizeClaimed")
+        .withArgs(id, players[0].address, expected);
+    });
     // <<END:finalized-winner-native>>
   });
 
