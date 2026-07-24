@@ -2481,5 +2481,42 @@ describe("CeloFlashTournament — claimPrize & cancelTournament", function () {
     // <<END:cancel-accounting>>
   });
 
+  describe("cancelTournament — access control", function () {
+    it("Should allow the creator to cancel", async function () {
+      const id = await createTournament();
+
+      await tournament.connect(creator).cancelTournament(id);
+
+      expect((await tournament.tournaments(id)).status).to.equal(2);
+    });
+
+    it("Should allow the contract owner to cancel", async function () {
+      const id = await createTournament();
+
+      await tournament.connect(owner).cancelTournament(id);
+
+      expect((await tournament.tournaments(id)).status).to.equal(2);
+    });
+
+    it("Should revert InvalidAddress when a non-creator/non-owner tries to cancel", async function () {
+      const id = await createTournament();
+
+      await expect(
+        tournament.connect(players[0]).cancelTournament(id)
+      ).to.be.revertedWithCustomError(tournament, "InvalidAddress");
+    });
+
+    it("Should refund the seed to the creator even when the owner cancels", async function () {
+      const id = await createTournament();
+
+      await expect(tournament.connect(owner).cancelTournament(id)).to.changeTokenBalances(
+        usdm,
+        [tournament, creator],
+        [-SEED_AMOUNT, SEED_AMOUNT]
+      );
+    });
+    // <<END:cancel-access>>
+  });
+
   // __CLAIM_TESTS_MARKER__
 });
