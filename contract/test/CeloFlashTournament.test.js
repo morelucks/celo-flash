@@ -1447,6 +1447,16 @@ describe("CeloFlashTournament — createTournament (dual-asset)", function () {
       const t = await tournament.tournaments(0);
       expect(t.creator).to.equal(creator.address);
     });
+    it("Should store the tournament name verbatim", async function () {
+      await tournament
+        .connect(creator)
+        .createTournament("Weekend USDm Blitz", ENTRY_FEE, SEED_AMOUNT, DURATION, false, {
+          value: 0n,
+        });
+
+      const t = await tournament.tournaments(0);
+      expect(t.name).to.equal("Weekend USDm Blitz");
+    });
     // ===USDM_MARKER===
   });
 
