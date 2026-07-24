@@ -2700,6 +2700,30 @@ describe("CeloFlashTournament — claimPrize & cancelTournament", function () {
       // Refund is derived from entryFee, not pre-seeded into claimablePrize.
       expect(await tournament.claimablePrize(id, players[0].address)).to.equal(0n);
     });
+    it("Should not pay the fee recipient anything on a winner claim", async function () {
+      const id = await finalizedTournament({ scorers: [{ player: players[0], score: 300 }] });
+
+      await expect(tournament.connect(players[0]).claimPrize(id)).to.changeTokenBalance(
+        usdm,
+        feeRecipient,
+        0n
+      );
+    });
+
+    it("Should match the PrizeClaimed amount to the claimablePrize view for 2nd place", async function () {
+      const id = await finalizedTournament({
+        scorers: [
+          { player: players[0], score: 300 },
+          { player: players[1], score: 200 },
+          { player: players[2], score: 100 },
+        ],
+      });
+      const claimable = await tournament.claimablePrize(id, players[1].address);
+
+      await expect(tournament.connect(players[1]).claimPrize(id))
+        .to.emit(tournament, "PrizeClaimed")
+        .withArgs(id, players[1].address, claimable);
+    });
     // <<END:misc-guards>>
   });
 
