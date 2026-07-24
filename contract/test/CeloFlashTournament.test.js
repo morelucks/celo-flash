@@ -2076,5 +2076,42 @@ describe("CeloFlashTournament — claimPrize & cancelTournament", function () {
     // <<END:finalized-distribution-usdm>>
   });
 
+  describe("Finalized — two-winner split (USDm)", function () {
+    async function twoWinnerTournament() {
+      return finalizedTournament({
+        scorers: [
+          { player: players[0], score: 300 },
+          { player: players[1], score: 200 },
+        ],
+      });
+    }
+
+    it("Should pay 1st place 70% of the pool with two winners", async function () {
+      const id = await twoWinnerTournament();
+      const pool = poolFor(2);
+      const first = (pool * 7000n) / BPS_DENOMINATOR;
+
+      await expect(tournament.connect(players[0]).claimPrize(id)).to.changeTokenBalance(
+        usdm,
+        players[0],
+        first
+      );
+    });
+
+    it("Should pay 2nd place the remaining 30% of the pool with two winners", async function () {
+      const id = await twoWinnerTournament();
+      const pool = poolFor(2);
+      const first = (pool * 7000n) / BPS_DENOMINATOR;
+      const second = pool - first;
+
+      await expect(tournament.connect(players[1]).claimPrize(id)).to.changeTokenBalance(
+        usdm,
+        players[1],
+        second
+      );
+    });
+    // <<END:finalized-two-winner>>
+  });
+
   // __CLAIM_TESTS_MARKER__
 });
