@@ -2868,5 +2868,39 @@ describe("CeloFlashTournament — claimPrize & cancelTournament", function () {
     // <<END:native-isolation>>
   });
 
+  describe("Finalized — claimable view accuracy", function () {
+    async function threeWinnerTournament() {
+      return finalizedTournament({
+        scorers: [
+          { player: players[0], score: 300 },
+          { player: players[1], score: 200 },
+          { player: players[2], score: 100 },
+        ],
+      });
+    }
+
+    it("Should assign the 60% share plus dust to 1st place in the claimable view", async function () {
+      const id = await threeWinnerTournament();
+      const pool = poolFor(3);
+      const second = (pool * 2500n) / BPS_DENOMINATOR;
+      const third = (pool * 1500n) / BPS_DENOMINATOR;
+      const first = pool - second - third;
+
+      expect(await tournament.claimablePrize(id, players[0].address)).to.equal(first);
+    });
+
+    it("Should have the three claimable shares sum to the full pool", async function () {
+      const id = await threeWinnerTournament();
+      const pool = poolFor(3);
+
+      const first = await tournament.claimablePrize(id, players[0].address);
+      const second = await tournament.claimablePrize(id, players[1].address);
+      const third = await tournament.claimablePrize(id, players[2].address);
+
+      expect(first + second + third).to.equal(pool);
+    });
+    // <<END:claimable-view>>
+  });
+
   // __CLAIM_TESTS_MARKER__
 });
