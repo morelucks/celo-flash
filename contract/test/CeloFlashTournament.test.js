@@ -1816,6 +1816,18 @@ describe("CeloFlashTournament — createTournament (dual-asset)", function () {
 
       expect(await tournament.nextTournamentId()).to.equal(1n);
     });
+    it("Should assign sequential ids 0, 1, 2 across three creations", async function () {
+      for (let i = 0; i < 3; i++) {
+        await tournament
+          .connect(creator)
+          .createTournament(`T${i}`, ENTRY_FEE, 0n, DURATION, false, { value: 0n });
+      }
+
+      expect((await tournament.tournaments(0)).id).to.equal(0n);
+      expect((await tournament.tournaments(1)).id).to.equal(1n);
+      expect((await tournament.tournaments(2)).id).to.equal(2n);
+      expect(await tournament.nextTournamentId()).to.equal(3n);
+    });
     // ===ID_MARKER===
   });
 
