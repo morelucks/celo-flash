@@ -2210,6 +2210,30 @@ describe("CeloFlashTournament — claimPrize & cancelTournament", function () {
         tournament.connect(players[0]).claimPrize(id)
       ).to.be.revertedWithCustomError(tournament, "NoPrizeToClaim");
     });
+    it("Should revert NoPrizeToClaim on a second native claim by the winner", async function () {
+      const id = await finalizedTournament({
+        isNative: true,
+        scorers: [{ player: players[0], score: 300 }],
+      });
+
+      await tournament.connect(players[0]).claimPrize(id);
+
+      await expect(
+        tournament.connect(players[0]).claimPrize(id)
+      ).to.be.revertedWithCustomError(tournament, "NoPrizeToClaim");
+    });
+
+    it("Should move no additional USDm on a reverted second claim", async function () {
+      const id = await finalizedTournament({ scorers: [{ player: players[0], score: 300 }] });
+      await tournament.connect(players[0]).claimPrize(id);
+      const balanceAfterFirst = await usdm.balanceOf(players[0].address);
+
+      await expect(
+        tournament.connect(players[0]).claimPrize(id)
+      ).to.be.revertedWithCustomError(tournament, "NoPrizeToClaim");
+
+      expect(await usdm.balanceOf(players[0].address)).to.equal(balanceAfterFirst);
+    });
     // <<END:finalized-double>>
   });
 
