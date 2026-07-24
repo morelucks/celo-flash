@@ -2569,5 +2569,26 @@ describe("CeloFlashTournament — claimPrize & cancelTournament", function () {
     // <<END:cancelled-event>>
   });
 
+  describe("Finalized — winner state & claim ordering", function () {
+    async function threeWinnerTournament() {
+      return finalizedTournament({
+        scorers: [
+          { player: players[0], score: 300 },
+          { player: players[1], score: 200 },
+          { player: players[2], score: 100 },
+        ],
+      });
+    }
+
+    it("Should record the top scorer as winner with the winning score", async function () {
+      const id = await threeWinnerTournament();
+
+      const t = await tournament.tournaments(id);
+      expect(t.winner).to.equal(players[0].address);
+      expect(t.winningScore).to.equal(300n);
+    });
+    // <<END:winner-state>>
+  });
+
   // __CLAIM_TESTS_MARKER__
 });
