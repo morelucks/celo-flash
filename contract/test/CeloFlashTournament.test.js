@@ -1513,7 +1513,6 @@ describe("CeloFlashTournament — createTournament (dual-asset)", function () {
 
       expect(returnedId).to.equal(0n);
     });
-    // ===USDM_MARKER===
   });
 
   describe("Native CELO mode — success", function () {
@@ -1572,7 +1571,6 @@ describe("CeloFlashTournament — createTournament (dual-asset)", function () {
           })
       ).to.changeTokenBalances(usdm, [creator, tournament], [0n, 0n]);
     });
-    // ===NATIVE_MARKER===
   });
 
   describe("Reverts — native value handling", function () {
@@ -1603,7 +1601,6 @@ describe("CeloFlashTournament — createTournament (dual-asset)", function () {
           })
       ).to.be.revertedWithCustomError(tournament, "InvalidValueSent");
     });
-    // ===NATIVE_REVERT_MARKER===
   });
 
   describe("Reverts — USDm value handling", function () {
@@ -1670,7 +1667,6 @@ describe("CeloFlashTournament — createTournament (dual-asset)", function () {
       const t = await tournament.tournaments(0);
       expect(t.entryFee).to.equal(0n);
     });
-    // ===ENTRY_FEE_MARKER===
   });
 
   describe("Reverts — duration bounds", function () {
@@ -1724,7 +1720,6 @@ describe("CeloFlashTournament — createTournament (dual-asset)", function () {
           })
       ).to.be.revertedWithCustomError(tournament, "InvalidDuration");
     });
-    // ===DURATION_MARKER===
   });
 
   describe("TournamentCreated event", function () {
@@ -1795,7 +1790,6 @@ describe("CeloFlashTournament — createTournament (dual-asset)", function () {
           false
         );
     });
-    // ===EVENT_MARKER===
   });
 
   describe("nextTournamentId sequencing", function () {
@@ -1844,7 +1838,6 @@ describe("CeloFlashTournament — createTournament (dual-asset)", function () {
       expect((await tournament.tournaments(2)).isNative).to.equal(false);
       expect(await tournament.nextTournamentId()).to.equal(3n);
     });
-    // ===ID_MARKER===
   });
 
   describe("Initial tournament state", function () {
@@ -1857,8 +1850,14 @@ describe("CeloFlashTournament — createTournament (dual-asset)", function () {
       expect(t.winner).to.equal(ethers.ZeroAddress);
       expect(t.winningScore).to.equal(0n);
     });
-    // ===STATE_MARKER===
+    it("Should start with a zero participant count", async function () {
+      await tournament
+        .connect(creator)
+        .createTournament("USDm Cup", ENTRY_FEE, SEED_AMOUNT, DURATION, false, { value: 0n });
+
+      const t = await tournament.tournaments(0);
+      expect(t.participantCount).to.equal(0n);
+    });
   });
 
-  // ===INSERT_MARKER===
 });
