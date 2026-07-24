@@ -2625,5 +2625,40 @@ describe("CeloFlashTournament — claimPrize & cancelTournament", function () {
     // <<END:winner-state>>
   });
 
+  describe("Cancelled — balances & refund ordering", function () {
+    it("Should hold exactly entryFee per participant after cancellation (USDm)", async function () {
+      const joiners = [players[0], players[1], players[2]];
+      const id = await cancelledTournament({ joiners });
+
+      // Seed already refunded on cancel; only entry fees remain.
+      expect(await usdm.balanceOf(await tournament.getAddress())).to.equal(
+        ENTRY_FEE * BigInt(joiners.length)
+      );
+    });
+
+    it("Should refund participants correctly regardless of claim order", async function () {
+      const joiners = [players[0], players[1], players[2]];
+      const id = await cancelledTournament({ joiners });
+
+      for (const p of [players[2], players[0], players[1]]) {
+        await expect(tournament.connect(p).claimPrize(id)).to.changeTokenBalance(
+          usdm,
+          p,
+          ENTRY_FEE
+        );
+      }
+    });
+
+    it("Should not touch another participant's claim state on refund", async function () {
+      const id = await cancelledTournament({ joiners: [players[0], players[1]] });
+
+      await tournament.connect(players[0]).claimPrize(id);
+
+      // players[1] has not been marked as refunded.
+      expect(await tournament.claimablePrize(id, players[1].address)).to.not.equal(SENTINEL);
+    });
+    // <<END:cancel-balances>>
+  });
+
   // __CLAIM_TESTS_MARKER__
 });
