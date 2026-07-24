@@ -2014,5 +2014,31 @@ describe("CeloFlashTournament — claimPrize & cancelTournament", function () {
     // <<END:finalized-winner-usdm>>
   });
 
+  describe("Finalized — prize distribution claims (USDm)", function () {
+    // players[0]=1st (300), players[1]=2nd (200), players[2]=3rd (100)
+    async function threeWinnerTournament() {
+      return finalizedTournament({
+        scorers: [
+          { player: players[0], score: 300 },
+          { player: players[1], score: 200 },
+          { player: players[2], score: 100 },
+        ],
+      });
+    }
+
+    it("Should pay 2nd place 25% of the pool", async function () {
+      const id = await threeWinnerTournament();
+      const pool = poolFor(3);
+      const second = (pool * 2500n) / BPS_DENOMINATOR;
+
+      await expect(tournament.connect(players[1]).claimPrize(id)).to.changeTokenBalance(
+        usdm,
+        players[1],
+        second
+      );
+    });
+    // <<END:finalized-distribution-usdm>>
+  });
+
   // __CLAIM_TESTS_MARKER__
 });
