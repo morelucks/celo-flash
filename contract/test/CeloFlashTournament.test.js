@@ -2003,6 +2003,14 @@ describe("CeloFlashTournament — claimPrize & cancelTournament", function () {
 
       expect(await tournament.claimablePrize(id, players[0].address)).to.equal(0n);
     });
+    it("Should emit PrizeClaimed with the winner and exact amount", async function () {
+      const id = await finalizedTournament({ scorers: [{ player: players[0], score: 300 }] });
+      const expected = poolFor(1);
+
+      await expect(tournament.connect(players[0]).claimPrize(id))
+        .to.emit(tournament, "PrizeClaimed")
+        .withArgs(id, players[0].address, expected);
+    });
     // <<END:finalized-winner-usdm>>
   });
 
