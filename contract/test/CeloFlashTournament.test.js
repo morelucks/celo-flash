@@ -1640,5 +1640,18 @@ describe("CeloFlashTournament — createTournament (dual-asset)", function () {
     });
   });
 
+  describe("Reverts — entry fee bounds", function () {
+    it("Should revert InvalidEntryFee when entry fee exceeds MAX_ENTRY_FEE", async function () {
+      await expect(
+        tournament
+          .connect(creator)
+          .createTournament("USDm Cup", MAX_ENTRY_FEE + 1n, SEED_AMOUNT, DURATION, false, {
+            value: 0n,
+          })
+      ).to.be.revertedWithCustomError(tournament, "InvalidEntryFee");
+    });
+    // ===ENTRY_FEE_MARKER===
+  });
+
   // ===INSERT_MARKER===
 });
