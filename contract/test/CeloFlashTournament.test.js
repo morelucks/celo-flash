@@ -1809,6 +1809,13 @@ describe("CeloFlashTournament — createTournament (dual-asset)", function () {
       const t = await tournament.tournaments(0);
       expect(t.id).to.equal(0n);
     });
+    it("Should increment nextTournamentId to 1 after one creation", async function () {
+      await tournament
+        .connect(creator)
+        .createTournament("First", ENTRY_FEE, 0n, DURATION, false, { value: 0n });
+
+      expect(await tournament.nextTournamentId()).to.equal(1n);
+    });
     // ===ID_MARKER===
   });
 
