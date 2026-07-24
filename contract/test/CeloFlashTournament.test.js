@@ -1516,5 +1516,21 @@ describe("CeloFlashTournament — createTournament (dual-asset)", function () {
     // ===USDM_MARKER===
   });
 
+  describe("Native CELO mode — success", function () {
+    it("Should accept msg.value equal to the seed and move CELO into the contract", async function () {
+      await expect(
+        tournament
+          .connect(creator)
+          .createTournament("CELO Cup", ENTRY_FEE, SEED_AMOUNT, DURATION, true, {
+            value: SEED_AMOUNT,
+          })
+      ).to.changeEtherBalances(
+        [creator, tournament],
+        [-SEED_AMOUNT, SEED_AMOUNT]
+      );
+    });
+    // ===NATIVE_MARKER===
+  });
+
   // ===INSERT_MARKER===
 });
