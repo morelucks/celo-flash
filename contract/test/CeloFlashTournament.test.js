@@ -1696,6 +1696,15 @@ describe("CeloFlashTournament — createTournament (dual-asset)", function () {
       expect(t.endTime - t.startTime).to.equal(BigInt(MIN_DURATION));
       expect(t.startTime).to.equal(block.timestamp);
     });
+    it("Should revert InvalidDuration when duration exceeds MAX_DURATION", async function () {
+      await expect(
+        tournament
+          .connect(creator)
+          .createTournament("USDm Cup", ENTRY_FEE, SEED_AMOUNT, MAX_DURATION + 1, false, {
+            value: 0n,
+          })
+      ).to.be.revertedWithCustomError(tournament, "InvalidDuration");
+    });
     // ===DURATION_MARKER===
   });
 
