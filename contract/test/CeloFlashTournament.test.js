@@ -2538,5 +2538,36 @@ describe("CeloFlashTournament — claimPrize & cancelTournament", function () {
     // <<END:cancel-lifecycle>>
   });
 
+  describe("TournamentCancelled event", function () {
+    it("Should emit TournamentCancelled with the tournament id when the creator cancels", async function () {
+      const id = await createTournament();
+
+      await expect(tournament.connect(creator).cancelTournament(id))
+        .to.emit(tournament, "TournamentCancelled")
+        .withArgs(id);
+    });
+
+    it("Should emit TournamentCancelled when the owner cancels", async function () {
+      const id = await createTournament({ isNative: true });
+
+      await expect(tournament.connect(owner).cancelTournament(id))
+        .to.emit(tournament, "TournamentCancelled")
+        .withArgs(id);
+    });
+
+    it("Should be queryable by the indexed tournamentId topic", async function () {
+      const id = await createTournament();
+      await tournament.connect(creator).cancelTournament(id);
+
+      const events = await tournament.queryFilter(
+        tournament.filters.TournamentCancelled(id)
+      );
+
+      expect(events.length).to.equal(1);
+      expect(events[0].args.tournamentId).to.equal(id);
+    });
+    // <<END:cancelled-event>>
+  });
+
   // __CLAIM_TESTS_MARKER__
 });
