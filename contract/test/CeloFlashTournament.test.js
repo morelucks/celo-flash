@@ -1550,6 +1550,19 @@ describe("CeloFlashTournament — createTournament (dual-asset)", function () {
       const t = await tournament.tournaments(0);
       expect(t.isNative).to.equal(true);
     });
+    it("Should allow a zero seed with zero msg.value", async function () {
+      await expect(
+        tournament
+          .connect(creator)
+          .createTournament("No Seed CELO", ENTRY_FEE, 0n, DURATION, true, {
+            value: 0n,
+          })
+      ).to.changeEtherBalances([creator, tournament], [0n, 0n]);
+
+      const t = await tournament.tournaments(0);
+      expect(t.prizePool).to.equal(0n);
+      expect(t.isNative).to.equal(true);
+    });
     // ===NATIVE_MARKER===
   });
 
