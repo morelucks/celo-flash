@@ -1606,5 +1606,27 @@ describe("CeloFlashTournament — createTournament (dual-asset)", function () {
     // ===NATIVE_REVERT_MARKER===
   });
 
+  describe("Reverts — USDm value handling", function () {
+    it("Should revert InvalidValueSent when native value is attached to a USDm tournament", async function () {
+      await expect(
+        tournament
+          .connect(creator)
+          .createTournament("USDm Cup", ENTRY_FEE, SEED_AMOUNT, DURATION, false, {
+            value: 1n,
+          })
+      ).to.be.revertedWithCustomError(tournament, "InvalidValueSent");
+    });
+
+    it("Should revert InvalidValueSent for a zero-seed USDm tournament with value", async function () {
+      await expect(
+        tournament
+          .connect(creator)
+          .createTournament("USDm Cup", ENTRY_FEE, 0n, DURATION, false, {
+            value: SEED_AMOUNT,
+          })
+      ).to.be.revertedWithCustomError(tournament, "InvalidValueSent");
+    });
+  });
+
   // ===INSERT_MARKER===
 });
