@@ -2374,5 +2374,24 @@ describe("CeloFlashTournament — claimPrize & cancelTournament", function () {
     // <<END:cancelled-double>>
   });
 
+  describe("Cancelled — non-participant reverts", function () {
+    it("Should revert NoPrizeToClaim for a non-participant on a cancelled USDm tournament", async function () {
+      const id = await cancelledTournament({ joiners: [players[0]] });
+
+      await expect(
+        tournament.connect(players[1]).claimPrize(id)
+      ).to.be.revertedWithCustomError(tournament, "NoPrizeToClaim");
+    });
+
+    it("Should revert NoPrizeToClaim for a non-participant on a cancelled native tournament", async function () {
+      const id = await cancelledTournament({ isNative: true, joiners: [players[0]] });
+
+      await expect(
+        tournament.connect(players[1]).claimPrize(id)
+      ).to.be.revertedWithCustomError(tournament, "NoPrizeToClaim");
+    });
+    // <<END:cancelled-nonparticipant>>
+  });
+
   // __CLAIM_TESTS_MARKER__
 });
