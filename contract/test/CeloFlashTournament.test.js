@@ -2113,5 +2113,21 @@ describe("CeloFlashTournament — claimPrize & cancelTournament", function () {
     // <<END:finalized-two-winner>>
   });
 
+  describe("Finalized — winner claims (native CELO)", function () {
+    it("Should pay the sole native winner via call{value} for the exact amount", async function () {
+      const id = await finalizedTournament({
+        isNative: true,
+        scorers: [{ player: players[0], score: 300 }],
+      });
+      const expected = poolFor(1);
+
+      await expect(tournament.connect(players[0]).claimPrize(id)).to.changeEtherBalance(
+        players[0],
+        expected
+      );
+    });
+    // <<END:finalized-winner-native>>
+  });
+
   // __CLAIM_TESTS_MARKER__
 });
