@@ -1973,5 +1973,21 @@ describe("CeloFlashTournament — claimPrize & cancelTournament", function () {
     }
   });
 
+  describe("Finalized — winner claims (USDm)", function () {
+    it("Should pay the sole winner the exact claimablePrize amount", async function () {
+      const id = await finalizedTournament({ scorers: [{ player: players[0], score: 300 }] });
+      const expected = poolFor(1);
+
+      expect(await tournament.claimablePrize(id, players[0].address)).to.equal(expected);
+
+      await expect(tournament.connect(players[0]).claimPrize(id)).to.changeTokenBalance(
+        usdm,
+        players[0],
+        expected
+      );
+    });
+    // <<END:finalized-winner-usdm>>
+  });
+
   // __CLAIM_TESTS_MARKER__
 });
