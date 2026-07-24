@@ -2393,5 +2393,18 @@ describe("CeloFlashTournament — claimPrize & cancelTournament", function () {
     // <<END:cancelled-nonparticipant>>
   });
 
+  describe("cancelTournament — seed refund & fee accounting", function () {
+    it("Should refund the USDm seed to the creator on cancellation", async function () {
+      const id = await createTournament();
+
+      await expect(tournament.connect(creator).cancelTournament(id)).to.changeTokenBalances(
+        usdm,
+        [tournament, creator],
+        [-SEED_AMOUNT, SEED_AMOUNT]
+      );
+    });
+    // <<END:cancel-accounting>>
+  });
+
   // __CLAIM_TESTS_MARKER__
 });
