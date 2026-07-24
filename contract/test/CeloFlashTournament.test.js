@@ -1491,6 +1491,19 @@ describe("CeloFlashTournament — createTournament (dual-asset)", function () {
       expect(t.startTime).to.equal(block.timestamp);
       expect(t.endTime).to.equal(BigInt(block.timestamp) + BigInt(DURATION));
     });
+    it("Should allow a zero seed with no token transfer", async function () {
+      await expect(
+        tournament
+          .connect(creator)
+          .createTournament("No Seed USDm", ENTRY_FEE, 0n, DURATION, false, {
+            value: 0n,
+          })
+      ).to.changeTokenBalances(usdm, [creator, tournament], [0n, 0n]);
+
+      const t = await tournament.tournaments(0);
+      expect(t.prizePool).to.equal(0n);
+      expect(t.seedAmount).to.equal(0n);
+    });
     // ===USDM_MARKER===
   });
 
