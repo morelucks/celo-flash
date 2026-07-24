@@ -1861,3 +1861,117 @@ describe("CeloFlashTournament — createTournament (dual-asset)", function () {
   });
 
 });
+
+describe("CeloFlashTournament — claimPrize & cancelTournament", function () {
+  const ENTRY_FEE = ethers.parseEther("10");
+  const SEED_AMOUNT = ethers.parseEther("20");
+  const DURATION = 3600; // 1 hour (MIN_DURATION)
+  const PROTOCOL_FEE_BPS = 500n;
+  const BPS_DENOMINATOR = 10_000n;
+
+  const FEE_PER_ENTRY = (ENTRY_FEE * PROTOCOL_FEE_BPS) / BPS_DENOMINATOR;
+  const PRIZE_PER_ENTRY = ENTRY_FEE - FEE_PER_ENTRY;
+  const SENTINEL = ethers.MaxUint256; // type(uint256).max — "already refunded" marker
+
+  let tournament;
+  let usdm;
+  let owner;
+  let verifier;
+  let feeRecipient;
+  let creator;
+  let players;
+
+  let nonceCounter = 0;
+
+  function uniqueNonce() {
+    return ethers.encodeBytes32String(`cp-nonce-${nonceCounter++}`);
+  }
+
+  async function signScore(tournamentId, playerAddress, score, nonce) {
+    const messageHash = ethers.solidityPackedKeccak256(
+      ["uint256", "address", "uint256", "bytes32"],
+      [tournamentId, playerAddress, score, nonce]
+    );
+    return verifier.signMessage(ethers.getBytes(messageHash));
+  }
+
+  async function createTournament({ isNative = false, seed = SEED_AMOUNT, entryFee = ENTRY_FEE } = {}) {
+    const id = await tournament.nextTournamentId();
+    await tournament
+      .connect(creator)
+      .createTournament("Claim Cup", entryFee, seed, DURATION, isNative, {
+        value: isNative ? seed : 0n,
+      });
+    return id;
+  }
+
+  async function join(id, player, isNative) {
+    await tournament
+      .connect(player)
+      .joinTournament(id, { value: isNative ? ENTRY_FEE : 0n });
+  }
+
+  async function submit(id, player, score) {
+    const nonce = uniqueNonce();
+    const sig = await signScore(id, player.address, score, nonce);
+    await tournament.connect(player).submitScore(id, score, nonce, sig);
+  }
+
+  // Build a finalized tournament with a ranked leaderboard.
+  //   scorers: [{ player, score }] — highest score becomes 1st place.
+  //   noScoreJoiners: players that pay entry but never submit a score.
+  async function finalizedTournament({ isNative = false, scorers = [], noScoreJoiners = [] } = {}) {
+    const id = await createTournament({ isNative });
+    for (const p of [...scorers.map((s) => s.player), ...noScoreJoiners]) {
+      await join(id, p, isNative);
+    }
+    for (const { player, score } of scorers) {
+      await submit(id, player, score);
+    }
+    await time.increase(DURATION + 1);
+    await tournament.finalizeTournament(id);
+    return id;
+  }
+
+  // Build a cancelled tournament after the given players have joined.
+  async function cancelledTournament({ isNative = false, joiners = [] } = {}) {
+    const id = await createTournament({ isNative });
+    for (const p of joiners) {
+      await join(id, p, isNative);
+    }
+    await tournament.connect(creator).cancelTournament(id);
+    return id;
+  }
+
+  // Total prize pool for a finalized tournament: seed + prize contribution per joiner.
+  function poolFor(joinerCount, seed = SEED_AMOUNT) {
+    return seed + PRIZE_PER_ENTRY * BigInt(joinerCount);
+  }
+
+  beforeEach(async function () {
+    [owner, verifier, feeRecipient, creator, ...players] = await ethers.getSigners();
+    players = players.slice(0, 6);
+
+    const MockERC20 = await ethers.getContractFactory("MockERC20");
+    usdm = await MockERC20.deploy("Mock USDm", "USDm", 18);
+    await usdm.waitForDeployment();
+
+    const CeloFlashTournament = await ethers.getContractFactory("CeloFlashTournament");
+    tournament = await CeloFlashTournament.deploy(
+      await usdm.getAddress(),
+      verifier.address,
+      feeRecipient.address
+    );
+    await tournament.waitForDeployment();
+
+    await usdm.mint(creator.address, ethers.parseEther("1000"));
+    await usdm.connect(creator).approve(await tournament.getAddress(), ethers.MaxUint256);
+
+    for (const player of players) {
+      await usdm.mint(player.address, ethers.parseEther("1000"));
+      await usdm.connect(player).approve(await tournament.getAddress(), ethers.MaxUint256);
+    }
+  });
+
+  // __CLAIM_TESTS_MARKER__
+});
