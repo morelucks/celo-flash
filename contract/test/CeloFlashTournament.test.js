@@ -2301,5 +2301,34 @@ describe("CeloFlashTournament — claimPrize & cancelTournament", function () {
     // <<END:cancelled-usdm>>
   });
 
+  describe("Cancelled — participant refunds (native CELO)", function () {
+    it("Should refund a native participant via call{value}", async function () {
+      const id = await cancelledTournament({ isNative: true, joiners: [players[0]] });
+
+      await expect(tournament.connect(players[0]).claimPrize(id)).to.changeEtherBalance(
+        players[0],
+        ENTRY_FEE
+      );
+    });
+
+    it("Should reduce the contract native balance by the refunded entry fee", async function () {
+      const id = await cancelledTournament({ isNative: true, joiners: [players[0]] });
+
+      await expect(tournament.connect(players[0]).claimPrize(id)).to.changeEtherBalance(
+        tournament,
+        -ENTRY_FEE
+      );
+    });
+
+    it("Should emit PrizeClaimed for a native refund", async function () {
+      const id = await cancelledTournament({ isNative: true, joiners: [players[0]] });
+
+      await expect(tournament.connect(players[0]).claimPrize(id))
+        .to.emit(tournament, "PrizeClaimed")
+        .withArgs(id, players[0].address, ENTRY_FEE);
+    });
+    // <<END:cancelled-native>>
+  });
+
   // __CLAIM_TESTS_MARKER__
 });
