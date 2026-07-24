@@ -1660,6 +1660,16 @@ describe("CeloFlashTournament — createTournament (dual-asset)", function () {
       const t = await tournament.tournaments(0);
       expect(t.entryFee).to.equal(MAX_ENTRY_FEE);
     });
+    it("Should accept a zero entry fee (free tournament)", async function () {
+      await tournament
+        .connect(creator)
+        .createTournament("Free USDm", 0n, SEED_AMOUNT, DURATION, false, {
+          value: 0n,
+        });
+
+      const t = await tournament.tournaments(0);
+      expect(t.entryFee).to.equal(0n);
+    });
     // ===ENTRY_FEE_MARKER===
   });
 
