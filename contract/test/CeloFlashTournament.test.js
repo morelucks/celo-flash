@@ -1828,6 +1828,22 @@ describe("CeloFlashTournament — createTournament (dual-asset)", function () {
       expect((await tournament.tournaments(2)).id).to.equal(2n);
       expect(await tournament.nextTournamentId()).to.equal(3n);
     });
+    it("Should keep ids sequential across mixed USDm and native creations", async function () {
+      await tournament
+        .connect(creator)
+        .createTournament("USDm", ENTRY_FEE, SEED_AMOUNT, DURATION, false, { value: 0n });
+      await tournament
+        .connect(creator)
+        .createTournament("CELO", ENTRY_FEE, SEED_AMOUNT, DURATION, true, { value: SEED_AMOUNT });
+      await tournament
+        .connect(creator)
+        .createTournament("USDm2", ENTRY_FEE, 0n, DURATION, false, { value: 0n });
+
+      expect((await tournament.tournaments(0)).isNative).to.equal(false);
+      expect((await tournament.tournaments(1)).isNative).to.equal(true);
+      expect((await tournament.tournaments(2)).isNative).to.equal(false);
+      expect(await tournament.nextTournamentId()).to.equal(3n);
+    });
     // ===ID_MARKER===
   });
 
