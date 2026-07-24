@@ -1352,3 +1352,512 @@ describe("CeloFlashTournament — joinTournament Extended Coverage", function ()
 // Tournament cancellation fee reduction check
 
 // Tournament 5-entry balance accounting invariant
+
+describe("CeloFlashTournament — createTournament (dual-asset)", function () {
+  const ENTRY_FEE = ethers.parseEther("10");
+  const SEED_AMOUNT = ethers.parseEther("20");
+  const DURATION = 3600; // 1 hour (MIN_DURATION)
+
+  // Contract-mirrored constants for boundary assertions.
+  const MAX_ENTRY_FEE = ethers.parseEther("100"); // 100e18
+  const MIN_DURATION = 3600; // 1 hour
+  const MAX_DURATION = 7 * 24 * 3600; // 7 days
+
+  let tournament;
+  let usdm;
+  let owner;
+  let verifier;
+  let feeRecipient;
+  let creator;
+  let other;
+
+  beforeEach(async function () {
+    [owner, verifier, feeRecipient, creator, other] = await ethers.getSigners();
+
+    const MockERC20 = await ethers.getContractFactory("MockERC20");
+    usdm = await MockERC20.deploy("Mock USDm", "USDm", 18);
+    await usdm.waitForDeployment();
+
+    const CeloFlashTournament = await ethers.getContractFactory("CeloFlashTournament");
+    tournament = await CeloFlashTournament.deploy(
+      await usdm.getAddress(),
+      verifier.address,
+      feeRecipient.address
+    );
+    await tournament.waitForDeployment();
+
+    await usdm.mint(creator.address, ethers.parseEther("1000"));
+    await usdm
+      .connect(creator)
+      .approve(await tournament.getAddress(), ethers.MaxUint256);
+  });
+
+  describe("USDm mode — success", function () {
+    it("Should pull the seed from the creator via safeTransferFrom", async function () {
+      await expect(
+        tournament
+          .connect(creator)
+          .createTournament("USDm Cup", ENTRY_FEE, SEED_AMOUNT, DURATION, false, {
+            value: 0n,
+          })
+      ).to.changeTokenBalances(
+        usdm,
+        [creator, tournament],
+        [-SEED_AMOUNT, SEED_AMOUNT]
+      );
+    });
+
+    it("Should set prizePool equal to the seed amount", async function () {
+      await tournament
+        .connect(creator)
+        .createTournament("USDm Cup", ENTRY_FEE, SEED_AMOUNT, DURATION, false, {
+          value: 0n,
+        });
+
+      const t = await tournament.tournaments(0);
+      expect(t.prizePool).to.equal(SEED_AMOUNT);
+    });
+    it("Should record the seedAmount on the tournament struct", async function () {
+      await tournament
+        .connect(creator)
+        .createTournament("USDm Cup", ENTRY_FEE, SEED_AMOUNT, DURATION, false, {
+          value: 0n,
+        });
+
+      const t = await tournament.tournaments(0);
+      expect(t.seedAmount).to.equal(SEED_AMOUNT);
+    });
+    it("Should flag the tournament as non-native (isNative == false)", async function () {
+      await tournament
+        .connect(creator)
+        .createTournament("USDm Cup", ENTRY_FEE, SEED_AMOUNT, DURATION, false, {
+          value: 0n,
+        });
+
+      const t = await tournament.tournaments(0);
+      expect(t.isNative).to.equal(false);
+    });
+    it("Should record msg.sender as the tournament creator", async function () {
+      await tournament
+        .connect(creator)
+        .createTournament("USDm Cup", ENTRY_FEE, SEED_AMOUNT, DURATION, false, {
+          value: 0n,
+        });
+
+      const t = await tournament.tournaments(0);
+      expect(t.creator).to.equal(creator.address);
+    });
+    it("Should store the tournament name verbatim", async function () {
+      await tournament
+        .connect(creator)
+        .createTournament("Weekend USDm Blitz", ENTRY_FEE, SEED_AMOUNT, DURATION, false, {
+          value: 0n,
+        });
+
+      const t = await tournament.tournaments(0);
+      expect(t.name).to.equal("Weekend USDm Blitz");
+    });
+    it("Should store the entry fee on the tournament struct", async function () {
+      await tournament
+        .connect(creator)
+        .createTournament("USDm Cup", ENTRY_FEE, SEED_AMOUNT, DURATION, false, {
+          value: 0n,
+        });
+
+      const t = await tournament.tournaments(0);
+      expect(t.entryFee).to.equal(ENTRY_FEE);
+    });
+    it("Should mark a freshly created tournament as Active", async function () {
+      await tournament
+        .connect(creator)
+        .createTournament("USDm Cup", ENTRY_FEE, SEED_AMOUNT, DURATION, false, {
+          value: 0n,
+        });
+
+      const t = await tournament.tournaments(0);
+      // TournamentStatus.Active == 0
+      expect(t.status).to.equal(0);
+    });
+    it("Should set startTime to the creation block and endTime to start + duration", async function () {
+      const tx = await tournament
+        .connect(creator)
+        .createTournament("USDm Cup", ENTRY_FEE, SEED_AMOUNT, DURATION, false, {
+          value: 0n,
+        });
+      const receipt = await tx.wait();
+      const block = await ethers.provider.getBlock(receipt.blockNumber);
+
+      const t = await tournament.tournaments(0);
+      expect(t.startTime).to.equal(block.timestamp);
+      expect(t.endTime).to.equal(BigInt(block.timestamp) + BigInt(DURATION));
+    });
+    it("Should allow a zero seed with no token transfer", async function () {
+      await expect(
+        tournament
+          .connect(creator)
+          .createTournament("No Seed USDm", ENTRY_FEE, 0n, DURATION, false, {
+            value: 0n,
+          })
+      ).to.changeTokenBalances(usdm, [creator, tournament], [0n, 0n]);
+
+      const t = await tournament.tournaments(0);
+      expect(t.prizePool).to.equal(0n);
+      expect(t.seedAmount).to.equal(0n);
+    });
+    it("Should return the newly assigned tournamentId", async function () {
+      const returnedId = await tournament
+        .connect(creator)
+        .createTournament.staticCall("USDm Cup", ENTRY_FEE, SEED_AMOUNT, DURATION, false, {
+          value: 0n,
+        });
+
+      expect(returnedId).to.equal(0n);
+    });
+  });
+
+  describe("Native CELO mode — success", function () {
+    it("Should accept msg.value equal to the seed and move CELO into the contract", async function () {
+      await expect(
+        tournament
+          .connect(creator)
+          .createTournament("CELO Cup", ENTRY_FEE, SEED_AMOUNT, DURATION, true, {
+            value: SEED_AMOUNT,
+          })
+      ).to.changeEtherBalances(
+        [creator, tournament],
+        [-SEED_AMOUNT, SEED_AMOUNT]
+      );
+    });
+    it("Should set prizePool equal to the native seed amount", async function () {
+      await tournament
+        .connect(creator)
+        .createTournament("CELO Cup", ENTRY_FEE, SEED_AMOUNT, DURATION, true, {
+          value: SEED_AMOUNT,
+        });
+
+      const t = await tournament.tournaments(0);
+      expect(t.prizePool).to.equal(SEED_AMOUNT);
+      expect(t.seedAmount).to.equal(SEED_AMOUNT);
+    });
+    it("Should flag the tournament as native (isNative == true)", async function () {
+      await tournament
+        .connect(creator)
+        .createTournament("CELO Cup", ENTRY_FEE, SEED_AMOUNT, DURATION, true, {
+          value: SEED_AMOUNT,
+        });
+
+      const t = await tournament.tournaments(0);
+      expect(t.isNative).to.equal(true);
+    });
+    it("Should allow a zero seed with zero msg.value", async function () {
+      await expect(
+        tournament
+          .connect(creator)
+          .createTournament("No Seed CELO", ENTRY_FEE, 0n, DURATION, true, {
+            value: 0n,
+          })
+      ).to.changeEtherBalances([creator, tournament], [0n, 0n]);
+
+      const t = await tournament.tournaments(0);
+      expect(t.prizePool).to.equal(0n);
+      expect(t.isNative).to.equal(true);
+    });
+    it("Should not move any USDm when creating a native tournament", async function () {
+      await expect(
+        tournament
+          .connect(creator)
+          .createTournament("CELO Cup", ENTRY_FEE, SEED_AMOUNT, DURATION, true, {
+            value: SEED_AMOUNT,
+          })
+      ).to.changeTokenBalances(usdm, [creator, tournament], [0n, 0n]);
+    });
+  });
+
+  describe("Reverts — native value handling", function () {
+    it("Should revert InvalidValueSent when msg.value is less than the seed", async function () {
+      await expect(
+        tournament
+          .connect(creator)
+          .createTournament("CELO Cup", ENTRY_FEE, SEED_AMOUNT, DURATION, true, {
+            value: SEED_AMOUNT - 1n,
+          })
+      ).to.be.revertedWithCustomError(tournament, "InvalidValueSent");
+    });
+    it("Should revert InvalidValueSent when msg.value exceeds the seed", async function () {
+      await expect(
+        tournament
+          .connect(creator)
+          .createTournament("CELO Cup", ENTRY_FEE, SEED_AMOUNT, DURATION, true, {
+            value: SEED_AMOUNT + 1n,
+          })
+      ).to.be.revertedWithCustomError(tournament, "InvalidValueSent");
+    });
+    it("Should revert InvalidValueSent when seed is positive but no value is sent", async function () {
+      await expect(
+        tournament
+          .connect(creator)
+          .createTournament("CELO Cup", ENTRY_FEE, SEED_AMOUNT, DURATION, true, {
+            value: 0n,
+          })
+      ).to.be.revertedWithCustomError(tournament, "InvalidValueSent");
+    });
+  });
+
+  describe("Reverts — USDm value handling", function () {
+    it("Should revert InvalidValueSent when native value is attached to a USDm tournament", async function () {
+      await expect(
+        tournament
+          .connect(creator)
+          .createTournament("USDm Cup", ENTRY_FEE, SEED_AMOUNT, DURATION, false, {
+            value: 1n,
+          })
+      ).to.be.revertedWithCustomError(tournament, "InvalidValueSent");
+    });
+
+    it("Should revert InvalidValueSent for a zero-seed USDm tournament with value", async function () {
+      await expect(
+        tournament
+          .connect(creator)
+          .createTournament("USDm Cup", ENTRY_FEE, 0n, DURATION, false, {
+            value: SEED_AMOUNT,
+          })
+      ).to.be.revertedWithCustomError(tournament, "InvalidValueSent");
+    });
+  });
+
+  describe("Reverts — name validation", function () {
+    it("Should revert EmptyName when the name is an empty string", async function () {
+      await expect(
+        tournament
+          .connect(creator)
+          .createTournament("", ENTRY_FEE, SEED_AMOUNT, DURATION, false, {
+            value: 0n,
+          })
+      ).to.be.revertedWithCustomError(tournament, "EmptyName");
+    });
+  });
+
+  describe("Reverts — entry fee bounds", function () {
+    it("Should revert InvalidEntryFee when entry fee exceeds MAX_ENTRY_FEE", async function () {
+      await expect(
+        tournament
+          .connect(creator)
+          .createTournament("USDm Cup", MAX_ENTRY_FEE + 1n, SEED_AMOUNT, DURATION, false, {
+            value: 0n,
+          })
+      ).to.be.revertedWithCustomError(tournament, "InvalidEntryFee");
+    });
+    it("Should accept an entry fee exactly equal to MAX_ENTRY_FEE (boundary)", async function () {
+      await tournament
+        .connect(creator)
+        .createTournament("USDm Cup", MAX_ENTRY_FEE, SEED_AMOUNT, DURATION, false, {
+          value: 0n,
+        });
+
+      const t = await tournament.tournaments(0);
+      expect(t.entryFee).to.equal(MAX_ENTRY_FEE);
+    });
+    it("Should accept a zero entry fee (free tournament)", async function () {
+      await tournament
+        .connect(creator)
+        .createTournament("Free USDm", 0n, SEED_AMOUNT, DURATION, false, {
+          value: 0n,
+        });
+
+      const t = await tournament.tournaments(0);
+      expect(t.entryFee).to.equal(0n);
+    });
+  });
+
+  describe("Reverts — duration bounds", function () {
+    it("Should revert InvalidDuration when duration is below MIN_DURATION", async function () {
+      await expect(
+        tournament
+          .connect(creator)
+          .createTournament("USDm Cup", ENTRY_FEE, SEED_AMOUNT, MIN_DURATION - 1, false, {
+            value: 0n,
+          })
+      ).to.be.revertedWithCustomError(tournament, "InvalidDuration");
+    });
+    it("Should accept a duration exactly equal to MIN_DURATION (boundary)", async function () {
+      const tx = await tournament
+        .connect(creator)
+        .createTournament("USDm Cup", ENTRY_FEE, SEED_AMOUNT, MIN_DURATION, false, {
+          value: 0n,
+        });
+      const receipt = await tx.wait();
+      const block = await ethers.provider.getBlock(receipt.blockNumber);
+
+      const t = await tournament.tournaments(0);
+      expect(t.endTime - t.startTime).to.equal(BigInt(MIN_DURATION));
+      expect(t.startTime).to.equal(block.timestamp);
+    });
+    it("Should revert InvalidDuration when duration exceeds MAX_DURATION", async function () {
+      await expect(
+        tournament
+          .connect(creator)
+          .createTournament("USDm Cup", ENTRY_FEE, SEED_AMOUNT, MAX_DURATION + 1, false, {
+            value: 0n,
+          })
+      ).to.be.revertedWithCustomError(tournament, "InvalidDuration");
+    });
+    it("Should accept a duration exactly equal to MAX_DURATION (boundary)", async function () {
+      await tournament
+        .connect(creator)
+        .createTournament("USDm Cup", ENTRY_FEE, SEED_AMOUNT, MAX_DURATION, false, {
+          value: 0n,
+        });
+
+      const t = await tournament.tournaments(0);
+      expect(t.endTime - t.startTime).to.equal(BigInt(MAX_DURATION));
+    });
+    it("Should revert InvalidDuration when duration is zero", async function () {
+      await expect(
+        tournament
+          .connect(creator)
+          .createTournament("USDm Cup", ENTRY_FEE, SEED_AMOUNT, 0, false, {
+            value: 0n,
+          })
+      ).to.be.revertedWithCustomError(tournament, "InvalidDuration");
+    });
+  });
+
+  describe("TournamentCreated event", function () {
+    it("Should emit TournamentCreated with all fields for a USDm tournament", async function () {
+      const tx = await tournament
+        .connect(creator)
+        .createTournament("USDm Cup", ENTRY_FEE, SEED_AMOUNT, DURATION, false, {
+          value: 0n,
+        });
+      const receipt = await tx.wait();
+      const block = await ethers.provider.getBlock(receipt.blockNumber);
+      const start = BigInt(block.timestamp);
+
+      await expect(tx)
+        .to.emit(tournament, "TournamentCreated")
+        .withArgs(
+          0,
+          creator.address,
+          "USDm Cup",
+          ENTRY_FEE,
+          SEED_AMOUNT,
+          start,
+          start + BigInt(DURATION),
+          false
+        );
+    });
+    it("Should emit TournamentCreated with isNative true for a native tournament", async function () {
+      const tx = await tournament
+        .connect(creator)
+        .createTournament("CELO Cup", ENTRY_FEE, SEED_AMOUNT, DURATION, true, {
+          value: SEED_AMOUNT,
+        });
+      const receipt = await tx.wait();
+      const block = await ethers.provider.getBlock(receipt.blockNumber);
+      const start = BigInt(block.timestamp);
+
+      await expect(tx)
+        .to.emit(tournament, "TournamentCreated")
+        .withArgs(
+          0,
+          creator.address,
+          "CELO Cup",
+          ENTRY_FEE,
+          SEED_AMOUNT,
+          start,
+          start + BigInt(DURATION),
+          true
+        );
+    });
+    it("Should emit the same startTime and endTime in the event as stored on the struct", async function () {
+      const tx = await tournament
+        .connect(creator)
+        .createTournament("USDm Cup", ENTRY_FEE, SEED_AMOUNT, DURATION, false, {
+          value: 0n,
+        });
+
+      const t = await tournament.tournaments(0);
+      await expect(tx)
+        .to.emit(tournament, "TournamentCreated")
+        .withArgs(
+          0,
+          creator.address,
+          "USDm Cup",
+          ENTRY_FEE,
+          SEED_AMOUNT,
+          t.startTime,
+          t.endTime,
+          false
+        );
+    });
+  });
+
+  describe("nextTournamentId sequencing", function () {
+    it("Should assign id 0 to the very first tournament", async function () {
+      expect(await tournament.nextTournamentId()).to.equal(0n);
+
+      await tournament
+        .connect(creator)
+        .createTournament("First", ENTRY_FEE, 0n, DURATION, false, { value: 0n });
+
+      const t = await tournament.tournaments(0);
+      expect(t.id).to.equal(0n);
+    });
+    it("Should increment nextTournamentId to 1 after one creation", async function () {
+      await tournament
+        .connect(creator)
+        .createTournament("First", ENTRY_FEE, 0n, DURATION, false, { value: 0n });
+
+      expect(await tournament.nextTournamentId()).to.equal(1n);
+    });
+    it("Should assign sequential ids 0, 1, 2 across three creations", async function () {
+      for (let i = 0; i < 3; i++) {
+        await tournament
+          .connect(creator)
+          .createTournament(`T${i}`, ENTRY_FEE, 0n, DURATION, false, { value: 0n });
+      }
+
+      expect((await tournament.tournaments(0)).id).to.equal(0n);
+      expect((await tournament.tournaments(1)).id).to.equal(1n);
+      expect((await tournament.tournaments(2)).id).to.equal(2n);
+      expect(await tournament.nextTournamentId()).to.equal(3n);
+    });
+    it("Should keep ids sequential across mixed USDm and native creations", async function () {
+      await tournament
+        .connect(creator)
+        .createTournament("USDm", ENTRY_FEE, SEED_AMOUNT, DURATION, false, { value: 0n });
+      await tournament
+        .connect(creator)
+        .createTournament("CELO", ENTRY_FEE, SEED_AMOUNT, DURATION, true, { value: SEED_AMOUNT });
+      await tournament
+        .connect(creator)
+        .createTournament("USDm2", ENTRY_FEE, 0n, DURATION, false, { value: 0n });
+
+      expect((await tournament.tournaments(0)).isNative).to.equal(false);
+      expect((await tournament.tournaments(1)).isNative).to.equal(true);
+      expect((await tournament.tournaments(2)).isNative).to.equal(false);
+      expect(await tournament.nextTournamentId()).to.equal(3n);
+    });
+  });
+
+  describe("Initial tournament state", function () {
+    it("Should leave winner unset and winningScore at zero on creation", async function () {
+      await tournament
+        .connect(creator)
+        .createTournament("USDm Cup", ENTRY_FEE, SEED_AMOUNT, DURATION, false, { value: 0n });
+
+      const t = await tournament.tournaments(0);
+      expect(t.winner).to.equal(ethers.ZeroAddress);
+      expect(t.winningScore).to.equal(0n);
+    });
+    it("Should start with a zero participant count", async function () {
+      await tournament
+        .connect(creator)
+        .createTournament("USDm Cup", ENTRY_FEE, SEED_AMOUNT, DURATION, false, { value: 0n });
+
+      const t = await tournament.tournaments(0);
+      expect(t.participantCount).to.equal(0n);
+    });
+  });
+
+});
