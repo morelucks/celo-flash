@@ -2200,5 +2200,18 @@ describe("CeloFlashTournament — claimPrize & cancelTournament", function () {
     // <<END:finalized-non-winner>>
   });
 
+  describe("Finalized — double claim prevention", function () {
+    it("Should revert NoPrizeToClaim on a second USDm claim by the winner", async function () {
+      const id = await finalizedTournament({ scorers: [{ player: players[0], score: 300 }] });
+
+      await tournament.connect(players[0]).claimPrize(id);
+
+      await expect(
+        tournament.connect(players[0]).claimPrize(id)
+      ).to.be.revertedWithCustomError(tournament, "NoPrizeToClaim");
+    });
+    // <<END:finalized-double>>
+  });
+
   // __CLAIM_TESTS_MARKER__
 });
