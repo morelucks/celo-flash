@@ -1650,6 +1650,16 @@ describe("CeloFlashTournament — createTournament (dual-asset)", function () {
           })
       ).to.be.revertedWithCustomError(tournament, "InvalidEntryFee");
     });
+    it("Should accept an entry fee exactly equal to MAX_ENTRY_FEE (boundary)", async function () {
+      await tournament
+        .connect(creator)
+        .createTournament("USDm Cup", MAX_ENTRY_FEE, SEED_AMOUNT, DURATION, false, {
+          value: 0n,
+        });
+
+      const t = await tournament.tournaments(0);
+      expect(t.entryFee).to.equal(MAX_ENTRY_FEE);
+    });
     // ===ENTRY_FEE_MARKER===
   });
 
