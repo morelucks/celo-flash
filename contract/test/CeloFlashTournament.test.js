@@ -1457,6 +1457,16 @@ describe("CeloFlashTournament — createTournament (dual-asset)", function () {
       const t = await tournament.tournaments(0);
       expect(t.name).to.equal("Weekend USDm Blitz");
     });
+    it("Should store the entry fee on the tournament struct", async function () {
+      await tournament
+        .connect(creator)
+        .createTournament("USDm Cup", ENTRY_FEE, SEED_AMOUNT, DURATION, false, {
+          value: 0n,
+        });
+
+      const t = await tournament.tournaments(0);
+      expect(t.entryFee).to.equal(ENTRY_FEE);
+    });
     // ===USDM_MARKER===
   });
 
