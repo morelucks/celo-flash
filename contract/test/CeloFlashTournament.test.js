@@ -1847,5 +1847,18 @@ describe("CeloFlashTournament — createTournament (dual-asset)", function () {
     // ===ID_MARKER===
   });
 
+  describe("Initial tournament state", function () {
+    it("Should leave winner unset and winningScore at zero on creation", async function () {
+      await tournament
+        .connect(creator)
+        .createTournament("USDm Cup", ENTRY_FEE, SEED_AMOUNT, DURATION, false, { value: 0n });
+
+      const t = await tournament.tournaments(0);
+      expect(t.winner).to.equal(ethers.ZeroAddress);
+      expect(t.winningScore).to.equal(0n);
+    });
+    // ===STATE_MARKER===
+  });
+
   // ===INSERT_MARKER===
 });
