@@ -1478,6 +1478,19 @@ describe("CeloFlashTournament — createTournament (dual-asset)", function () {
       // TournamentStatus.Active == 0
       expect(t.status).to.equal(0);
     });
+    it("Should set startTime to the creation block and endTime to start + duration", async function () {
+      const tx = await tournament
+        .connect(creator)
+        .createTournament("USDm Cup", ENTRY_FEE, SEED_AMOUNT, DURATION, false, {
+          value: 0n,
+        });
+      const receipt = await tx.wait();
+      const block = await ethers.provider.getBlock(receipt.blockNumber);
+
+      const t = await tournament.tournaments(0);
+      expect(t.startTime).to.equal(block.timestamp);
+      expect(t.endTime).to.equal(BigInt(block.timestamp) + BigInt(DURATION));
+    });
     // ===USDM_MARKER===
   });
 
