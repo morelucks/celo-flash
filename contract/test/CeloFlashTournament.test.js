@@ -2902,5 +2902,26 @@ describe("CeloFlashTournament — claimPrize & cancelTournament", function () {
     // <<END:claimable-view>>
   });
 
+  describe("Cancelled — native double refund is a no-op", function () {
+    it("Should move no additional CELO on a reverted second native refund", async function () {
+      // Two joiners so the contract still holds one refund's worth of CELO
+      // after the first participant is refunded once.
+      const id = await cancelledTournament({ isNative: true, joiners: [players[0], players[1]] });
+      await tournament.connect(players[0]).claimPrize(id);
+
+      const balanceAfterFirst = await ethers.provider.getBalance(await tournament.getAddress());
+
+      await expect(
+        tournament.connect(players[0]).claimPrize(id)
+      ).to.be.revertedWithCustomError(tournament, "NoPrizeToClaim");
+
+      // The reverted second refund leaves the contract's native balance untouched.
+      expect(await ethers.provider.getBalance(await tournament.getAddress())).to.equal(
+        balanceAfterFirst
+      );
+    });
+    // <<END:native-double-noop>>
+  });
+
   // __CLAIM_TESTS_MARKER__
 });
