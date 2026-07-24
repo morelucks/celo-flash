@@ -2037,6 +2037,17 @@ describe("CeloFlashTournament — claimPrize & cancelTournament", function () {
         second
       );
     });
+    it("Should pay 3rd place 15% of the pool", async function () {
+      const id = await threeWinnerTournament();
+      const pool = poolFor(3);
+      const third = (pool * 1500n) / BPS_DENOMINATOR;
+
+      await expect(tournament.connect(players[2]).claimPrize(id)).to.changeTokenBalance(
+        usdm,
+        players[2],
+        third
+      );
+    });
     // <<END:finalized-distribution-usdm>>
   });
 
