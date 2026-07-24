@@ -2330,5 +2330,49 @@ describe("CeloFlashTournament — claimPrize & cancelTournament", function () {
     // <<END:cancelled-native>>
   });
 
+  describe("Cancelled — double refund prevention", function () {
+    it("Should revert NoPrizeToClaim on a second USDm refund", async function () {
+      const id = await cancelledTournament({ joiners: [players[0]] });
+      await tournament.connect(players[0]).claimPrize(id);
+
+      await expect(
+        tournament.connect(players[0]).claimPrize(id)
+      ).to.be.revertedWithCustomError(tournament, "NoPrizeToClaim");
+    });
+
+    it("Should revert NoPrizeToClaim on a second native refund", async function () {
+      const id = await cancelledTournament({ isNative: true, joiners: [players[0]] });
+      await tournament.connect(players[0]).claimPrize(id);
+
+      await expect(
+        tournament.connect(players[0]).claimPrize(id)
+      ).to.be.revertedWithCustomError(tournament, "NoPrizeToClaim");
+    });
+
+    it("Should keep the sentinel marker set after the first refund", async function () {
+      const id = await cancelledTournament({ joiners: [players[0]] });
+      await tournament.connect(players[0]).claimPrize(id);
+
+      await expect(
+        tournament.connect(players[0]).claimPrize(id)
+      ).to.be.revertedWithCustomError(tournament, "NoPrizeToClaim");
+
+      expect(await tournament.claimablePrize(id, players[0].address)).to.equal(SENTINEL);
+    });
+
+    it("Should move no additional USDm on a reverted second refund", async function () {
+      const id = await cancelledTournament({ joiners: [players[0]] });
+      await tournament.connect(players[0]).claimPrize(id);
+      const balanceAfterFirst = await usdm.balanceOf(players[0].address);
+
+      await expect(
+        tournament.connect(players[0]).claimPrize(id)
+      ).to.be.revertedWithCustomError(tournament, "NoPrizeToClaim");
+
+      expect(await usdm.balanceOf(players[0].address)).to.equal(balanceAfterFirst);
+    });
+    // <<END:cancelled-double>>
+  });
+
   // __CLAIM_TESTS_MARKER__
 });
