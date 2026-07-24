@@ -2153,5 +2153,28 @@ describe("CeloFlashTournament — claimPrize & cancelTournament", function () {
     // <<END:finalized-winner-native>>
   });
 
+  describe("Finalized — non-winner reverts", function () {
+    // players[0..2] score & rank; players[3] joins but never scores.
+    async function tournamentWithNonWinner() {
+      return finalizedTournament({
+        scorers: [
+          { player: players[0], score: 300 },
+          { player: players[1], score: 200 },
+          { player: players[2], score: 100 },
+        ],
+        noScoreJoiners: [players[3]],
+      });
+    }
+
+    it("Should revert NoPrizeToClaim for a joined player outside the top three", async function () {
+      const id = await tournamentWithNonWinner();
+
+      await expect(
+        tournament.connect(players[3]).claimPrize(id)
+      ).to.be.revertedWithCustomError(tournament, "NoPrizeToClaim");
+    });
+    // <<END:finalized-non-winner>>
+  });
+
   // __CLAIM_TESTS_MARKER__
 });
