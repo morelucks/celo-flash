@@ -1861,3 +1861,1067 @@ describe("CeloFlashTournament — createTournament (dual-asset)", function () {
   });
 
 });
+
+describe("CeloFlashTournament — claimPrize & cancelTournament", function () {
+  const ENTRY_FEE = ethers.parseEther("10");
+  const SEED_AMOUNT = ethers.parseEther("20");
+  const DURATION = 3600; // 1 hour (MIN_DURATION)
+  const PROTOCOL_FEE_BPS = 500n;
+  const BPS_DENOMINATOR = 10_000n;
+
+  const FEE_PER_ENTRY = (ENTRY_FEE * PROTOCOL_FEE_BPS) / BPS_DENOMINATOR;
+  const PRIZE_PER_ENTRY = ENTRY_FEE - FEE_PER_ENTRY;
+  const SENTINEL = ethers.MaxUint256; // type(uint256).max — "already refunded" marker
+
+  let tournament;
+  let usdm;
+  let owner;
+  let verifier;
+  let feeRecipient;
+  let creator;
+  let players;
+
+  let nonceCounter = 0;
+
+  function uniqueNonce() {
+    return ethers.encodeBytes32String(`cp-nonce-${nonceCounter++}`);
+  }
+
+  async function signScore(tournamentId, playerAddress, score, nonce) {
+    const messageHash = ethers.solidityPackedKeccak256(
+      ["uint256", "address", "uint256", "bytes32"],
+      [tournamentId, playerAddress, score, nonce]
+    );
+    return verifier.signMessage(ethers.getBytes(messageHash));
+  }
+
+  async function createTournament({ isNative = false, seed = SEED_AMOUNT, entryFee = ENTRY_FEE } = {}) {
+    const id = await tournament.nextTournamentId();
+    await tournament
+      .connect(creator)
+      .createTournament("Claim Cup", entryFee, seed, DURATION, isNative, {
+        value: isNative ? seed : 0n,
+      });
+    return id;
+  }
+
+  async function join(id, player, isNative) {
+    await tournament
+      .connect(player)
+      .joinTournament(id, { value: isNative ? ENTRY_FEE : 0n });
+  }
+
+  async function submit(id, player, score) {
+    const nonce = uniqueNonce();
+    const sig = await signScore(id, player.address, score, nonce);
+    await tournament.connect(player).submitScore(id, score, nonce, sig);
+  }
+
+  // Build a finalized tournament with a ranked leaderboard.
+  //   scorers: [{ player, score }] — highest score becomes 1st place.
+  //   noScoreJoiners: players that pay entry but never submit a score.
+  async function finalizedTournament({ isNative = false, scorers = [], noScoreJoiners = [] } = {}) {
+    const id = await createTournament({ isNative });
+    for (const p of [...scorers.map((s) => s.player), ...noScoreJoiners]) {
+      await join(id, p, isNative);
+    }
+    for (const { player, score } of scorers) {
+      await submit(id, player, score);
+    }
+    await time.increase(DURATION + 1);
+    await tournament.finalizeTournament(id);
+    return id;
+  }
+
+  // Build a cancelled tournament after the given players have joined.
+  async function cancelledTournament({ isNative = false, joiners = [] } = {}) {
+    const id = await createTournament({ isNative });
+    for (const p of joiners) {
+      await join(id, p, isNative);
+    }
+    await tournament.connect(creator).cancelTournament(id);
+    return id;
+  }
+
+  // Total prize pool for a finalized tournament: seed + prize contribution per joiner.
+  function poolFor(joinerCount, seed = SEED_AMOUNT) {
+    return seed + PRIZE_PER_ENTRY * BigInt(joinerCount);
+  }
+
+  beforeEach(async function () {
+    [owner, verifier, feeRecipient, creator, ...players] = await ethers.getSigners();
+    players = players.slice(0, 6);
+
+    const MockERC20 = await ethers.getContractFactory("MockERC20");
+    usdm = await MockERC20.deploy("Mock USDm", "USDm", 18);
+    await usdm.waitForDeployment();
+
+    const CeloFlashTournament = await ethers.getContractFactory("CeloFlashTournament");
+    tournament = await CeloFlashTournament.deploy(
+      await usdm.getAddress(),
+      verifier.address,
+      feeRecipient.address
+    );
+    await tournament.waitForDeployment();
+
+    await usdm.mint(creator.address, ethers.parseEther("1000"));
+    await usdm.connect(creator).approve(await tournament.getAddress(), ethers.MaxUint256);
+
+    for (const player of players) {
+      await usdm.mint(player.address, ethers.parseEther("1000"));
+      await usdm.connect(player).approve(await tournament.getAddress(), ethers.MaxUint256);
+    }
+  });
+
+  describe("Finalized — winner claims (USDm)", function () {
+    it("Should pay the sole winner the exact claimablePrize amount", async function () {
+      const id = await finalizedTournament({ scorers: [{ player: players[0], score: 300 }] });
+      const expected = poolFor(1);
+
+      expect(await tournament.claimablePrize(id, players[0].address)).to.equal(expected);
+
+      await expect(tournament.connect(players[0]).claimPrize(id)).to.changeTokenBalance(
+        usdm,
+        players[0],
+        expected
+      );
+    });
+    it("Should reduce the contract USDm balance by the amount paid to the winner", async function () {
+      const id = await finalizedTournament({ scorers: [{ player: players[0], score: 300 }] });
+      const expected = poolFor(1);
+
+      await expect(tournament.connect(players[0]).claimPrize(id)).to.changeTokenBalance(
+        usdm,
+        tournament,
+        -expected
+      );
+    });
+    it("Should zero the winner's claimablePrize after a successful claim", async function () {
+      const id = await finalizedTournament({ scorers: [{ player: players[0], score: 300 }] });
+
+      await tournament.connect(players[0]).claimPrize(id);
+
+      expect(await tournament.claimablePrize(id, players[0].address)).to.equal(0n);
+    });
+    it("Should emit PrizeClaimed with the winner and exact amount", async function () {
+      const id = await finalizedTournament({ scorers: [{ player: players[0], score: 300 }] });
+      const expected = poolFor(1);
+
+      await expect(tournament.connect(players[0]).claimPrize(id))
+        .to.emit(tournament, "PrizeClaimed")
+        .withArgs(id, players[0].address, expected);
+    });
+    // <<END:finalized-winner-usdm>>
+  });
+
+  describe("Finalized — prize distribution claims (USDm)", function () {
+    // players[0]=1st (300), players[1]=2nd (200), players[2]=3rd (100)
+    async function threeWinnerTournament() {
+      return finalizedTournament({
+        scorers: [
+          { player: players[0], score: 300 },
+          { player: players[1], score: 200 },
+          { player: players[2], score: 100 },
+        ],
+      });
+    }
+
+    it("Should pay 2nd place 25% of the pool", async function () {
+      const id = await threeWinnerTournament();
+      const pool = poolFor(3);
+      const second = (pool * 2500n) / BPS_DENOMINATOR;
+
+      await expect(tournament.connect(players[1]).claimPrize(id)).to.changeTokenBalance(
+        usdm,
+        players[1],
+        second
+      );
+    });
+    it("Should pay 3rd place 15% of the pool", async function () {
+      const id = await threeWinnerTournament();
+      const pool = poolFor(3);
+      const third = (pool * 1500n) / BPS_DENOMINATOR;
+
+      await expect(tournament.connect(players[2]).claimPrize(id)).to.changeTokenBalance(
+        usdm,
+        players[2],
+        third
+      );
+    });
+    it("Should pay 1st place 60% plus any rounding dust", async function () {
+      const id = await threeWinnerTournament();
+      const pool = poolFor(3);
+      const second = (pool * 2500n) / BPS_DENOMINATOR;
+      const third = (pool * 1500n) / BPS_DENOMINATOR;
+      const first = pool - second - third; // 60% + leftover dust
+
+      await expect(tournament.connect(players[0]).claimPrize(id)).to.changeTokenBalance(
+        usdm,
+        players[0],
+        first
+      );
+    });
+
+    it("Should drain the pool exactly once fees are withdrawn and all three winners claim", async function () {
+      const id = await threeWinnerTournament();
+      const contractAddr = await tournament.getAddress();
+
+      await tournament.withdrawFees();
+      for (const p of [players[0], players[1], players[2]]) {
+        await tournament.connect(p).claimPrize(id);
+      }
+
+      expect(await usdm.balanceOf(contractAddr)).to.equal(0n);
+    });
+    // <<END:finalized-distribution-usdm>>
+  });
+
+  describe("Finalized — two-winner split (USDm)", function () {
+    async function twoWinnerTournament() {
+      return finalizedTournament({
+        scorers: [
+          { player: players[0], score: 300 },
+          { player: players[1], score: 200 },
+        ],
+      });
+    }
+
+    it("Should pay 1st place 70% of the pool with two winners", async function () {
+      const id = await twoWinnerTournament();
+      const pool = poolFor(2);
+      const first = (pool * 7000n) / BPS_DENOMINATOR;
+
+      await expect(tournament.connect(players[0]).claimPrize(id)).to.changeTokenBalance(
+        usdm,
+        players[0],
+        first
+      );
+    });
+
+    it("Should pay 2nd place the remaining 30% of the pool with two winners", async function () {
+      const id = await twoWinnerTournament();
+      const pool = poolFor(2);
+      const first = (pool * 7000n) / BPS_DENOMINATOR;
+      const second = pool - first;
+
+      await expect(tournament.connect(players[1]).claimPrize(id)).to.changeTokenBalance(
+        usdm,
+        players[1],
+        second
+      );
+    });
+    // <<END:finalized-two-winner>>
+  });
+
+  describe("Finalized — winner claims (native CELO)", function () {
+    it("Should pay the sole native winner via call{value} for the exact amount", async function () {
+      const id = await finalizedTournament({
+        isNative: true,
+        scorers: [{ player: players[0], score: 300 }],
+      });
+      const expected = poolFor(1);
+
+      await expect(tournament.connect(players[0]).claimPrize(id)).to.changeEtherBalance(
+        players[0],
+        expected
+      );
+    });
+    it("Should reduce the contract native balance by the amount paid to the winner", async function () {
+      const id = await finalizedTournament({
+        isNative: true,
+        scorers: [{ player: players[0], score: 300 }],
+      });
+      const expected = poolFor(1);
+
+      await expect(tournament.connect(players[0]).claimPrize(id)).to.changeEtherBalance(
+        tournament,
+        -expected
+      );
+    });
+
+    it("Should emit PrizeClaimed for a native winner claim", async function () {
+      const id = await finalizedTournament({
+        isNative: true,
+        scorers: [{ player: players[0], score: 300 }],
+      });
+      const expected = poolFor(1);
+
+      await expect(tournament.connect(players[0]).claimPrize(id))
+        .to.emit(tournament, "PrizeClaimed")
+        .withArgs(id, players[0].address, expected);
+    });
+    // <<END:finalized-winner-native>>
+  });
+
+  describe("Finalized — non-winner reverts", function () {
+    // players[0..2] score & rank; players[3] joins but never scores.
+    async function tournamentWithNonWinner() {
+      return finalizedTournament({
+        scorers: [
+          { player: players[0], score: 300 },
+          { player: players[1], score: 200 },
+          { player: players[2], score: 100 },
+        ],
+        noScoreJoiners: [players[3]],
+      });
+    }
+
+    it("Should revert NoPrizeToClaim for a joined player outside the top three", async function () {
+      const id = await tournamentWithNonWinner();
+
+      await expect(
+        tournament.connect(players[3]).claimPrize(id)
+      ).to.be.revertedWithCustomError(tournament, "NoPrizeToClaim");
+    });
+    it("Should revert NoPrizeToClaim for an address that never joined", async function () {
+      const id = await tournamentWithNonWinner();
+
+      await expect(
+        tournament.connect(players[5]).claimPrize(id)
+      ).to.be.revertedWithCustomError(tournament, "NoPrizeToClaim");
+    });
+
+    it("Should record zero claimablePrize for a non-winning participant", async function () {
+      const id = await tournamentWithNonWinner();
+
+      expect(await tournament.claimablePrize(id, players[3].address)).to.equal(0n);
+    });
+
+    it("Should move no USDm when a non-winner claim reverts", async function () {
+      const id = await tournamentWithNonWinner();
+
+      await expect(
+        tournament.connect(players[3]).claimPrize(id)
+      ).to.be.revertedWithCustomError(tournament, "NoPrizeToClaim");
+
+      // Balances stay put; the revert leaves the pool intact.
+      expect(await usdm.balanceOf(players[3].address)).to.equal(ethers.parseEther("990"));
+    });
+    // <<END:finalized-non-winner>>
+  });
+
+  describe("Finalized — double claim prevention", function () {
+    it("Should revert NoPrizeToClaim on a second USDm claim by the winner", async function () {
+      const id = await finalizedTournament({ scorers: [{ player: players[0], score: 300 }] });
+
+      await tournament.connect(players[0]).claimPrize(id);
+
+      await expect(
+        tournament.connect(players[0]).claimPrize(id)
+      ).to.be.revertedWithCustomError(tournament, "NoPrizeToClaim");
+    });
+    it("Should revert NoPrizeToClaim on a second native claim by the winner", async function () {
+      const id = await finalizedTournament({
+        isNative: true,
+        scorers: [{ player: players[0], score: 300 }],
+      });
+
+      await tournament.connect(players[0]).claimPrize(id);
+
+      await expect(
+        tournament.connect(players[0]).claimPrize(id)
+      ).to.be.revertedWithCustomError(tournament, "NoPrizeToClaim");
+    });
+
+    it("Should move no additional USDm on a reverted second claim", async function () {
+      const id = await finalizedTournament({ scorers: [{ player: players[0], score: 300 }] });
+      await tournament.connect(players[0]).claimPrize(id);
+      const balanceAfterFirst = await usdm.balanceOf(players[0].address);
+
+      await expect(
+        tournament.connect(players[0]).claimPrize(id)
+      ).to.be.revertedWithCustomError(tournament, "NoPrizeToClaim");
+
+      expect(await usdm.balanceOf(players[0].address)).to.equal(balanceAfterFirst);
+    });
+    // <<END:finalized-double>>
+  });
+
+  describe("Active tournament — claim rejected", function () {
+    it("Should revert TournamentNotActive when claiming on a still-active tournament", async function () {
+      const id = await createTournament();
+      await join(id, players[0], false);
+
+      await expect(
+        tournament.connect(players[0]).claimPrize(id)
+      ).to.be.revertedWithCustomError(tournament, "TournamentNotActive");
+    });
+
+    it("Should revert TournamentNotActive when the winner claims before finalization", async function () {
+      const id = await createTournament();
+      await join(id, players[0], false);
+      await submit(id, players[0], 300);
+      await time.increase(DURATION + 1); // ended, but NOT finalized yet
+
+      await expect(
+        tournament.connect(players[0]).claimPrize(id)
+      ).to.be.revertedWithCustomError(tournament, "TournamentNotActive");
+    });
+    // <<END:active-claim>>
+  });
+
+  describe("Cancelled — participant refunds (USDm)", function () {
+    it("Should refund a participant the full entry fee via stablecoin transfer", async function () {
+      const id = await cancelledTournament({ joiners: [players[0], players[1]] });
+
+      await expect(tournament.connect(players[0]).claimPrize(id)).to.changeTokenBalances(
+        usdm,
+        [tournament, players[0]],
+        [-ENTRY_FEE, ENTRY_FEE]
+      );
+    });
+    it("Should emit PrizeClaimed with the entry fee as the refund amount", async function () {
+      const id = await cancelledTournament({ joiners: [players[0]] });
+
+      await expect(tournament.connect(players[0]).claimPrize(id))
+        .to.emit(tournament, "PrizeClaimed")
+        .withArgs(id, players[0].address, ENTRY_FEE);
+    });
+
+    it("Should mark the participant as refunded with the sentinel value", async function () {
+      const id = await cancelledTournament({ joiners: [players[0]] });
+
+      await tournament.connect(players[0]).claimPrize(id);
+
+      expect(await tournament.claimablePrize(id, players[0].address)).to.equal(SENTINEL);
+    });
+
+    it("Should refund every participant independently", async function () {
+      const joiners = [players[0], players[1], players[2]];
+      const id = await cancelledTournament({ joiners });
+
+      for (const p of joiners) {
+        await expect(tournament.connect(p).claimPrize(id)).to.changeTokenBalance(
+          usdm,
+          p,
+          ENTRY_FEE
+        );
+      }
+    });
+    // <<END:cancelled-usdm>>
+  });
+
+  describe("Cancelled — participant refunds (native CELO)", function () {
+    it("Should refund a native participant via call{value}", async function () {
+      const id = await cancelledTournament({ isNative: true, joiners: [players[0]] });
+
+      await expect(tournament.connect(players[0]).claimPrize(id)).to.changeEtherBalance(
+        players[0],
+        ENTRY_FEE
+      );
+    });
+
+    it("Should reduce the contract native balance by the refunded entry fee", async function () {
+      const id = await cancelledTournament({ isNative: true, joiners: [players[0]] });
+
+      await expect(tournament.connect(players[0]).claimPrize(id)).to.changeEtherBalance(
+        tournament,
+        -ENTRY_FEE
+      );
+    });
+
+    it("Should emit PrizeClaimed for a native refund", async function () {
+      const id = await cancelledTournament({ isNative: true, joiners: [players[0]] });
+
+      await expect(tournament.connect(players[0]).claimPrize(id))
+        .to.emit(tournament, "PrizeClaimed")
+        .withArgs(id, players[0].address, ENTRY_FEE);
+    });
+    // <<END:cancelled-native>>
+  });
+
+  describe("Cancelled — double refund prevention", function () {
+    it("Should revert NoPrizeToClaim on a second USDm refund", async function () {
+      const id = await cancelledTournament({ joiners: [players[0]] });
+      await tournament.connect(players[0]).claimPrize(id);
+
+      await expect(
+        tournament.connect(players[0]).claimPrize(id)
+      ).to.be.revertedWithCustomError(tournament, "NoPrizeToClaim");
+    });
+
+    it("Should revert NoPrizeToClaim on a second native refund", async function () {
+      const id = await cancelledTournament({ isNative: true, joiners: [players[0]] });
+      await tournament.connect(players[0]).claimPrize(id);
+
+      await expect(
+        tournament.connect(players[0]).claimPrize(id)
+      ).to.be.revertedWithCustomError(tournament, "NoPrizeToClaim");
+    });
+
+    it("Should keep the sentinel marker set after the first refund", async function () {
+      const id = await cancelledTournament({ joiners: [players[0]] });
+      await tournament.connect(players[0]).claimPrize(id);
+
+      await expect(
+        tournament.connect(players[0]).claimPrize(id)
+      ).to.be.revertedWithCustomError(tournament, "NoPrizeToClaim");
+
+      expect(await tournament.claimablePrize(id, players[0].address)).to.equal(SENTINEL);
+    });
+
+    it("Should move no additional USDm on a reverted second refund", async function () {
+      const id = await cancelledTournament({ joiners: [players[0]] });
+      await tournament.connect(players[0]).claimPrize(id);
+      const balanceAfterFirst = await usdm.balanceOf(players[0].address);
+
+      await expect(
+        tournament.connect(players[0]).claimPrize(id)
+      ).to.be.revertedWithCustomError(tournament, "NoPrizeToClaim");
+
+      expect(await usdm.balanceOf(players[0].address)).to.equal(balanceAfterFirst);
+    });
+    // <<END:cancelled-double>>
+  });
+
+  describe("Cancelled — non-participant reverts", function () {
+    it("Should revert NoPrizeToClaim for a non-participant on a cancelled USDm tournament", async function () {
+      const id = await cancelledTournament({ joiners: [players[0]] });
+
+      await expect(
+        tournament.connect(players[1]).claimPrize(id)
+      ).to.be.revertedWithCustomError(tournament, "NoPrizeToClaim");
+    });
+
+    it("Should revert NoPrizeToClaim for a non-participant on a cancelled native tournament", async function () {
+      const id = await cancelledTournament({ isNative: true, joiners: [players[0]] });
+
+      await expect(
+        tournament.connect(players[1]).claimPrize(id)
+      ).to.be.revertedWithCustomError(tournament, "NoPrizeToClaim");
+    });
+    // <<END:cancelled-nonparticipant>>
+  });
+
+  describe("cancelTournament — seed refund & fee accounting", function () {
+    it("Should refund the USDm seed to the creator on cancellation", async function () {
+      const id = await createTournament();
+
+      await expect(tournament.connect(creator).cancelTournament(id)).to.changeTokenBalances(
+        usdm,
+        [tournament, creator],
+        [-SEED_AMOUNT, SEED_AMOUNT]
+      );
+    });
+    it("Should refund the native seed to the creator on cancellation", async function () {
+      const id = await createTournament({ isNative: true });
+
+      await expect(tournament.connect(creator).cancelTournament(id)).to.changeEtherBalance(
+        creator,
+        SEED_AMOUNT
+      );
+    });
+
+    it("Should not attempt a transfer when the seed is zero", async function () {
+      const id = await createTournament({ seed: 0n });
+
+      await expect(tournament.connect(creator).cancelTournament(id)).to.changeTokenBalance(
+        usdm,
+        creator,
+        0n
+      );
+    });
+    it("Should reduce accumulatedFees by the cancelled entries' protocol portion (USDm)", async function () {
+      const id = await createTournament();
+      await join(id, players[0], false);
+      await join(id, players[1], false);
+      expect(await tournament.accumulatedFees()).to.equal(FEE_PER_ENTRY * 2n);
+
+      await tournament.connect(creator).cancelTournament(id);
+
+      expect(await tournament.accumulatedFees()).to.equal(0n);
+    });
+
+    it("Should reduce accumulatedNativeFees by the cancelled entries' protocol portion", async function () {
+      const id = await createTournament({ isNative: true });
+      await join(id, players[0], true);
+      await join(id, players[1], true);
+      expect(await tournament.accumulatedNativeFees()).to.equal(FEE_PER_ENTRY * 2n);
+
+      await tournament.connect(creator).cancelTournament(id);
+
+      expect(await tournament.accumulatedNativeFees()).to.equal(0n);
+    });
+
+    it("Should only claw back the cancelled tournament's own fees, not others'", async function () {
+      const cancelledId = await createTournament();
+      await join(cancelledId, players[0], false);
+      await join(cancelledId, players[1], false);
+
+      const survivingId = await createTournament();
+      await join(survivingId, players[2], false);
+
+      expect(await tournament.accumulatedFees()).to.equal(FEE_PER_ENTRY * 3n);
+
+      await tournament.connect(creator).cancelTournament(cancelledId);
+
+      // Only the surviving tournament's single entry fee remains.
+      expect(await tournament.accumulatedFees()).to.equal(FEE_PER_ENTRY);
+    });
+    it("Should set the tournament status to Cancelled", async function () {
+      const id = await createTournament();
+
+      await tournament.connect(creator).cancelTournament(id);
+
+      // TournamentStatus.Cancelled == 2
+      expect((await tournament.tournaments(id)).status).to.equal(2);
+    });
+
+    it("Should leave no funds stuck after seed refund plus every USDm refund", async function () {
+      const joiners = [players[0], players[1], players[2]];
+      const id = await createTournament();
+      for (const p of joiners) await join(id, p, false);
+
+      await tournament.connect(creator).cancelTournament(id);
+      for (const p of joiners) await tournament.connect(p).claimPrize(id);
+
+      expect(await usdm.balanceOf(await tournament.getAddress())).to.equal(0n);
+      expect(await tournament.accumulatedFees()).to.equal(0n);
+    });
+    // <<END:cancel-accounting>>
+  });
+
+  describe("cancelTournament — access control", function () {
+    it("Should allow the creator to cancel", async function () {
+      const id = await createTournament();
+
+      await tournament.connect(creator).cancelTournament(id);
+
+      expect((await tournament.tournaments(id)).status).to.equal(2);
+    });
+
+    it("Should allow the contract owner to cancel", async function () {
+      const id = await createTournament();
+
+      await tournament.connect(owner).cancelTournament(id);
+
+      expect((await tournament.tournaments(id)).status).to.equal(2);
+    });
+
+    it("Should revert InvalidAddress when a non-creator/non-owner tries to cancel", async function () {
+      const id = await createTournament();
+
+      await expect(
+        tournament.connect(players[0]).cancelTournament(id)
+      ).to.be.revertedWithCustomError(tournament, "InvalidAddress");
+    });
+
+    it("Should refund the seed to the creator even when the owner cancels", async function () {
+      const id = await createTournament();
+
+      await expect(tournament.connect(owner).cancelTournament(id)).to.changeTokenBalances(
+        usdm,
+        [tournament, creator],
+        [-SEED_AMOUNT, SEED_AMOUNT]
+      );
+    });
+    // <<END:cancel-access>>
+  });
+
+  describe("cancelTournament — lifecycle guards", function () {
+    it("Should revert TournamentAlreadyFinalized when cancelling a finalized tournament", async function () {
+      const id = await finalizedTournament({ scorers: [{ player: players[0], score: 300 }] });
+
+      await expect(
+        tournament.connect(creator).cancelTournament(id)
+      ).to.be.revertedWithCustomError(tournament, "TournamentAlreadyFinalized");
+    });
+
+    it("Should revert TournamentAlreadyFinalized when cancelling an already-cancelled tournament", async function () {
+      const id = await createTournament();
+      await tournament.connect(creator).cancelTournament(id);
+
+      await expect(
+        tournament.connect(creator).cancelTournament(id)
+      ).to.be.revertedWithCustomError(tournament, "TournamentAlreadyFinalized");
+    });
+    // <<END:cancel-lifecycle>>
+  });
+
+  describe("TournamentCancelled event", function () {
+    it("Should emit TournamentCancelled with the tournament id when the creator cancels", async function () {
+      const id = await createTournament();
+
+      await expect(tournament.connect(creator).cancelTournament(id))
+        .to.emit(tournament, "TournamentCancelled")
+        .withArgs(id);
+    });
+
+    it("Should emit TournamentCancelled when the owner cancels", async function () {
+      const id = await createTournament({ isNative: true });
+
+      await expect(tournament.connect(owner).cancelTournament(id))
+        .to.emit(tournament, "TournamentCancelled")
+        .withArgs(id);
+    });
+
+    it("Should be queryable by the indexed tournamentId topic", async function () {
+      const id = await createTournament();
+      await tournament.connect(creator).cancelTournament(id);
+
+      const events = await tournament.queryFilter(
+        tournament.filters.TournamentCancelled(id)
+      );
+
+      expect(events.length).to.equal(1);
+      expect(events[0].args.tournamentId).to.equal(id);
+    });
+    // <<END:cancelled-event>>
+  });
+
+  describe("Finalized — winner state & claim ordering", function () {
+    async function threeWinnerTournament() {
+      return finalizedTournament({
+        scorers: [
+          { player: players[0], score: 300 },
+          { player: players[1], score: 200 },
+          { player: players[2], score: 100 },
+        ],
+      });
+    }
+
+    it("Should record the top scorer as winner with the winning score", async function () {
+      const id = await threeWinnerTournament();
+
+      const t = await tournament.tournaments(id);
+      expect(t.winner).to.equal(players[0].address);
+      expect(t.winningScore).to.equal(300n);
+    });
+    it("Should let winners claim in any order with unchanged amounts", async function () {
+      const id = await threeWinnerTournament();
+      const pool = poolFor(3);
+      const second = (pool * 2500n) / BPS_DENOMINATOR;
+      const third = (pool * 1500n) / BPS_DENOMINATOR;
+      const first = pool - second - third;
+
+      // Claim reverse order: 3rd, then 2nd, then 1st.
+      await expect(tournament.connect(players[2]).claimPrize(id)).to.changeTokenBalance(
+        usdm,
+        players[2],
+        third
+      );
+      await expect(tournament.connect(players[1]).claimPrize(id)).to.changeTokenBalance(
+        usdm,
+        players[1],
+        second
+      );
+      await expect(tournament.connect(players[0]).claimPrize(id)).to.changeTokenBalance(
+        usdm,
+        players[0],
+        first
+      );
+    });
+
+    it("Should not affect another winner's claimable when one winner claims", async function () {
+      const id = await threeWinnerTournament();
+      const pool = poolFor(3);
+      const second = (pool * 2500n) / BPS_DENOMINATOR;
+
+      await tournament.connect(players[0]).claimPrize(id);
+
+      // 2nd place claimable is untouched by 1st place's claim.
+      expect(await tournament.claimablePrize(id, players[1].address)).to.equal(second);
+    });
+    // <<END:winner-state>>
+  });
+
+  describe("Cancelled — balances & refund ordering", function () {
+    it("Should hold exactly entryFee per participant after cancellation (USDm)", async function () {
+      const joiners = [players[0], players[1], players[2]];
+      const id = await cancelledTournament({ joiners });
+
+      // Seed already refunded on cancel; only entry fees remain.
+      expect(await usdm.balanceOf(await tournament.getAddress())).to.equal(
+        ENTRY_FEE * BigInt(joiners.length)
+      );
+    });
+
+    it("Should refund participants correctly regardless of claim order", async function () {
+      const joiners = [players[0], players[1], players[2]];
+      const id = await cancelledTournament({ joiners });
+
+      for (const p of [players[2], players[0], players[1]]) {
+        await expect(tournament.connect(p).claimPrize(id)).to.changeTokenBalance(
+          usdm,
+          p,
+          ENTRY_FEE
+        );
+      }
+    });
+
+    it("Should not touch another participant's claim state on refund", async function () {
+      const id = await cancelledTournament({ joiners: [players[0], players[1]] });
+
+      await tournament.connect(players[0]).claimPrize(id);
+
+      // players[1] has not been marked as refunded.
+      expect(await tournament.claimablePrize(id, players[1].address)).to.not.equal(SENTINEL);
+    });
+    // <<END:cancel-balances>>
+  });
+
+  describe("Full-drain invariants", function () {
+    it("Should leave zero native balance after cancel seed refund plus all refunds", async function () {
+      const joiners = [players[0], players[1], players[2]];
+      const id = await createTournament({ isNative: true });
+      for (const p of joiners) await join(id, p, true);
+
+      await tournament.connect(creator).cancelTournament(id);
+      for (const p of joiners) await tournament.connect(p).claimPrize(id);
+
+      expect(await ethers.provider.getBalance(await tournament.getAddress())).to.equal(0n);
+      expect(await tournament.accumulatedNativeFees()).to.equal(0n);
+    });
+
+    it("Should leave zero native balance after finalize, fee withdrawal, and winner claim", async function () {
+      const id = await finalizedTournament({
+        isNative: true,
+        scorers: [{ player: players[0], score: 300 }],
+      });
+
+      await tournament.withdrawFees();
+      await tournament.connect(players[0]).claimPrize(id);
+
+      expect(await ethers.provider.getBalance(await tournament.getAddress())).to.equal(0n);
+    });
+    // <<END:full-drain>>
+  });
+
+  describe("claimPrize — miscellaneous guards", function () {
+    it("Should revert TournamentNotActive for a non-existent tournament id", async function () {
+      await expect(
+        tournament.connect(players[0]).claimPrize(9999n)
+      ).to.be.revertedWithCustomError(tournament, "TournamentNotActive");
+    });
+
+    it("Should report zero claimable for a cancelled participant before they claim", async function () {
+      const id = await cancelledTournament({ joiners: [players[0]] });
+
+      // Refund is derived from entryFee, not pre-seeded into claimablePrize.
+      expect(await tournament.claimablePrize(id, players[0].address)).to.equal(0n);
+    });
+    it("Should not pay the fee recipient anything on a winner claim", async function () {
+      const id = await finalizedTournament({ scorers: [{ player: players[0], score: 300 }] });
+
+      await expect(tournament.connect(players[0]).claimPrize(id)).to.changeTokenBalance(
+        usdm,
+        feeRecipient,
+        0n
+      );
+    });
+
+    it("Should match the PrizeClaimed amount to the claimablePrize view for 2nd place", async function () {
+      const id = await finalizedTournament({
+        scorers: [
+          { player: players[0], score: 300 },
+          { player: players[1], score: 200 },
+          { player: players[2], score: 100 },
+        ],
+      });
+      const claimable = await tournament.claimablePrize(id, players[1].address);
+
+      await expect(tournament.connect(players[1]).claimPrize(id))
+        .to.emit(tournament, "PrizeClaimed")
+        .withArgs(id, players[1].address, claimable);
+    });
+    // <<END:misc-guards>>
+  });
+
+  describe("Finalized — native distribution & event queries", function () {
+    it("Should split 70/30 to two native winners on claim", async function () {
+      const id = await finalizedTournament({
+        isNative: true,
+        scorers: [
+          { player: players[0], score: 300 },
+          { player: players[1], score: 200 },
+        ],
+      });
+      const pool = poolFor(2);
+      const first = (pool * 7000n) / BPS_DENOMINATOR;
+      const second = pool - first;
+
+      await expect(tournament.connect(players[0]).claimPrize(id)).to.changeEtherBalance(
+        players[0],
+        first
+      );
+      await expect(tournament.connect(players[1]).claimPrize(id)).to.changeEtherBalance(
+        players[1],
+        second
+      );
+    });
+
+    it("Should expose PrizeClaimed via an indexed tournamentId query", async function () {
+      const id = await finalizedTournament({ scorers: [{ player: players[0], score: 300 }] });
+      await tournament.connect(players[0]).claimPrize(id);
+
+      const events = await tournament.queryFilter(tournament.filters.PrizeClaimed(id));
+
+      expect(events.length).to.equal(1);
+      expect(events[0].args.player).to.equal(players[0].address);
+      expect(events[0].args.amount).to.equal(poolFor(1));
+    });
+    // <<END:native-dist>>
+  });
+
+  describe("Finalized — pool composition & partial winners", function () {
+    it("Should include no-score joiners' contributions in the sole winner's prize", async function () {
+      // 1 scorer + 2 non-scoring joiners => single winner takes the whole 3-entry pool.
+      const id = await finalizedTournament({
+        scorers: [{ player: players[0], score: 300 }],
+        noScoreJoiners: [players[1], players[2]],
+      });
+      const expected = poolFor(3);
+
+      expect(await tournament.claimablePrize(id, players[0].address)).to.equal(expected);
+      await expect(tournament.connect(players[0]).claimPrize(id)).to.changeTokenBalance(
+        usdm,
+        players[0],
+        expected
+      );
+    });
+
+    it("Should revert NoPrizeToClaim for a joined non-scorer in a two-winner tournament", async function () {
+      const id = await finalizedTournament({
+        scorers: [
+          { player: players[0], score: 300 },
+          { player: players[1], score: 200 },
+        ],
+        noScoreJoiners: [players[2]],
+      });
+
+      await expect(
+        tournament.connect(players[2]).claimPrize(id)
+      ).to.be.revertedWithCustomError(tournament, "NoPrizeToClaim");
+    });
+    // <<END:pool-composition>>
+  });
+
+  describe("Cross-tournament isolation & native sentinel", function () {
+    it("Should keep refund state isolated between two cancelled tournaments", async function () {
+      const idA = await cancelledTournament({ joiners: [players[0]] });
+      const idB = await cancelledTournament({ joiners: [players[0]] });
+
+      await tournament.connect(players[0]).claimPrize(idA);
+
+      // Refunding in A must not mark the player refunded in B.
+      expect(await tournament.claimablePrize(idA, players[0].address)).to.equal(SENTINEL);
+      expect(await tournament.claimablePrize(idB, players[0].address)).to.equal(0n);
+
+      // The player can still claim their B refund.
+      await expect(tournament.connect(players[0]).claimPrize(idB)).to.changeTokenBalance(
+        usdm,
+        players[0],
+        ENTRY_FEE
+      );
+    });
+
+    it("Should set the sentinel marker after a native refund", async function () {
+      const id = await cancelledTournament({ isNative: true, joiners: [players[0]] });
+
+      await tournament.connect(players[0]).claimPrize(id);
+
+      expect(await tournament.claimablePrize(id, players[0].address)).to.equal(SENTINEL);
+    });
+    // <<END:isolation-sentinel>>
+  });
+
+  describe("cancelTournament — native isolation & owner-triggered refunds", function () {
+    it("Should only claw back the cancelled native tournament's own fees", async function () {
+      const cancelledId = await createTournament({ isNative: true });
+      await join(cancelledId, players[0], true);
+      await join(cancelledId, players[1], true);
+
+      const survivingId = await createTournament({ isNative: true });
+      await join(survivingId, players[2], true);
+
+      expect(await tournament.accumulatedNativeFees()).to.equal(FEE_PER_ENTRY * 3n);
+
+      await tournament.connect(creator).cancelTournament(cancelledId);
+
+      expect(await tournament.accumulatedNativeFees()).to.equal(FEE_PER_ENTRY);
+    });
+
+    it("Should let participants claim refunds after the owner cancels (USDm)", async function () {
+      const joiners = [players[0], players[1]];
+      const id = await createTournament();
+      for (const p of joiners) await join(id, p, false);
+
+      await tournament.connect(owner).cancelTournament(id);
+
+      for (const p of joiners) {
+        await expect(tournament.connect(p).claimPrize(id)).to.changeTokenBalance(
+          usdm,
+          p,
+          ENTRY_FEE
+        );
+      }
+    });
+
+    it("Should hold exactly entryFee per participant after a native cancellation", async function () {
+      const joiners = [players[0], players[1], players[2]];
+      const id = await cancelledTournament({ isNative: true, joiners });
+
+      expect(await ethers.provider.getBalance(await tournament.getAddress())).to.equal(
+        ENTRY_FEE * BigInt(joiners.length)
+      );
+    });
+    // <<END:native-isolation>>
+  });
+
+  describe("Finalized — claimable view accuracy", function () {
+    async function threeWinnerTournament() {
+      return finalizedTournament({
+        scorers: [
+          { player: players[0], score: 300 },
+          { player: players[1], score: 200 },
+          { player: players[2], score: 100 },
+        ],
+      });
+    }
+
+    it("Should assign the 60% share plus dust to 1st place in the claimable view", async function () {
+      const id = await threeWinnerTournament();
+      const pool = poolFor(3);
+      const second = (pool * 2500n) / BPS_DENOMINATOR;
+      const third = (pool * 1500n) / BPS_DENOMINATOR;
+      const first = pool - second - third;
+
+      expect(await tournament.claimablePrize(id, players[0].address)).to.equal(first);
+    });
+
+    it("Should have the three claimable shares sum to the full pool", async function () {
+      const id = await threeWinnerTournament();
+      const pool = poolFor(3);
+
+      const first = await tournament.claimablePrize(id, players[0].address);
+      const second = await tournament.claimablePrize(id, players[1].address);
+      const third = await tournament.claimablePrize(id, players[2].address);
+
+      expect(first + second + third).to.equal(pool);
+    });
+    // <<END:claimable-view>>
+  });
+
+  describe("Cancelled — native double refund is a no-op", function () {
+    it("Should move no additional CELO on a reverted second native refund", async function () {
+      // Two joiners so the contract still holds one refund's worth of CELO
+      // after the first participant is refunded once.
+      const id = await cancelledTournament({ isNative: true, joiners: [players[0], players[1]] });
+      await tournament.connect(players[0]).claimPrize(id);
+
+      const balanceAfterFirst = await ethers.provider.getBalance(await tournament.getAddress());
+
+      await expect(
+        tournament.connect(players[0]).claimPrize(id)
+      ).to.be.revertedWithCustomError(tournament, "NoPrizeToClaim");
+
+      // The reverted second refund leaves the contract's native balance untouched.
+      expect(await ethers.provider.getBalance(await tournament.getAddress())).to.equal(
+        balanceAfterFirst
+      );
+    });
+    // <<END:native-double-noop>>
+  });
+
+  // __CLAIM_TESTS_MARKER__
+});
