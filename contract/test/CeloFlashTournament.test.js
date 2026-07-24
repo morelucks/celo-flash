@@ -2825,5 +2825,48 @@ describe("CeloFlashTournament — claimPrize & cancelTournament", function () {
     // <<END:isolation-sentinel>>
   });
 
+  describe("cancelTournament — native isolation & owner-triggered refunds", function () {
+    it("Should only claw back the cancelled native tournament's own fees", async function () {
+      const cancelledId = await createTournament({ isNative: true });
+      await join(cancelledId, players[0], true);
+      await join(cancelledId, players[1], true);
+
+      const survivingId = await createTournament({ isNative: true });
+      await join(survivingId, players[2], true);
+
+      expect(await tournament.accumulatedNativeFees()).to.equal(FEE_PER_ENTRY * 3n);
+
+      await tournament.connect(creator).cancelTournament(cancelledId);
+
+      expect(await tournament.accumulatedNativeFees()).to.equal(FEE_PER_ENTRY);
+    });
+
+    it("Should let participants claim refunds after the owner cancels (USDm)", async function () {
+      const joiners = [players[0], players[1]];
+      const id = await createTournament();
+      for (const p of joiners) await join(id, p, false);
+
+      await tournament.connect(owner).cancelTournament(id);
+
+      for (const p of joiners) {
+        await expect(tournament.connect(p).claimPrize(id)).to.changeTokenBalance(
+          usdm,
+          p,
+          ENTRY_FEE
+        );
+      }
+    });
+
+    it("Should hold exactly entryFee per participant after a native cancellation", async function () {
+      const joiners = [players[0], players[1], players[2]];
+      const id = await cancelledTournament({ isNative: true, joiners });
+
+      expect(await ethers.provider.getBalance(await tournament.getAddress())).to.equal(
+        ENTRY_FEE * BigInt(joiners.length)
+      );
+    });
+    // <<END:native-isolation>>
+  });
+
   // __CLAIM_TESTS_MARKER__
 });
