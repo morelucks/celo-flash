@@ -1575,5 +1575,18 @@ describe("CeloFlashTournament — createTournament (dual-asset)", function () {
     // ===NATIVE_MARKER===
   });
 
+  describe("Reverts — native value handling", function () {
+    it("Should revert InvalidValueSent when msg.value is less than the seed", async function () {
+      await expect(
+        tournament
+          .connect(creator)
+          .createTournament("CELO Cup", ENTRY_FEE, SEED_AMOUNT, DURATION, true, {
+            value: SEED_AMOUNT - 1n,
+          })
+      ).to.be.revertedWithCustomError(tournament, "InvalidValueSent");
+    });
+    // ===NATIVE_REVERT_MARKER===
+  });
+
   // ===INSERT_MARKER===
 });
