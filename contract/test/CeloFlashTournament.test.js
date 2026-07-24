@@ -2403,6 +2403,24 @@ describe("CeloFlashTournament — claimPrize & cancelTournament", function () {
         [-SEED_AMOUNT, SEED_AMOUNT]
       );
     });
+    it("Should refund the native seed to the creator on cancellation", async function () {
+      const id = await createTournament({ isNative: true });
+
+      await expect(tournament.connect(creator).cancelTournament(id)).to.changeEtherBalance(
+        creator,
+        SEED_AMOUNT
+      );
+    });
+
+    it("Should not attempt a transfer when the seed is zero", async function () {
+      const id = await createTournament({ seed: 0n });
+
+      await expect(tournament.connect(creator).cancelTournament(id)).to.changeTokenBalance(
+        usdm,
+        creator,
+        0n
+      );
+    });
     // <<END:cancel-accounting>>
   });
 
