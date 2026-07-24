@@ -1996,6 +1996,13 @@ describe("CeloFlashTournament — claimPrize & cancelTournament", function () {
         -expected
       );
     });
+    it("Should zero the winner's claimablePrize after a successful claim", async function () {
+      const id = await finalizedTournament({ scorers: [{ player: players[0], score: 300 }] });
+
+      await tournament.connect(players[0]).claimPrize(id);
+
+      expect(await tournament.claimablePrize(id, players[0].address)).to.equal(0n);
+    });
     // <<END:finalized-winner-usdm>>
   });
 
