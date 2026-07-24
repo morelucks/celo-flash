@@ -1774,6 +1774,27 @@ describe("CeloFlashTournament — createTournament (dual-asset)", function () {
           true
         );
     });
+    it("Should emit the same startTime and endTime in the event as stored on the struct", async function () {
+      const tx = await tournament
+        .connect(creator)
+        .createTournament("USDm Cup", ENTRY_FEE, SEED_AMOUNT, DURATION, false, {
+          value: 0n,
+        });
+
+      const t = await tournament.tournaments(0);
+      await expect(tx)
+        .to.emit(tournament, "TournamentCreated")
+        .withArgs(
+          0,
+          creator.address,
+          "USDm Cup",
+          ENTRY_FEE,
+          SEED_AMOUNT,
+          t.startTime,
+          t.endTime,
+          false
+        );
+    });
     // ===EVENT_MARKER===
   });
 
