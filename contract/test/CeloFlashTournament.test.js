@@ -2270,6 +2270,34 @@ describe("CeloFlashTournament — claimPrize & cancelTournament", function () {
         [-ENTRY_FEE, ENTRY_FEE]
       );
     });
+    it("Should emit PrizeClaimed with the entry fee as the refund amount", async function () {
+      const id = await cancelledTournament({ joiners: [players[0]] });
+
+      await expect(tournament.connect(players[0]).claimPrize(id))
+        .to.emit(tournament, "PrizeClaimed")
+        .withArgs(id, players[0].address, ENTRY_FEE);
+    });
+
+    it("Should mark the participant as refunded with the sentinel value", async function () {
+      const id = await cancelledTournament({ joiners: [players[0]] });
+
+      await tournament.connect(players[0]).claimPrize(id);
+
+      expect(await tournament.claimablePrize(id, players[0].address)).to.equal(SENTINEL);
+    });
+
+    it("Should refund every participant independently", async function () {
+      const joiners = [players[0], players[1], players[2]];
+      const id = await cancelledTournament({ joiners });
+
+      for (const p of joiners) {
+        await expect(tournament.connect(p).claimPrize(id)).to.changeTokenBalance(
+          usdm,
+          p,
+          ENTRY_FEE
+        );
+      }
+    });
     // <<END:cancelled-usdm>>
   });
 
