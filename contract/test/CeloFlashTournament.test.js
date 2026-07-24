@@ -1540,6 +1540,16 @@ describe("CeloFlashTournament — createTournament (dual-asset)", function () {
       expect(t.prizePool).to.equal(SEED_AMOUNT);
       expect(t.seedAmount).to.equal(SEED_AMOUNT);
     });
+    it("Should flag the tournament as native (isNative == true)", async function () {
+      await tournament
+        .connect(creator)
+        .createTournament("CELO Cup", ENTRY_FEE, SEED_AMOUNT, DURATION, true, {
+          value: SEED_AMOUNT,
+        });
+
+      const t = await tournament.tournaments(0);
+      expect(t.isNative).to.equal(true);
+    });
     // ===NATIVE_MARKER===
   });
 
