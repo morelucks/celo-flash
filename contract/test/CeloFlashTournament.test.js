@@ -1751,6 +1751,29 @@ describe("CeloFlashTournament — createTournament (dual-asset)", function () {
           false
         );
     });
+    it("Should emit TournamentCreated with isNative true for a native tournament", async function () {
+      const tx = await tournament
+        .connect(creator)
+        .createTournament("CELO Cup", ENTRY_FEE, SEED_AMOUNT, DURATION, true, {
+          value: SEED_AMOUNT,
+        });
+      const receipt = await tx.wait();
+      const block = await ethers.provider.getBlock(receipt.blockNumber);
+      const start = BigInt(block.timestamp);
+
+      await expect(tx)
+        .to.emit(tournament, "TournamentCreated")
+        .withArgs(
+          0,
+          creator.address,
+          "CELO Cup",
+          ENTRY_FEE,
+          SEED_AMOUNT,
+          start,
+          start + BigInt(DURATION),
+          true
+        );
+    });
     // ===EVENT_MARKER===
   });
 
