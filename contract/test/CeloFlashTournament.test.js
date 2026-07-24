@@ -2796,5 +2796,34 @@ describe("CeloFlashTournament — claimPrize & cancelTournament", function () {
     // <<END:pool-composition>>
   });
 
+  describe("Cross-tournament isolation & native sentinel", function () {
+    it("Should keep refund state isolated between two cancelled tournaments", async function () {
+      const idA = await cancelledTournament({ joiners: [players[0]] });
+      const idB = await cancelledTournament({ joiners: [players[0]] });
+
+      await tournament.connect(players[0]).claimPrize(idA);
+
+      // Refunding in A must not mark the player refunded in B.
+      expect(await tournament.claimablePrize(idA, players[0].address)).to.equal(SENTINEL);
+      expect(await tournament.claimablePrize(idB, players[0].address)).to.equal(0n);
+
+      // The player can still claim their B refund.
+      await expect(tournament.connect(players[0]).claimPrize(idB)).to.changeTokenBalance(
+        usdm,
+        players[0],
+        ENTRY_FEE
+      );
+    });
+
+    it("Should set the sentinel marker after a native refund", async function () {
+      const id = await cancelledTournament({ isNative: true, joiners: [players[0]] });
+
+      await tournament.connect(players[0]).claimPrize(id);
+
+      expect(await tournament.claimablePrize(id, players[0].address)).to.equal(SENTINEL);
+    });
+    // <<END:isolation-sentinel>>
+  });
+
   // __CLAIM_TESTS_MARKER__
 });
