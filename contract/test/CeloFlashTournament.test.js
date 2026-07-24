@@ -2173,6 +2173,30 @@ describe("CeloFlashTournament — claimPrize & cancelTournament", function () {
         tournament.connect(players[3]).claimPrize(id)
       ).to.be.revertedWithCustomError(tournament, "NoPrizeToClaim");
     });
+    it("Should revert NoPrizeToClaim for an address that never joined", async function () {
+      const id = await tournamentWithNonWinner();
+
+      await expect(
+        tournament.connect(players[5]).claimPrize(id)
+      ).to.be.revertedWithCustomError(tournament, "NoPrizeToClaim");
+    });
+
+    it("Should record zero claimablePrize for a non-winning participant", async function () {
+      const id = await tournamentWithNonWinner();
+
+      expect(await tournament.claimablePrize(id, players[3].address)).to.equal(0n);
+    });
+
+    it("Should move no USDm when a non-winner claim reverts", async function () {
+      const id = await tournamentWithNonWinner();
+
+      await expect(
+        tournament.connect(players[3]).claimPrize(id)
+      ).to.be.revertedWithCustomError(tournament, "NoPrizeToClaim");
+
+      // Balances stay put; the revert leaves the pool intact.
+      expect(await usdm.balanceOf(players[3].address)).to.equal(ethers.parseEther("990"));
+    });
     // <<END:finalized-non-winner>>
   });
 
