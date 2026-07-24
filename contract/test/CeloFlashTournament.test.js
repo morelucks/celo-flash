@@ -2687,5 +2687,21 @@ describe("CeloFlashTournament — claimPrize & cancelTournament", function () {
     // <<END:full-drain>>
   });
 
+  describe("claimPrize — miscellaneous guards", function () {
+    it("Should revert TournamentNotActive for a non-existent tournament id", async function () {
+      await expect(
+        tournament.connect(players[0]).claimPrize(9999n)
+      ).to.be.revertedWithCustomError(tournament, "TournamentNotActive");
+    });
+
+    it("Should report zero claimable for a cancelled participant before they claim", async function () {
+      const id = await cancelledTournament({ joiners: [players[0]] });
+
+      // Refund is derived from entryFee, not pre-seeded into claimablePrize.
+      expect(await tournament.claimablePrize(id, players[0].address)).to.equal(0n);
+    });
+    // <<END:misc-guards>>
+  });
+
   // __CLAIM_TESTS_MARKER__
 });
