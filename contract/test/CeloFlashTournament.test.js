@@ -2237,5 +2237,28 @@ describe("CeloFlashTournament — claimPrize & cancelTournament", function () {
     // <<END:finalized-double>>
   });
 
+  describe("Active tournament — claim rejected", function () {
+    it("Should revert TournamentNotActive when claiming on a still-active tournament", async function () {
+      const id = await createTournament();
+      await join(id, players[0], false);
+
+      await expect(
+        tournament.connect(players[0]).claimPrize(id)
+      ).to.be.revertedWithCustomError(tournament, "TournamentNotActive");
+    });
+
+    it("Should revert TournamentNotActive when the winner claims before finalization", async function () {
+      const id = await createTournament();
+      await join(id, players[0], false);
+      await submit(id, players[0], 300);
+      await time.increase(DURATION + 1); // ended, but NOT finalized yet
+
+      await expect(
+        tournament.connect(players[0]).claimPrize(id)
+      ).to.be.revertedWithCustomError(tournament, "TournamentNotActive");
+    });
+    // <<END:active-claim>>
+  });
+
   // __CLAIM_TESTS_MARKER__
 });
