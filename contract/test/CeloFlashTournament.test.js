@@ -1594,6 +1594,15 @@ describe("CeloFlashTournament — createTournament (dual-asset)", function () {
           })
       ).to.be.revertedWithCustomError(tournament, "InvalidValueSent");
     });
+    it("Should revert InvalidValueSent when seed is positive but no value is sent", async function () {
+      await expect(
+        tournament
+          .connect(creator)
+          .createTournament("CELO Cup", ENTRY_FEE, SEED_AMOUNT, DURATION, true, {
+            value: 0n,
+          })
+      ).to.be.revertedWithCustomError(tournament, "InvalidValueSent");
+    });
     // ===NATIVE_REVERT_MARKER===
   });
 
