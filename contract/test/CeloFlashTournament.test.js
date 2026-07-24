@@ -2763,5 +2763,38 @@ describe("CeloFlashTournament — claimPrize & cancelTournament", function () {
     // <<END:native-dist>>
   });
 
+  describe("Finalized — pool composition & partial winners", function () {
+    it("Should include no-score joiners' contributions in the sole winner's prize", async function () {
+      // 1 scorer + 2 non-scoring joiners => single winner takes the whole 3-entry pool.
+      const id = await finalizedTournament({
+        scorers: [{ player: players[0], score: 300 }],
+        noScoreJoiners: [players[1], players[2]],
+      });
+      const expected = poolFor(3);
+
+      expect(await tournament.claimablePrize(id, players[0].address)).to.equal(expected);
+      await expect(tournament.connect(players[0]).claimPrize(id)).to.changeTokenBalance(
+        usdm,
+        players[0],
+        expected
+      );
+    });
+
+    it("Should revert NoPrizeToClaim for a joined non-scorer in a two-winner tournament", async function () {
+      const id = await finalizedTournament({
+        scorers: [
+          { player: players[0], score: 300 },
+          { player: players[1], score: 200 },
+        ],
+        noScoreJoiners: [players[2]],
+      });
+
+      await expect(
+        tournament.connect(players[2]).claimPrize(id)
+      ).to.be.revertedWithCustomError(tournament, "NoPrizeToClaim");
+    });
+    // <<END:pool-composition>>
+  });
+
   // __CLAIM_TESTS_MARKER__
 });
