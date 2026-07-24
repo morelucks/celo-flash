@@ -2660,5 +2660,32 @@ describe("CeloFlashTournament — claimPrize & cancelTournament", function () {
     // <<END:cancel-balances>>
   });
 
+  describe("Full-drain invariants", function () {
+    it("Should leave zero native balance after cancel seed refund plus all refunds", async function () {
+      const joiners = [players[0], players[1], players[2]];
+      const id = await createTournament({ isNative: true });
+      for (const p of joiners) await join(id, p, true);
+
+      await tournament.connect(creator).cancelTournament(id);
+      for (const p of joiners) await tournament.connect(p).claimPrize(id);
+
+      expect(await ethers.provider.getBalance(await tournament.getAddress())).to.equal(0n);
+      expect(await tournament.accumulatedNativeFees()).to.equal(0n);
+    });
+
+    it("Should leave zero native balance after finalize, fee withdrawal, and winner claim", async function () {
+      const id = await finalizedTournament({
+        isNative: true,
+        scorers: [{ player: players[0], score: 300 }],
+      });
+
+      await tournament.withdrawFees();
+      await tournament.connect(players[0]).claimPrize(id);
+
+      expect(await ethers.provider.getBalance(await tournament.getAddress())).to.equal(0n);
+    });
+    // <<END:full-drain>>
+  });
+
   // __CLAIM_TESTS_MARKER__
 });
