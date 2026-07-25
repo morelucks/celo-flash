@@ -3318,6 +3318,16 @@ describe("CeloFlashTournament — Leaderboard (insertion sort boundaries)", func
       expect(occurrences.length).to.equal(1);
       expect(lb[1].score).to.equal(250n);
     });
+
+    it("Should keep the board length unchanged when a player improves", async function () {
+      const id = await createFreeTournament();
+      await joinAll(id, players.slice(0, 10));
+      await fillBoard(id);
+
+      await submit(id, players[3], 450);
+
+      expect((await tournament.getLeaderboard(id)).length).to.equal(10);
+    });
     // <<END:lb-updates>>
   });
 
