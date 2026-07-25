@@ -1039,4 +1039,18 @@ describe("CeloFlashWager — expireWager extended coverage", function () {
 
     expect(await wager.getHouseReserve()).to.equal(balance - liabilities - edge);
   });
+
+  it("restores the reserve to its funded baseline after a max wager expires", async function () {
+    const wagerId = await placePending(players[0], MAX_WAGER);
+
+    // A 10 CELO stake locks another 10 CELO of house risk.
+    expect(await wager.getHouseReserve()).to.equal(
+      FUND_AMOUNT - (payoutOf(MAX_WAGER) - MAX_WAGER)
+    );
+
+    await time.increase(WAGER_EXPIRY + 1);
+    await wager.expireWager(wagerId);
+
+    expect(await wager.getHouseReserve()).to.equal(FUND_AMOUNT);
+  });
 });
