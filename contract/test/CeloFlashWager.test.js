@@ -1178,4 +1178,15 @@ describe("CeloFlashWager — expireWager extended coverage", function () {
 
     expect(await wager.totalPendingLiabilities()).to.equal(0);
   });
+
+  it("drops the contract balance by exactly the max wager stake", async function () {
+    const wagerId = await placePending(players[0], MAX_WAGER);
+    await time.increase(WAGER_EXPIRY + 1);
+
+    // Only the 10 CELO stake leaves, never the 20 CELO potential payout.
+    await expect(wager.expireWager(wagerId)).to.changeEtherBalance(
+      wager,
+      -MAX_WAGER
+    );
+  });
 });
