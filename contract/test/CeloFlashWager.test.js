@@ -1063,4 +1063,15 @@ describe("CeloFlashWager — expireWager extended coverage", function () {
 
     expect(await wager.accumulatedHouseEdge()).to.equal(0);
   });
+
+  it("grows the free reserve when the house is funded after an expiry", async function () {
+    const wagerId = await placePending(players[0]);
+    await time.increase(WAGER_EXPIRY + 1);
+    await wager.expireWager(wagerId);
+
+    const topUp = ethers.parseEther("5");
+    await wager.connect(players[3]).fundHouse({ value: topUp });
+
+    expect(await wager.getHouseReserve()).to.equal(FUND_AMOUNT + topUp);
+  });
 });
