@@ -2933,6 +2933,9 @@ describe("CeloFlashTournament — Leaderboard (insertion sort boundaries)", func
   // produces a full board sorted 1000 → 100 with players in reverse order.
   const FILL_SCORES = [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000];
 
+  // Fixed "random" submission order used by the ordering tests.
+  const RANDOM_SCORES = [730, 120, 990, 450, 310, 860, 40, 670, 555, 205];
+
   let tournament;
   let usdm;
   let owner;
@@ -3084,6 +3087,16 @@ describe("CeloFlashTournament — Leaderboard (insertion sort boundaries)", func
       const lb = await tournament.getLeaderboard(id);
       expect(boardScores(lb)).to.deep.equal([900n, 100n]);
       expect(boardPlayers(lb)).to.deep.equal([players[1].address, players[0].address]);
+    });
+
+    it("Should maintain descending order after every one of ten submissions", async function () {
+      const id = await createFreeTournament();
+      await joinAll(id, players.slice(0, 10));
+
+      for (let i = 0; i < 10; i++) {
+        await submit(id, players[i], RANDOM_SCORES[i]);
+        expectDescending(await tournament.getLeaderboard(id));
+      }
     });
     // <<END:lb-ordering>>
   });
