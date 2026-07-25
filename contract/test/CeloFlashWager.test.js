@@ -816,4 +816,23 @@ describe("CeloFlashWager — expireWager extended coverage", function () {
       "WagerNotExpired"
     );
   });
+
+  it("cannot resolve a wager once it has been expired", async function () {
+    const wagerId = await placePending(players[0]);
+    await time.increase(WAGER_EXPIRY + 1);
+    await wager.expireWager(wagerId);
+
+    // Even a validly signed winning score is rejected after expiry.
+    const nonce = uniqueNonce();
+    const signature = await signScore(
+      wagerId,
+      players[0].address,
+      SCORE_THRESHOLD + 10,
+      nonce
+    );
+
+    await expect(
+      wager.connect(players[0]).resolveWager(wagerId, SCORE_THRESHOLD + 10, nonce, signature)
+    ).to.be.revertedWithCustomError(wager, "WagerNotPending");
+  });
 });
