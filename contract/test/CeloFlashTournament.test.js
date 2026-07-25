@@ -3271,6 +3271,17 @@ describe("CeloFlashTournament — Leaderboard (insertion sort boundaries)", func
       expect(lb[9].score).to.equal(101n);
       expectDescending(lb);
     });
+
+    it("Should retain the evicted player's best score in playerBestScore", async function () {
+      const id = await createFreeTournament();
+      await joinAll(id, players.slice(0, 11));
+      await fillBoard(id);
+
+      await submit(id, players[10], 550);
+
+      // players[0] was evicted, but their best score record survives
+      expect(await tournament.playerBestScore(id, players[0].address)).to.equal(100n);
+    });
     // <<END:lb-cap>>
   });
 
