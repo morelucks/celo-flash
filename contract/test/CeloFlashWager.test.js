@@ -845,4 +845,15 @@ describe("CeloFlashWager — expireWager extended coverage", function () {
       wager.connect(players[0]).claimWinnings(wagerId)
     ).to.be.revertedWithCustomError(wager, "WagerNotWon");
   });
+
+  it("still expires and refunds a wager thirty days after placement", async function () {
+    const wagerId = await placePending(players[0]);
+
+    await time.increase(30 * 24 * 3600); // long-forgotten wager
+
+    await expect(wager.expireWager(wagerId)).to.changeEtherBalance(
+      players[0],
+      WAGER_AMOUNT
+    );
+  });
 });
