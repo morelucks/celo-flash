@@ -3401,5 +3401,23 @@ describe("CeloFlashTournament — Leaderboard (insertion sort boundaries)", func
     // <<END:lb-updates>>
   });
 
+  describe("Tied scores", function () {
+    it("Should keep both players on the board when their scores tie", async function () {
+      const id = await createFreeTournament();
+      await joinAll(id, players.slice(0, 2));
+
+      await submit(id, players[0], 500);
+      await submit(id, players[1], 500);
+
+      const lb = await tournament.getLeaderboard(id);
+      expect(lb.length).to.equal(2);
+      expect(boardPlayers(lb)).to.include.members([
+        players[0].address,
+        players[1].address,
+      ]);
+    });
+    // <<END:lb-ties>>
+  });
+
   // <<END:leaderboard-suite>>
 });
