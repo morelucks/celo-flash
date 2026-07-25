@@ -1029,4 +1029,14 @@ describe("CeloFlashWager — expireWager extended coverage", function () {
     expect(events[0].args.wagerId).to.equal(wagerId);
     expect(events[0].args.player).to.equal(players[0].address);
   });
+
+  it("keeps getHouseReserve equal to balance minus liabilities and edge while pending", async function () {
+    await placePending(players[0]);
+
+    const balance = await ethers.provider.getBalance(await wager.getAddress());
+    const liabilities = await wager.totalPendingLiabilities();
+    const edge = await wager.accumulatedHouseEdge();
+
+    expect(await wager.getHouseReserve()).to.equal(balance - liabilities - edge);
+  });
 });
