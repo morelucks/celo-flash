@@ -3469,6 +3469,25 @@ describe("CeloFlashTournament — Leaderboard (insertion sort boundaries)", func
         expect(await tournament.playerBestScore(id, entry.player)).to.equal(entry.score);
       }
     });
+
+    it("Should keep leaderboards fully isolated between tournaments", async function () {
+      const idA = await createFreeTournament();
+      const idB = await createFreeTournament();
+      await joinAll(idA, [players[0]]);
+      await joinAll(idB, [players[1]]);
+
+      await submit(idA, players[0], 500);
+      await submit(idB, players[1], 700);
+
+      const lbA = await tournament.getLeaderboard(idA);
+      const lbB = await tournament.getLeaderboard(idB);
+      expect(lbA.length).to.equal(1);
+      expect(lbA[0].player).to.equal(players[0].address);
+      expect(lbA[0].score).to.equal(500n);
+      expect(lbB.length).to.equal(1);
+      expect(lbB[0].player).to.equal(players[1].address);
+      expect(lbB[0].score).to.equal(700n);
+    });
     // <<END:lb-views>>
   });
 
