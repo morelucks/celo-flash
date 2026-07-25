@@ -1083,4 +1083,15 @@ describe("CeloFlashWager — expireWager extended coverage", function () {
     await expectSolvent();
     expect(await wager.totalPendingLiabilities()).to.equal(0);
   });
+
+  it("rejects a second expiry attempt from a different caller", async function () {
+    const wagerId = await placePending(players[0]);
+    await time.increase(WAGER_EXPIRY + 1);
+    await wager.connect(players[1]).expireWager(wagerId);
+
+    // Once refunded the wager is no longer Pending, whoever asks.
+    await expect(
+      wager.connect(players[2]).expireWager(wagerId)
+    ).to.be.revertedWithCustomError(wager, "WagerNotPending");
+  });
 });
