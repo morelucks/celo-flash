@@ -3037,6 +3037,17 @@ describe("CeloFlashTournament — Leaderboard (insertion sort boundaries)", func
       const lb = await tournament.getLeaderboard(id);
       expect(lb.length).to.equal(1);
     });
+
+    it("Should record the submitter's address and score on the entry", async function () {
+      const id = await createFreeTournament();
+      await joinAll(id, [players[0]]);
+
+      await submit(id, players[0], 500);
+
+      const [entry] = await tournament.getLeaderboard(id);
+      expect(entry.player).to.equal(players[0].address);
+      expect(entry.score).to.equal(500n);
+    });
     // <<END:lb-basics>>
   });
 
