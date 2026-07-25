@@ -3048,6 +3048,17 @@ describe("CeloFlashTournament — Leaderboard (insertion sort boundaries)", func
       expect(entry.player).to.equal(players[0].address);
       expect(entry.score).to.equal(500n);
     });
+
+    it("Should stamp submittedAt with the submission block timestamp", async function () {
+      const id = await createFreeTournament();
+      await joinAll(id, [players[0]]);
+
+      await submit(id, players[0], 500);
+      const submissionTime = await time.latest();
+
+      const [entry] = await tournament.getLeaderboard(id);
+      expect(entry.submittedAt).to.equal(submissionTime);
+    });
     // <<END:lb-basics>>
   });
 
