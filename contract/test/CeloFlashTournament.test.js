@@ -3122,6 +3122,20 @@ describe("CeloFlashTournament — Leaderboard (insertion sort boundaries)", func
       const expected = [...FILL_SCORES].reverse().map((score) => BigInt(score));
       expect(boardScores(await tournament.getLeaderboard(id))).to.deep.equal(expected);
     });
+
+    it("Should preserve ten strictly descending submissions as-is", async function () {
+      const id = await createFreeTournament();
+      await joinAll(id, players.slice(0, 10));
+
+      const descending = [...FILL_SCORES].reverse();
+      for (let i = 0; i < 10; i++) {
+        await submit(id, players[i], descending[i]);
+      }
+
+      const lb = await tournament.getLeaderboard(id);
+      expect(boardScores(lb)).to.deep.equal(descending.map((score) => BigInt(score)));
+      expect(boardPlayers(lb)).to.deep.equal(players.slice(0, 10).map((p) => p.address));
+    });
     // <<END:lb-ordering>>
   });
 
