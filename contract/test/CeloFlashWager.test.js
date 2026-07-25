@@ -997,4 +997,13 @@ describe("CeloFlashWager — expireWager extended coverage", function () {
       wager.connect(treasury).expireWager(wagerId)
     ).to.changeEtherBalance(players[0], WAGER_AMOUNT);
   });
+
+  it("is permissionless: the score verifier account can trigger the expiry", async function () {
+    const wagerId = await placePending(players[0]);
+    await time.increase(WAGER_EXPIRY + 1);
+
+    await expect(
+      wager.connect(verifier).expireWager(wagerId)
+    ).to.changeEtherBalance(players[0], WAGER_AMOUNT);
+  });
 });
