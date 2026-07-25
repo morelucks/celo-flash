@@ -3027,6 +3027,16 @@ describe("CeloFlashTournament — Leaderboard (insertion sort boundaries)", func
 
       expect(lb.length).to.equal(0);
     });
+
+    it("Should hold exactly one entry after a single participant submits", async function () {
+      const id = await createFreeTournament();
+      await joinAll(id, [players[0]]);
+
+      await submit(id, players[0], 500);
+
+      const lb = await tournament.getLeaderboard(id);
+      expect(lb.length).to.equal(1);
+    });
     // <<END:lb-basics>>
   });
 
