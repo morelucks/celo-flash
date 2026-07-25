@@ -1219,4 +1219,17 @@ describe("CeloFlashWager — expireWager extended coverage", function () {
       WAGER_AMOUNT
     );
   });
+
+  it("returns the expired stake to the player instead of booking house profit", async function () {
+    // A lost wager leaves its stake behind as house profit.
+    await placeAndResolve(players[1], SCORE_THRESHOLD - 1);
+    expect(await wager.getHouseReserve()).to.equal(FUND_AMOUNT + WAGER_AMOUNT);
+
+    // An expired wager must not: the reserve stays exactly where it was.
+    const wagerId = await placePending(players[0]);
+    await time.increase(WAGER_EXPIRY + 1);
+    await wager.expireWager(wagerId);
+
+    expect(await wager.getHouseReserve()).to.equal(FUND_AMOUNT + WAGER_AMOUNT);
+  });
 });
