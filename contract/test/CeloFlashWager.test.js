@@ -1074,4 +1074,13 @@ describe("CeloFlashWager — expireWager extended coverage", function () {
 
     expect(await wager.getHouseReserve()).to.equal(FUND_AMOUNT + topUp);
   });
+
+  it("keeps the contract solvent after refunding a max-sized wager", async function () {
+    const wagerId = await placePending(players[0], MAX_WAGER);
+    await time.increase(WAGER_EXPIRY + 1);
+    await wager.expireWager(wagerId);
+
+    await expectSolvent();
+    expect(await wager.totalPendingLiabilities()).to.equal(0);
+  });
 });
