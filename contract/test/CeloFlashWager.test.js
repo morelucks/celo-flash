@@ -746,4 +746,10 @@ describe("CeloFlashWager — expireWager extended coverage", function () {
     );
     return verifier.signMessage(ethers.getBytes(messageHash));
   }
+
+  // Place a pending wager for `player` and return its id.
+  async function placePending(player, amount = WAGER_AMOUNT) {
+    await wager.connect(player).placeWager({ value: amount });
+    return wager.nextWagerId();
+  }
 });
