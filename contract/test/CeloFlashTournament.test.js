@@ -2937,6 +2937,20 @@ describe("CeloFlashTournament — Leaderboard (insertion sort boundaries)", func
   let creator;
   let players;
 
+  let lbNonceCounter = 0;
+
+  function uniqueNonce() {
+    return ethers.encodeBytes32String(`lb-nonce-${lbNonceCounter++}`);
+  }
+
+  async function signScore(tournamentId, playerAddress, score, nonce) {
+    const messageHash = ethers.solidityPackedKeccak256(
+      ["uint256", "address", "uint256", "bytes32"],
+      [tournamentId, playerAddress, score, nonce]
+    );
+    return verifier.signMessage(ethers.getBytes(messageHash));
+  }
+
   // Fresh deployment per test — leaderboard state must start empty.
   beforeEach(async function () {
     const signers = await ethers.getSigners();
