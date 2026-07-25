@@ -1006,4 +1006,16 @@ describe("CeloFlashWager — expireWager extended coverage", function () {
       wager.connect(verifier).expireWager(wagerId)
     ).to.changeEtherBalance(players[0], WAGER_AMOUNT);
   });
+
+  it("emits exactly one WagerExpired log in the expiry receipt", async function () {
+    const wagerId = await placePending(players[0]);
+    await time.increase(WAGER_EXPIRY + 1);
+
+    const receipt = await (await wager.expireWager(wagerId)).wait();
+    const expiredLogs = receipt.logs
+      .map((log) => wager.interface.parseLog(log))
+      .filter((parsed) => parsed && parsed.name === "WagerExpired");
+
+    expect(expiredLogs).to.have.lengthOf(1);
+  });
 });
