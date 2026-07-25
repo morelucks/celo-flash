@@ -735,4 +735,15 @@ describe("CeloFlashWager — expireWager extended coverage", function () {
 
     await wager.fundHouse({ value: FUND_AMOUNT });
   });
+
+  let nonceCounter = 0;
+  const uniqueNonce = () => ethers.encodeBytes32String(`ext-nonce-${nonceCounter++}`);
+
+  async function signScore(wagerId, playerAddress, score, nonce) {
+    const messageHash = ethers.solidityPackedKeccak256(
+      ["uint256", "address", "uint256", "bytes32"],
+      [wagerId, playerAddress, score, nonce]
+    );
+    return verifier.signMessage(ethers.getBytes(messageHash));
+  }
 });
