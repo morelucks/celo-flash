@@ -1168,4 +1168,14 @@ describe("CeloFlashWager — expireWager extended coverage", function () {
 
     expect(await wager.totalPendingLiabilities()).to.equal(0);
   });
+
+  it("drops liabilities by the odd wager's exact potentialPayout", async function () {
+    const wagerId = await placePending(players[0], ODD_WAGER);
+    expect(await wager.totalPendingLiabilities()).to.equal(payoutOf(ODD_WAGER));
+
+    await time.increase(WAGER_EXPIRY + 1);
+    await wager.expireWager(wagerId);
+
+    expect(await wager.totalPendingLiabilities()).to.equal(0);
+  });
 });
