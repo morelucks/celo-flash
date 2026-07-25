@@ -3244,6 +3244,19 @@ describe("CeloFlashTournament — Leaderboard (insertion sort boundaries)", func
       ]);
       expect(lb[5].player).to.equal(players[10].address);
     });
+
+    it("Should place an 11th player with the highest score at rank 1", async function () {
+      const id = await createFreeTournament();
+      await joinAll(id, players.slice(0, 11));
+      await fillBoard(id);
+
+      await submit(id, players[10], 5000);
+
+      const lb = await tournament.getLeaderboard(id);
+      expect(lb[0].player).to.equal(players[10].address);
+      expect(lb[0].score).to.equal(5000n);
+      expect(lb.length).to.equal(10);
+    });
     // <<END:lb-cap>>
   });
 
