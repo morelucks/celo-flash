@@ -3062,5 +3062,19 @@ describe("CeloFlashTournament — Leaderboard (insertion sort boundaries)", func
     // <<END:lb-basics>>
   });
 
+  describe("Descending order maintenance", function () {
+    it("Should keep two entries sorted when submitted high-then-low", async function () {
+      const id = await createFreeTournament();
+      await joinAll(id, players.slice(0, 2));
+
+      await submit(id, players[0], 900);
+      await submit(id, players[1], 100);
+
+      const lb = await tournament.getLeaderboard(id);
+      expect(boardScores(lb)).to.deep.equal([900n, 100n]);
+    });
+    // <<END:lb-ordering>>
+  });
+
   // <<END:leaderboard-suite>>
 });
