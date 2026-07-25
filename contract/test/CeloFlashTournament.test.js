@@ -2973,6 +2973,20 @@ describe("CeloFlashTournament — Leaderboard (insertion sort boundaries)", func
     }
   }
 
+  function expectDescending(lb) {
+    for (let i = 1; i < lb.length; i++) {
+      expect(lb[i - 1].score).to.be.gte(lb[i].score);
+    }
+  }
+
+  function boardScores(lb) {
+    return lb.map((entry) => entry.score);
+  }
+
+  function boardPlayers(lb) {
+    return lb.map((entry) => entry.player);
+  }
+
   // Fresh deployment per test — leaderboard state must start empty.
   beforeEach(async function () {
     const signers = await ethers.getSigners();
