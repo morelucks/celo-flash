@@ -856,4 +856,14 @@ describe("CeloFlashWager — expireWager extended coverage", function () {
       WAGER_AMOUNT
     );
   });
+
+  it("keeps the expired record's score at zero", async function () {
+    const wagerId = await placePending(players[0]);
+    await time.increase(WAGER_EXPIRY + 1);
+    await wager.expireWager(wagerId);
+
+    // No score was ever attested, and expiry must not fabricate one.
+    const stored = await wager.getWager(wagerId);
+    expect(stored.score).to.equal(0);
+  });
 });
