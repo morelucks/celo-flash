@@ -3194,6 +3194,20 @@ describe("CeloFlashTournament — Leaderboard (insertion sort boundaries)", func
       ]);
       expect(after).to.deep.equal(before);
     });
+
+    it("Should reject an 11th score that only ties the current last entry", async function () {
+      const id = await createFreeTournament();
+      await joinAll(id, players.slice(0, 11));
+      await fillBoard(id);
+
+      // lb[9].score == 100; a tie must not displace the incumbent
+      await submit(id, players[10], 100);
+
+      const lb = await tournament.getLeaderboard(id);
+      expect(lb.length).to.equal(10);
+      expect(boardPlayers(lb)).to.not.include(players[10].address);
+      expect(lb[9].player).to.equal(players[0].address);
+    });
     // <<END:lb-cap>>
   });
 
