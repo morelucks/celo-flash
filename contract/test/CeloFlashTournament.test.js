@@ -2925,3 +2925,571 @@ describe("CeloFlashTournament — claimPrize & cancelTournament", function () {
 
   // __CLAIM_TESTS_MARKER__
 });
+
+describe("CeloFlashTournament — Leaderboard (insertion sort boundaries)", function () {
+  const DURATION = 3600; // 1 hour (MIN_DURATION)
+
+  // Ten distinct ascending scores for players[0..9]; submitting them in order
+  // produces a full board sorted 1000 → 100 with players in reverse order.
+  const FILL_SCORES = [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000];
+
+  // Fixed "random" submission order used by the ordering tests.
+  const RANDOM_SCORES = [730, 120, 990, 450, 310, 860, 40, 670, 555, 205];
+
+  let tournament;
+  let usdm;
+  let owner;
+  let verifier;
+  let feeRecipient;
+  let creator;
+  let players;
+
+  let lbNonceCounter = 0;
+
+  function uniqueNonce() {
+    return ethers.encodeBytes32String(`lb-nonce-${lbNonceCounter++}`);
+  }
+
+  async function signScore(tournamentId, playerAddress, score, nonce) {
+    const messageHash = ethers.solidityPackedKeccak256(
+      ["uint256", "address", "uint256", "bytes32"],
+      [tournamentId, playerAddress, score, nonce]
+    );
+    return verifier.signMessage(ethers.getBytes(messageHash));
+  }
+
+  async function submit(tournamentId, player, score) {
+    const nonce = uniqueNonce();
+    const signature = await signScore(tournamentId, player.address, score, nonce);
+    return tournament.connect(player).submitScore(tournamentId, score, nonce, signature);
+  }
+
+  // Free tournament: no entry fee or seed, so no token funding is needed
+  // and the leaderboard logic is exercised in isolation.
+  async function createFreeTournament() {
+    const id = await tournament.nextTournamentId();
+    await tournament
+      .connect(creator)
+      .createTournament("Leaderboard Cup", 0n, 0n, DURATION, false, { value: 0n });
+    return id;
+  }
+
+  async function joinAll(tournamentId, joiners) {
+    for (const player of joiners) {
+      await tournament.connect(player).joinTournament(tournamentId);
+    }
+  }
+
+  function expectDescending(lb) {
+    for (let i = 1; i < lb.length; i++) {
+      expect(lb[i - 1].score).to.be.gte(lb[i].score);
+    }
+  }
+
+  function boardScores(lb) {
+    return lb.map((entry) => entry.score);
+  }
+
+  function boardPlayers(lb) {
+    return lb.map((entry) => entry.player);
+  }
+
+  // Fills the board with players[0..9] submitting FILL_SCORES in ascending
+  // order, leaving a full 10-entry leaderboard sorted 1000 → 100.
+  async function fillBoard(tournamentId) {
+    for (let i = 0; i < 10; i++) {
+      await submit(tournamentId, players[i], FILL_SCORES[i]);
+    }
+  }
+
+  // Fresh deployment per test — leaderboard state must start empty.
+  beforeEach(async function () {
+    const signers = await ethers.getSigners();
+    [owner, verifier, feeRecipient, creator] = signers;
+    players = signers.slice(4, 16);
+
+    const MockERC20 = await ethers.getContractFactory("MockERC20");
+    usdm = await MockERC20.deploy("Mock USDm", "USDm", 18);
+    await usdm.waitForDeployment();
+
+    const CeloFlashTournament = await ethers.getContractFactory("CeloFlashTournament");
+    tournament = await CeloFlashTournament.deploy(
+      await usdm.getAddress(),
+      verifier.address,
+      feeRecipient.address
+    );
+    await tournament.waitForDeployment();
+  });
+
+  describe("Basics & single participant", function () {
+    it("Should return an empty leaderboard before any score is submitted", async function () {
+      const id = await createFreeTournament();
+      await joinAll(id, [players[0]]);
+
+      const lb = await tournament.getLeaderboard(id);
+
+      expect(lb.length).to.equal(0);
+    });
+
+    it("Should hold exactly one entry after a single participant submits", async function () {
+      const id = await createFreeTournament();
+      await joinAll(id, [players[0]]);
+
+      await submit(id, players[0], 500);
+
+      const lb = await tournament.getLeaderboard(id);
+      expect(lb.length).to.equal(1);
+    });
+
+    it("Should record the submitter's address and score on the entry", async function () {
+      const id = await createFreeTournament();
+      await joinAll(id, [players[0]]);
+
+      await submit(id, players[0], 500);
+
+      const [entry] = await tournament.getLeaderboard(id);
+      expect(entry.player).to.equal(players[0].address);
+      expect(entry.score).to.equal(500n);
+    });
+
+    it("Should stamp submittedAt with the submission block timestamp", async function () {
+      const id = await createFreeTournament();
+      await joinAll(id, [players[0]]);
+
+      await submit(id, players[0], 500);
+      const submissionTime = await time.latest();
+
+      const [entry] = await tournament.getLeaderboard(id);
+      expect(entry.submittedAt).to.equal(submissionTime);
+    });
+    // <<END:lb-basics>>
+  });
+
+  describe("Descending order maintenance", function () {
+    it("Should keep two entries sorted when submitted high-then-low", async function () {
+      const id = await createFreeTournament();
+      await joinAll(id, players.slice(0, 2));
+
+      await submit(id, players[0], 900);
+      await submit(id, players[1], 100);
+
+      const lb = await tournament.getLeaderboard(id);
+      expect(boardScores(lb)).to.deep.equal([900n, 100n]);
+    });
+
+    it("Should re-sort two entries submitted low-then-high", async function () {
+      const id = await createFreeTournament();
+      await joinAll(id, players.slice(0, 2));
+
+      await submit(id, players[0], 100);
+      await submit(id, players[1], 900);
+
+      const lb = await tournament.getLeaderboard(id);
+      expect(boardScores(lb)).to.deep.equal([900n, 100n]);
+      expect(boardPlayers(lb)).to.deep.equal([players[1].address, players[0].address]);
+    });
+
+    it("Should maintain descending order after every one of ten submissions", async function () {
+      const id = await createFreeTournament();
+      await joinAll(id, players.slice(0, 10));
+
+      for (let i = 0; i < 10; i++) {
+        await submit(id, players[i], RANDOM_SCORES[i]);
+        expectDescending(await tournament.getLeaderboard(id));
+      }
+    });
+
+    it("Should fully sort ten scores submitted in random order", async function () {
+      const id = await createFreeTournament();
+      await joinAll(id, players.slice(0, 10));
+
+      for (let i = 0; i < 10; i++) {
+        await submit(id, players[i], RANDOM_SCORES[i]);
+      }
+
+      const expected = [...RANDOM_SCORES]
+        .sort((a, b) => b - a)
+        .map((score) => BigInt(score));
+      expect(boardScores(await tournament.getLeaderboard(id))).to.deep.equal(expected);
+    });
+
+    it("Should reverse ten strictly ascending submissions into descending order", async function () {
+      const id = await createFreeTournament();
+      await joinAll(id, players.slice(0, 10));
+
+      await fillBoard(id);
+
+      const expected = [...FILL_SCORES].reverse().map((score) => BigInt(score));
+      expect(boardScores(await tournament.getLeaderboard(id))).to.deep.equal(expected);
+    });
+
+    it("Should preserve ten strictly descending submissions as-is", async function () {
+      const id = await createFreeTournament();
+      await joinAll(id, players.slice(0, 10));
+
+      const descending = [...FILL_SCORES].reverse();
+      for (let i = 0; i < 10; i++) {
+        await submit(id, players[i], descending[i]);
+      }
+
+      const lb = await tournament.getLeaderboard(id);
+      expect(boardScores(lb)).to.deep.equal(descending.map((score) => BigInt(score)));
+      expect(boardPlayers(lb)).to.deep.equal(players.slice(0, 10).map((p) => p.address));
+    });
+
+    it("Should append a below-minimum score while the board is not yet full", async function () {
+      const id = await createFreeTournament();
+      await joinAll(id, players.slice(0, 4));
+
+      await submit(id, players[0], 900);
+      await submit(id, players[1], 800);
+      await submit(id, players[2], 700);
+      await submit(id, players[3], 5);
+
+      const lb = await tournament.getLeaderboard(id);
+      expect(lb.length).to.equal(4);
+      expect(lb[3].player).to.equal(players[3].address);
+      expect(lb[3].score).to.equal(5n);
+    });
+    // <<END:lb-ordering>>
+  });
+
+  describe("Top-10 cap and replacement", function () {
+    it("Should cap the board at exactly ten entries once ten players submit", async function () {
+      const id = await createFreeTournament();
+      await joinAll(id, players.slice(0, 10));
+
+      await fillBoard(id);
+
+      expect((await tournament.getLeaderboard(id)).length).to.equal(10);
+    });
+
+    it("Should not add an 11th player whose score is below the entire board", async function () {
+      const id = await createFreeTournament();
+      await joinAll(id, players.slice(0, 11));
+      await fillBoard(id);
+
+      await submit(id, players[10], 50);
+
+      const lb = await tournament.getLeaderboard(id);
+      expect(lb.length).to.equal(10);
+      expect(boardPlayers(lb)).to.not.include(players[10].address);
+    });
+
+    it("Should leave every existing entry untouched when the 11th score is rejected", async function () {
+      const id = await createFreeTournament();
+      await joinAll(id, players.slice(0, 11));
+      await fillBoard(id);
+
+      const before = (await tournament.getLeaderboard(id)).map((entry) => [
+        entry.player,
+        entry.score,
+      ]);
+
+      await submit(id, players[10], 50);
+
+      const after = (await tournament.getLeaderboard(id)).map((entry) => [
+        entry.player,
+        entry.score,
+      ]);
+      expect(after).to.deep.equal(before);
+    });
+
+    it("Should reject an 11th score that only ties the current last entry", async function () {
+      const id = await createFreeTournament();
+      await joinAll(id, players.slice(0, 11));
+      await fillBoard(id);
+
+      // lb[9].score == 100; a tie must not displace the incumbent
+      await submit(id, players[10], 100);
+
+      const lb = await tournament.getLeaderboard(id);
+      expect(lb.length).to.equal(10);
+      expect(boardPlayers(lb)).to.not.include(players[10].address);
+      expect(lb[9].player).to.equal(players[0].address);
+    });
+
+    it("Should keep the board at ten entries when the 11th score beats the last", async function () {
+      const id = await createFreeTournament();
+      await joinAll(id, players.slice(0, 11));
+      await fillBoard(id);
+
+      await submit(id, players[10], 550);
+
+      expect((await tournament.getLeaderboard(id)).length).to.equal(10);
+    });
+
+    it("Should evict the lowest entry when a better 11th score arrives", async function () {
+      const id = await createFreeTournament();
+      await joinAll(id, players.slice(0, 11));
+      await fillBoard(id);
+
+      await submit(id, players[10], 550);
+
+      const lb = await tournament.getLeaderboard(id);
+      expect(boardPlayers(lb)).to.include(players[10].address);
+      expect(boardPlayers(lb)).to.not.include(players[0].address); // held 100
+    });
+
+    it("Should re-sort the board so the replacing score sits at its correct rank", async function () {
+      const id = await createFreeTournament();
+      await joinAll(id, players.slice(0, 11));
+      await fillBoard(id);
+
+      await submit(id, players[10], 550);
+
+      const lb = await tournament.getLeaderboard(id);
+      expect(boardScores(lb)).to.deep.equal([
+        1000n, 900n, 800n, 700n, 600n, 550n, 500n, 400n, 300n, 200n,
+      ]);
+      expect(lb[5].player).to.equal(players[10].address);
+    });
+
+    it("Should place an 11th player with the highest score at rank 1", async function () {
+      const id = await createFreeTournament();
+      await joinAll(id, players.slice(0, 11));
+      await fillBoard(id);
+
+      await submit(id, players[10], 5000);
+
+      const lb = await tournament.getLeaderboard(id);
+      expect(lb[0].player).to.equal(players[10].address);
+      expect(lb[0].score).to.equal(5000n);
+      expect(lb.length).to.equal(10);
+    });
+
+    it("Should slot an 11th player barely above the last entry at rank 10", async function () {
+      const id = await createFreeTournament();
+      await joinAll(id, players.slice(0, 11));
+      await fillBoard(id);
+
+      // 101 beats only the evicted 100, so the newcomer lands at the bottom
+      await submit(id, players[10], 101);
+
+      const lb = await tournament.getLeaderboard(id);
+      expect(lb[9].player).to.equal(players[10].address);
+      expect(lb[9].score).to.equal(101n);
+      expectDescending(lb);
+    });
+
+    it("Should retain the evicted player's best score in playerBestScore", async function () {
+      const id = await createFreeTournament();
+      await joinAll(id, players.slice(0, 11));
+      await fillBoard(id);
+
+      await submit(id, players[10], 550);
+
+      // players[0] was evicted, but their best score record survives
+      expect(await tournament.playerBestScore(id, players[0].address)).to.equal(100n);
+    });
+
+    it("Should allow an evicted player to re-enter by beating the new last entry", async function () {
+      const id = await createFreeTournament();
+      await joinAll(id, players.slice(0, 11));
+      await fillBoard(id);
+
+      await submit(id, players[10], 550); // evicts players[0] (100)
+      await submit(id, players[0], 999); // beats new last entry (200)
+
+      const lb = await tournament.getLeaderboard(id);
+      expect(boardPlayers(lb)).to.include(players[0].address);
+      expect(lb[1].player).to.equal(players[0].address);
+      expect(lb[1].score).to.equal(999n);
+      expect(lb.length).to.equal(10);
+      expectDescending(lb);
+    });
+    // <<END:lb-cap>>
+  });
+
+  describe("In-place score updates", function () {
+    it("Should update an existing entry in place without creating a duplicate", async function () {
+      const id = await createFreeTournament();
+      await joinAll(id, players.slice(0, 3));
+
+      await submit(id, players[0], 300);
+      await submit(id, players[1], 200);
+      await submit(id, players[2], 100);
+      await submit(id, players[1], 250);
+
+      const lb = await tournament.getLeaderboard(id);
+      const occurrences = boardPlayers(lb).filter(
+        (addr) => addr === players[1].address
+      );
+      expect(occurrences.length).to.equal(1);
+      expect(lb[1].score).to.equal(250n);
+    });
+
+    it("Should keep the board length unchanged when a player improves", async function () {
+      const id = await createFreeTournament();
+      await joinAll(id, players.slice(0, 10));
+      await fillBoard(id);
+
+      await submit(id, players[3], 450);
+
+      expect((await tournament.getLeaderboard(id)).length).to.equal(10);
+    });
+
+    it("Should move a player to rank 1 when they beat every other score", async function () {
+      const id = await createFreeTournament();
+      await joinAll(id, players.slice(0, 10));
+      await fillBoard(id);
+
+      // players[0] currently holds last place with 100
+      await submit(id, players[0], 9999);
+
+      const lb = await tournament.getLeaderboard(id);
+      expect(lb[0].player).to.equal(players[0].address);
+      expect(lb[0].score).to.equal(9999n);
+      expectDescending(lb);
+    });
+
+    it("Should ignore a resubmission that merely equals the player's best", async function () {
+      const id = await createFreeTournament();
+      await joinAll(id, players.slice(0, 2));
+
+      await submit(id, players[0], 500);
+      await submit(id, players[1], 400);
+      const before = boardScores(await tournament.getLeaderboard(id));
+
+      await submit(id, players[1], 400);
+
+      expect(boardScores(await tournament.getLeaderboard(id))).to.deep.equal(before);
+    });
+
+    it("Should ignore a resubmission lower than the player's best", async function () {
+      const id = await createFreeTournament();
+      await joinAll(id, players.slice(0, 2));
+
+      await submit(id, players[0], 500);
+      await submit(id, players[1], 400);
+
+      await submit(id, players[1], 10);
+
+      const lb = await tournament.getLeaderboard(id);
+      expect(lb[1].score).to.equal(400n);
+      expect(await tournament.playerBestScore(id, players[1].address)).to.equal(400n);
+    });
+
+    it("Should re-sort correctly when a mid-board player improves", async function () {
+      const id = await createFreeTournament();
+      await joinAll(id, players.slice(0, 10));
+      await fillBoard(id);
+
+      // players[4] holds 500 (rank 6); improving to 750 lifts them to rank 4
+      await submit(id, players[4], 750);
+
+      const lb = await tournament.getLeaderboard(id);
+      expect(boardScores(lb)).to.deep.equal([
+        1000n, 900n, 800n, 750n, 700n, 600n, 400n, 300n, 200n, 100n,
+      ]);
+      expect(lb[3].player).to.equal(players[4].address);
+    });
+
+    it("Should refresh submittedAt when an entry is updated in place", async function () {
+      const id = await createFreeTournament();
+      await joinAll(id, [players[0]]);
+
+      await submit(id, players[0], 100);
+      const [before] = await tournament.getLeaderboard(id);
+
+      await time.increase(120);
+      await submit(id, players[0], 200);
+
+      const [after] = await tournament.getLeaderboard(id);
+      expect(after.submittedAt).to.be.gt(before.submittedAt);
+    });
+    // <<END:lb-updates>>
+  });
+
+  describe("Tied scores", function () {
+    it("Should keep both players on the board when their scores tie", async function () {
+      const id = await createFreeTournament();
+      await joinAll(id, players.slice(0, 2));
+
+      await submit(id, players[0], 500);
+      await submit(id, players[1], 500);
+
+      const lb = await tournament.getLeaderboard(id);
+      expect(lb.length).to.equal(2);
+      expect(boardPlayers(lb)).to.include.members([
+        players[0].address,
+        players[1].address,
+      ]);
+    });
+
+    it("Should rank the earlier submitter ahead on a tied score", async function () {
+      const id = await createFreeTournament();
+      await joinAll(id, players.slice(0, 3));
+
+      await submit(id, players[0], 700);
+      await submit(id, players[1], 500);
+      await submit(id, players[2], 500);
+
+      const lb = await tournament.getLeaderboard(id);
+      expect(boardPlayers(lb)).to.deep.equal([
+        players[0].address,
+        players[1].address,
+        players[2].address,
+      ]);
+    });
+
+    it("Should hold all ten identically-scored players in submission order", async function () {
+      const id = await createFreeTournament();
+      await joinAll(id, players.slice(0, 10));
+
+      for (let i = 0; i < 10; i++) {
+        await submit(id, players[i], 500);
+      }
+
+      const lb = await tournament.getLeaderboard(id);
+      expect(lb.length).to.equal(10);
+      expect(boardScores(lb)).to.deep.equal(Array(10).fill(500n));
+      expect(boardPlayers(lb)).to.deep.equal(
+        players.slice(0, 10).map((p) => p.address)
+      );
+    });
+    // <<END:lb-ties>>
+  });
+
+  describe("View consistency & isolation", function () {
+    it("Should return identical data from repeated getLeaderboard calls and match playerBestScore", async function () {
+      const id = await createFreeTournament();
+      await joinAll(id, players.slice(0, 10));
+
+      for (let i = 0; i < 10; i++) {
+        await submit(id, players[i], RANDOM_SCORES[i]);
+      }
+
+      const first = await tournament.getLeaderboard(id);
+      const second = await tournament.getLeaderboard(id);
+      expect(boardScores(first)).to.deep.equal(boardScores(second));
+      expect(boardPlayers(first)).to.deep.equal(boardPlayers(second));
+
+      for (const entry of first) {
+        expect(await tournament.playerBestScore(id, entry.player)).to.equal(entry.score);
+      }
+    });
+
+    it("Should keep leaderboards fully isolated between tournaments", async function () {
+      const idA = await createFreeTournament();
+      const idB = await createFreeTournament();
+      await joinAll(idA, [players[0]]);
+      await joinAll(idB, [players[1]]);
+
+      await submit(idA, players[0], 500);
+      await submit(idB, players[1], 700);
+
+      const lbA = await tournament.getLeaderboard(idA);
+      const lbB = await tournament.getLeaderboard(idB);
+      expect(lbA.length).to.equal(1);
+      expect(lbA[0].player).to.equal(players[0].address);
+      expect(lbA[0].score).to.equal(500n);
+      expect(lbB.length).to.equal(1);
+      expect(lbB[0].player).to.equal(players[1].address);
+      expect(lbB[0].score).to.equal(700n);
+    });
+    // <<END:lb-views>>
+  });
+
+  // <<END:leaderboard-suite>>
+});
