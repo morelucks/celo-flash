@@ -3257,6 +3257,20 @@ describe("CeloFlashTournament — Leaderboard (insertion sort boundaries)", func
       expect(lb[0].score).to.equal(5000n);
       expect(lb.length).to.equal(10);
     });
+
+    it("Should slot an 11th player barely above the last entry at rank 10", async function () {
+      const id = await createFreeTournament();
+      await joinAll(id, players.slice(0, 11));
+      await fillBoard(id);
+
+      // 101 beats only the evicted 100, so the newcomer lands at the bottom
+      await submit(id, players[10], 101);
+
+      const lb = await tournament.getLeaderboard(id);
+      expect(lb[9].player).to.equal(players[10].address);
+      expect(lb[9].score).to.equal(101n);
+      expectDescending(lb);
+    });
     // <<END:lb-cap>>
   });
 
