@@ -3432,6 +3432,22 @@ describe("CeloFlashTournament — Leaderboard (insertion sort boundaries)", func
         players[2].address,
       ]);
     });
+
+    it("Should hold all ten identically-scored players in submission order", async function () {
+      const id = await createFreeTournament();
+      await joinAll(id, players.slice(0, 10));
+
+      for (let i = 0; i < 10; i++) {
+        await submit(id, players[i], 500);
+      }
+
+      const lb = await tournament.getLeaderboard(id);
+      expect(lb.length).to.equal(10);
+      expect(boardScores(lb)).to.deep.equal(Array(10).fill(500n));
+      expect(boardPlayers(lb)).to.deep.equal(
+        players.slice(0, 10).map((p) => p.address)
+      );
+    });
     // <<END:lb-ties>>
   });
 
