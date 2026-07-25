@@ -900,4 +900,15 @@ describe("CeloFlashWager — expireWager extended coverage", function () {
     expect(await wager.activeWager(players[0].address)).to.equal(secondId);
     expect(secondId).to.not.equal(firstId);
   });
+
+  it("leaves nextWagerId untouched when a wager expires", async function () {
+    const wagerId = await placePending(players[0]);
+    const idBefore = await wager.nextWagerId();
+
+    await time.increase(WAGER_EXPIRY + 1);
+    await wager.expireWager(wagerId);
+
+    // Expiry consumes no ids — only placements advance the counter.
+    expect(await wager.nextWagerId()).to.equal(idBefore);
+  });
 });
