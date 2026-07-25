@@ -3328,6 +3328,20 @@ describe("CeloFlashTournament — Leaderboard (insertion sort boundaries)", func
 
       expect((await tournament.getLeaderboard(id)).length).to.equal(10);
     });
+
+    it("Should move a player to rank 1 when they beat every other score", async function () {
+      const id = await createFreeTournament();
+      await joinAll(id, players.slice(0, 10));
+      await fillBoard(id);
+
+      // players[0] currently holds last place with 100
+      await submit(id, players[0], 9999);
+
+      const lb = await tournament.getLeaderboard(id);
+      expect(lb[0].player).to.equal(players[0].address);
+      expect(lb[0].score).to.equal(9999n);
+      expectDescending(lb);
+    });
     // <<END:lb-updates>>
   });
 
