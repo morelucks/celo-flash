@@ -3175,6 +3175,25 @@ describe("CeloFlashTournament — Leaderboard (insertion sort boundaries)", func
       expect(lb.length).to.equal(10);
       expect(boardPlayers(lb)).to.not.include(players[10].address);
     });
+
+    it("Should leave every existing entry untouched when the 11th score is rejected", async function () {
+      const id = await createFreeTournament();
+      await joinAll(id, players.slice(0, 11));
+      await fillBoard(id);
+
+      const before = (await tournament.getLeaderboard(id)).map((entry) => [
+        entry.player,
+        entry.score,
+      ]);
+
+      await submit(id, players[10], 50);
+
+      const after = (await tournament.getLeaderboard(id)).map((entry) => [
+        entry.player,
+        entry.score,
+      ]);
+      expect(after).to.deep.equal(before);
+    });
     // <<END:lb-cap>>
   });
 
