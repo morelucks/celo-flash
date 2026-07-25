@@ -1189,4 +1189,14 @@ describe("CeloFlashWager — expireWager extended coverage", function () {
       -MAX_WAGER
     );
   });
+
+  it("emits neither WagerResolved nor WagerClaimed on expiry", async function () {
+    const wagerId = await placePending(players[0]);
+    await time.increase(WAGER_EXPIRY + 1);
+
+    const tx = wager.expireWager(wagerId);
+    await expect(tx).to.emit(wager, "WagerExpired");
+    await expect(tx).to.not.emit(wager, "WagerResolved");
+    await expect(tx).to.not.emit(wager, "WagerClaimed");
+  });
 });
