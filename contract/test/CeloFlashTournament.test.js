@@ -3098,6 +3098,20 @@ describe("CeloFlashTournament — Leaderboard (insertion sort boundaries)", func
         expectDescending(await tournament.getLeaderboard(id));
       }
     });
+
+    it("Should fully sort ten scores submitted in random order", async function () {
+      const id = await createFreeTournament();
+      await joinAll(id, players.slice(0, 10));
+
+      for (let i = 0; i < 10; i++) {
+        await submit(id, players[i], RANDOM_SCORES[i]);
+      }
+
+      const expected = [...RANDOM_SCORES]
+        .sort((a, b) => b - a)
+        .map((score) => BigInt(score));
+      expect(boardScores(await tournament.getLeaderboard(id))).to.deep.equal(expected);
+    });
     // <<END:lb-ordering>>
   });
 
