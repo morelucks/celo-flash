@@ -940,4 +940,32 @@ describe("CeloFlashWager — expireWager extended coverage", function () {
 
     expect(await wager.totalPendingLiabilities()).to.equal(0);
   });
+
+  it("stays solvent through a mix of expiry, loss and claimed win", async function () {
+    const expiredId = await placePending(players[0]);
+    const lostId = await placePending(players[1]);
+    const wonId = await placePending(players[2]);
+
+    await time.increase(WAGER_EXPIRY + 1);
+    await wager.expireWager(expiredId);
+    await expectSolvent();
+
+    // Resolution has no deadline of its own, so the aged wagers still settle.
+    const loseNonce = uniqueNonce();
+    const loseSig = await signScore(lostId, players[1].address, 0, loseNonce);
+    await wager.connect(players[1]).resolveWager(lostId, 0, loseNonce, loseSig);
+    await expectSolvent();
+
+    const winScore = SCORE_THRESHOLD + 1;
+    const winNonce = uniqueNonce();
+    const winSig = await signScore(wonId, players[2].address, winScore, winNonce);
+    await wager.connect(players[2]).resolveWager(wonId, winScore, winNonce, winSig);
+    await wager.connect(players[2]).claimWinnings(wonId);
+    await expectSolvent();
+
+    expect(await wager.totalPendingLiabilities()).to.equal(0);
+    expect(await wager.accumulatedHouseEdge()).to.equal(
+      (GROSS_PAYOUT * HOUSE_EDGE_BPS) / BPS_DENOMINATOR
+    );
+  });
 });
