@@ -1199,4 +1199,24 @@ describe("CeloFlashWager — expireWager extended coverage", function () {
     await expect(tx).to.not.emit(wager, "WagerResolved");
     await expect(tx).to.not.emit(wager, "WagerClaimed");
   });
+
+  it("gives the replacement wager a fresh full expiry window", async function () {
+    const firstId = await placePending(players[0]);
+    await time.increase(WAGER_EXPIRY + 1);
+    await wager.expireWager(firstId);
+
+    const secondId = await placePending(players[0]);
+
+    // The old wager's age must not bleed into the new one.
+    await expect(wager.expireWager(secondId)).to.be.revertedWithCustomError(
+      wager,
+      "WagerNotExpired"
+    );
+
+    await time.increase(WAGER_EXPIRY + 1);
+    await expect(wager.expireWager(secondId)).to.changeEtherBalance(
+      players[0],
+      WAGER_AMOUNT
+    );
+  });
 });
