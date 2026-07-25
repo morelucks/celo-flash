@@ -752,4 +752,13 @@ describe("CeloFlashWager — expireWager extended coverage", function () {
     await wager.connect(player).placeWager({ value: amount });
     return wager.nextWagerId();
   }
+
+  // Place a wager then resolve it with the given score (won or lost).
+  async function placeAndResolve(player, score) {
+    const wagerId = await placePending(player);
+    const nonce = uniqueNonce();
+    const signature = await signScore(wagerId, player.address, score, nonce);
+    await wager.connect(player).resolveWager(wagerId, score, nonce, signature);
+    return wagerId;
+  }
 });
