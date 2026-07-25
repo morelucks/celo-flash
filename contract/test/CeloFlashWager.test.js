@@ -769,4 +769,15 @@ describe("CeloFlashWager — expireWager extended coverage", function () {
     const edge = await wager.accumulatedHouseEdge();
     expect(balance).to.be.gte(liabilities + edge);
   }
+
+  it("refunds the exact stake for a mid-sized 2.5 CELO wager", async function () {
+    const wagerId = await placePending(players[0], MID_WAGER);
+
+    await time.increase(WAGER_EXPIRY + 1);
+
+    await expect(wager.expireWager(wagerId)).to.changeEtherBalance(
+      players[0],
+      MID_WAGER
+    );
+  });
 });
