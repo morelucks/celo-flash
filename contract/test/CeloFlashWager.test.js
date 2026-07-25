@@ -701,3 +701,535 @@ describe("CeloFlashWager — expireWager (time-based expiry & refunds)", functio
 // Wager 5-won-wager balance accounting invariant
 
 // Solvency invariant check
+
+describe("CeloFlashWager — expireWager extended coverage", function () {
+  const SCORE_THRESHOLD = 100;
+  const FUND_AMOUNT = ethers.parseEther("100");
+  const WAGER_AMOUNT = ethers.parseEther("1");
+  const MID_WAGER = ethers.parseEther("2.5");
+  const ODD_WAGER = ethers.parseEther("1.337");
+  const MAX_WAGER = ethers.parseEther("10");
+
+  const WIN_MULTIPLIER_BPS = 20_000n;
+  const HOUSE_EDGE_BPS = 500n;
+  const BPS_DENOMINATOR = 10_000n;
+  const WAGER_EXPIRY = 3600; // 1 hour, matches WAGER_EXPIRY in the contract
+
+  // Gross payout locked as a liability for a given stake (2x).
+  const payoutOf = (amount) => (amount * WIN_MULTIPLIER_BPS) / BPS_DENOMINATOR;
+  const GROSS_PAYOUT = payoutOf(WAGER_AMOUNT);
+
+  let wager;
+  let owner;
+  let verifier;
+  let treasury;
+  let players;
+
+  beforeEach(async function () {
+    [owner, verifier, treasury, ...players] = await ethers.getSigners();
+    players = players.slice(0, 5);
+
+    const CeloFlashWager = await ethers.getContractFactory("CeloFlashWager");
+    wager = await CeloFlashWager.deploy(verifier.address, treasury.address, SCORE_THRESHOLD);
+    await wager.waitForDeployment();
+
+    await wager.fundHouse({ value: FUND_AMOUNT });
+  });
+
+  let nonceCounter = 0;
+  const uniqueNonce = () => ethers.encodeBytes32String(`ext-nonce-${nonceCounter++}`);
+
+  async function signScore(wagerId, playerAddress, score, nonce) {
+    const messageHash = ethers.solidityPackedKeccak256(
+      ["uint256", "address", "uint256", "bytes32"],
+      [wagerId, playerAddress, score, nonce]
+    );
+    return verifier.signMessage(ethers.getBytes(messageHash));
+  }
+
+  // Place a pending wager for `player` and return its id.
+  async function placePending(player, amount = WAGER_AMOUNT) {
+    await wager.connect(player).placeWager({ value: amount });
+    return wager.nextWagerId();
+  }
+
+  // Place a wager then resolve it with the given score (won or lost).
+  async function placeAndResolve(player, score) {
+    const wagerId = await placePending(player);
+    const nonce = uniqueNonce();
+    const signature = await signScore(wagerId, player.address, score, nonce);
+    await wager.connect(player).resolveWager(wagerId, score, nonce, signature);
+    return wagerId;
+  }
+
+  // Assert the contract stays solvent: balance covers liabilities + edge.
+  async function expectSolvent() {
+    const balance = await ethers.provider.getBalance(await wager.getAddress());
+    const liabilities = await wager.totalPendingLiabilities();
+    const edge = await wager.accumulatedHouseEdge();
+    expect(balance).to.be.gte(liabilities + edge);
+  }
+
+  it("refunds the exact stake for a mid-sized 2.5 CELO wager", async function () {
+    const wagerId = await placePending(players[0], MID_WAGER);
+
+    await time.increase(WAGER_EXPIRY + 1);
+
+    await expect(wager.expireWager(wagerId)).to.changeEtherBalance(
+      players[0],
+      MID_WAGER
+    );
+  });
+
+  it("refunds the exact stake for an odd 1.337 CELO wager", async function () {
+    const wagerId = await placePending(players[0], ODD_WAGER);
+
+    await time.increase(WAGER_EXPIRY + 1);
+
+    // No rounding anywhere: the refund is the stake to the wei.
+    await expect(wager.expireWager(wagerId)).to.changeEtherBalance(
+      players[0],
+      ODD_WAGER
+    );
+  });
+
+  it("expiring an unknown wager id moves no funds and no real liability", async function () {
+    // A genuine pending wager locks a liability the phantom expiry must not touch.
+    await placePending(players[0]);
+    expect(await wager.totalPendingLiabilities()).to.equal(GROSS_PAYOUT);
+
+    await time.increase(WAGER_EXPIRY + 1);
+
+    // Id 999 was never created: its record is zeroed, so even though the call
+    // goes through, it refunds 0 wei to address(0) and cannot drain anything.
+    await expect(wager.expireWager(999)).to.changeEtherBalance(wager, 0n);
+    expect(await wager.totalPendingLiabilities()).to.equal(GROSS_PAYOUT);
+  });
+
+  it("reverts with WagerNotExpired at the half-hour mark", async function () {
+    const wagerId = await placePending(players[0]);
+
+    await time.increase(WAGER_EXPIRY / 2); // 30 minutes in, half the window
+
+    await expect(wager.expireWager(wagerId)).to.be.revertedWithCustomError(
+      wager,
+      "WagerNotExpired"
+    );
+  });
+
+  it("cannot resolve a wager once it has been expired", async function () {
+    const wagerId = await placePending(players[0]);
+    await time.increase(WAGER_EXPIRY + 1);
+    await wager.expireWager(wagerId);
+
+    // Even a validly signed winning score is rejected after expiry.
+    const nonce = uniqueNonce();
+    const signature = await signScore(
+      wagerId,
+      players[0].address,
+      SCORE_THRESHOLD + 10,
+      nonce
+    );
+
+    await expect(
+      wager.connect(players[0]).resolveWager(wagerId, SCORE_THRESHOLD + 10, nonce, signature)
+    ).to.be.revertedWithCustomError(wager, "WagerNotPending");
+  });
+
+  it("cannot claim winnings from an expired wager", async function () {
+    const wagerId = await placePending(players[0]);
+    await time.increase(WAGER_EXPIRY + 1);
+    await wager.expireWager(wagerId);
+
+    await expect(
+      wager.connect(players[0]).claimWinnings(wagerId)
+    ).to.be.revertedWithCustomError(wager, "WagerNotWon");
+  });
+
+  it("still expires and refunds a wager thirty days after placement", async function () {
+    const wagerId = await placePending(players[0]);
+
+    await time.increase(30 * 24 * 3600); // long-forgotten wager
+
+    await expect(wager.expireWager(wagerId)).to.changeEtherBalance(
+      players[0],
+      WAGER_AMOUNT
+    );
+  });
+
+  it("keeps the expired record's score at zero", async function () {
+    const wagerId = await placePending(players[0]);
+    await time.increase(WAGER_EXPIRY + 1);
+    await wager.expireWager(wagerId);
+
+    // No score was ever attested, and expiry must not fabricate one.
+    const stored = await wager.getWager(wagerId);
+    expect(stored.score).to.equal(0);
+  });
+
+  it("preserves the original createdAt timestamp through expiry", async function () {
+    const wagerId = await placePending(players[0]);
+    const { createdAt: before } = await wager.getWager(wagerId);
+
+    await time.increase(WAGER_EXPIRY + 1);
+    await wager.expireWager(wagerId);
+
+    const { createdAt: after } = await wager.getWager(wagerId);
+    expect(after).to.equal(before);
+  });
+
+  it("records a strictly later createdAt on the replacement wager", async function () {
+    const firstId = await placePending(players[0]);
+    const { createdAt: firstCreatedAt } = await wager.getWager(firstId);
+
+    await time.increase(WAGER_EXPIRY + 1);
+    await wager.expireWager(firstId);
+
+    const secondId = await placePending(players[0]);
+    const { createdAt: secondCreatedAt } = await wager.getWager(secondId);
+    expect(secondCreatedAt).to.be.gt(firstCreatedAt);
+  });
+
+  it("points the activeWager mapping at the replacement wager", async function () {
+    const firstId = await placePending(players[0]);
+    await time.increase(WAGER_EXPIRY + 1);
+    await wager.expireWager(firstId);
+
+    const secondId = await placePending(players[0]);
+
+    expect(await wager.activeWager(players[0].address)).to.equal(secondId);
+    expect(secondId).to.not.equal(firstId);
+  });
+
+  it("leaves nextWagerId untouched when a wager expires", async function () {
+    const wagerId = await placePending(players[0]);
+    const idBefore = await wager.nextWagerId();
+
+    await time.increase(WAGER_EXPIRY + 1);
+    await wager.expireWager(wagerId);
+
+    // Expiry consumes no ids — only placements advance the counter.
+    expect(await wager.nextWagerId()).to.equal(idBefore);
+  });
+
+  it("counts both the original and the replacement in totalWagersPlaced", async function () {
+    const wagerId = await placePending(players[0]);
+    await time.increase(WAGER_EXPIRY + 1);
+    await wager.expireWager(wagerId);
+
+    await placePending(players[0]);
+
+    expect(await wager.totalWagersPlaced()).to.equal(2);
+  });
+
+  it("refunds five stale players independently and clears all liabilities", async function () {
+    const ids = [];
+    for (const player of players) {
+      ids.push(await placePending(player));
+    }
+    expect(await wager.totalPendingLiabilities()).to.equal(GROSS_PAYOUT * 5n);
+
+    await time.increase(WAGER_EXPIRY + 1);
+
+    for (let i = 0; i < players.length; i++) {
+      await expect(wager.expireWager(ids[i])).to.changeEtherBalance(
+        players[i],
+        WAGER_AMOUNT
+      );
+    }
+
+    expect(await wager.totalPendingLiabilities()).to.equal(0);
+  });
+
+  it("stays solvent through a mix of expiry, loss and claimed win", async function () {
+    const expiredId = await placePending(players[0]);
+    const lostId = await placePending(players[1]);
+    const wonId = await placePending(players[2]);
+
+    await time.increase(WAGER_EXPIRY + 1);
+    await wager.expireWager(expiredId);
+    await expectSolvent();
+
+    // Resolution has no deadline of its own, so the aged wagers still settle.
+    const loseNonce = uniqueNonce();
+    const loseSig = await signScore(lostId, players[1].address, 0, loseNonce);
+    await wager.connect(players[1]).resolveWager(lostId, 0, loseNonce, loseSig);
+    await expectSolvent();
+
+    const winScore = SCORE_THRESHOLD + 1;
+    const winNonce = uniqueNonce();
+    const winSig = await signScore(wonId, players[2].address, winScore, winNonce);
+    await wager.connect(players[2]).resolveWager(wonId, winScore, winNonce, winSig);
+    await wager.connect(players[2]).claimWinnings(wonId);
+    await expectSolvent();
+
+    expect(await wager.totalPendingLiabilities()).to.equal(0);
+    expect(await wager.accumulatedHouseEdge()).to.equal(
+      (GROSS_PAYOUT * HOUSE_EDGE_BPS) / BPS_DENOMINATOR
+    );
+  });
+
+  it("expires staggered wagers only after their own deadlines", async function () {
+    const idA = await placePending(players[0]);
+    const { createdAt: createdA } = await wager.getWager(idA);
+
+    await time.increase(WAGER_EXPIRY / 2);
+    const idB = await placePending(players[1]);
+
+    // A is past its window, B is only ~30 minutes old.
+    await time.setNextBlockTimestamp(Number(createdA) + WAGER_EXPIRY + 1);
+    await expect(wager.expireWager(idA)).to.changeEtherBalance(
+      players[0],
+      WAGER_AMOUNT
+    );
+
+    await expect(wager.expireWager(idB)).to.be.revertedWithCustomError(
+      wager,
+      "WagerNotExpired"
+    );
+  });
+
+  it("is permissionless: the treasury account can trigger the expiry", async function () {
+    const wagerId = await placePending(players[0]);
+    await time.increase(WAGER_EXPIRY + 1);
+
+    await expect(
+      wager.connect(treasury).expireWager(wagerId)
+    ).to.changeEtherBalance(players[0], WAGER_AMOUNT);
+  });
+
+  it("is permissionless: the score verifier account can trigger the expiry", async function () {
+    const wagerId = await placePending(players[0]);
+    await time.increase(WAGER_EXPIRY + 1);
+
+    await expect(
+      wager.connect(verifier).expireWager(wagerId)
+    ).to.changeEtherBalance(players[0], WAGER_AMOUNT);
+  });
+
+  it("emits exactly one WagerExpired log in the expiry receipt", async function () {
+    const wagerId = await placePending(players[0]);
+    await time.increase(WAGER_EXPIRY + 1);
+
+    const receipt = await (await wager.expireWager(wagerId)).wait();
+    const expiredLogs = receipt.logs
+      .map((log) => wager.interface.parseLog(log))
+      .filter((parsed) => parsed && parsed.name === "WagerExpired");
+
+    expect(expiredLogs).to.have.lengthOf(1);
+  });
+
+  it("makes WagerExpired queryable by its indexed wager id", async function () {
+    const wagerId = await placePending(players[0]);
+    await time.increase(WAGER_EXPIRY + 1);
+    await wager.expireWager(wagerId);
+
+    const events = await wager.queryFilter(wager.filters.WagerExpired(wagerId));
+    expect(events).to.have.lengthOf(1);
+    expect(events[0].args.wagerId).to.equal(wagerId);
+    expect(events[0].args.player).to.equal(players[0].address);
+  });
+
+  it("keeps getHouseReserve equal to balance minus liabilities and edge while pending", async function () {
+    await placePending(players[0]);
+
+    const balance = await ethers.provider.getBalance(await wager.getAddress());
+    const liabilities = await wager.totalPendingLiabilities();
+    const edge = await wager.accumulatedHouseEdge();
+
+    expect(await wager.getHouseReserve()).to.equal(balance - liabilities - edge);
+  });
+
+  it("restores the reserve to its funded baseline after a max wager expires", async function () {
+    const wagerId = await placePending(players[0], MAX_WAGER);
+
+    // A 10 CELO stake locks another 10 CELO of house risk.
+    expect(await wager.getHouseReserve()).to.equal(
+      FUND_AMOUNT - (payoutOf(MAX_WAGER) - MAX_WAGER)
+    );
+
+    await time.increase(WAGER_EXPIRY + 1);
+    await wager.expireWager(wagerId);
+
+    expect(await wager.getHouseReserve()).to.equal(FUND_AMOUNT);
+  });
+
+  it("keeps accumulatedHouseEdge at zero across an expiry with no prior wins", async function () {
+    const wagerId = await placePending(players[0]);
+    expect(await wager.accumulatedHouseEdge()).to.equal(0);
+
+    await time.increase(WAGER_EXPIRY + 1);
+    await wager.expireWager(wagerId);
+
+    expect(await wager.accumulatedHouseEdge()).to.equal(0);
+  });
+
+  it("grows the free reserve when the house is funded after an expiry", async function () {
+    const wagerId = await placePending(players[0]);
+    await time.increase(WAGER_EXPIRY + 1);
+    await wager.expireWager(wagerId);
+
+    const topUp = ethers.parseEther("5");
+    await wager.connect(players[3]).fundHouse({ value: topUp });
+
+    expect(await wager.getHouseReserve()).to.equal(FUND_AMOUNT + topUp);
+  });
+
+  it("keeps the contract solvent after refunding a max-sized wager", async function () {
+    const wagerId = await placePending(players[0], MAX_WAGER);
+    await time.increase(WAGER_EXPIRY + 1);
+    await wager.expireWager(wagerId);
+
+    await expectSolvent();
+    expect(await wager.totalPendingLiabilities()).to.equal(0);
+  });
+
+  it("rejects a second expiry attempt from a different caller", async function () {
+    const wagerId = await placePending(players[0]);
+    await time.increase(WAGER_EXPIRY + 1);
+    await wager.connect(players[1]).expireWager(wagerId);
+
+    // Once refunded the wager is no longer Pending, whoever asks.
+    await expect(
+      wager.connect(players[2]).expireWager(wagerId)
+    ).to.be.revertedWithCustomError(wager, "WagerNotPending");
+  });
+
+  it("leaves another player's pending wager untouched by the expiry", async function () {
+    const idA = await placePending(players[0]);
+    const idB = await placePending(players[1]);
+
+    await time.increase(WAGER_EXPIRY + 1);
+    await wager.expireWager(idA);
+
+    const storedB = await wager.getWager(idB);
+    expect(storedB.status).to.equal(0); // still Pending
+    expect(await wager.getActiveWager(players[1].address)).to.equal(idB);
+  });
+
+  it("keeps the Expired record alongside the player's new pending wager", async function () {
+    const firstId = await placePending(players[0]);
+    await time.increase(WAGER_EXPIRY + 1);
+    await wager.expireWager(firstId);
+
+    const secondId = await placePending(players[0]);
+
+    const first = await wager.getWager(firstId);
+    const second = await wager.getWager(secondId);
+    expect(first.status).to.equal(3); // Expired
+    expect(second.status).to.equal(0); // Pending
+  });
+
+  it("takes no house edge cut out of the refund", async function () {
+    const wagerId = await placePending(players[0]);
+    await time.increase(WAGER_EXPIRY + 1);
+
+    // A win pays out net of the 5% edge; a refund must not.
+    const edgeCut = (WAGER_AMOUNT * HOUSE_EDGE_BPS) / BPS_DENOMINATOR;
+    expect(edgeCut).to.be.gt(0);
+
+    await expect(wager.expireWager(wagerId)).to.changeEtherBalance(
+      players[0],
+      WAGER_AMOUNT // full stake, not WAGER_AMOUNT - edgeCut
+    );
+  });
+
+  it("costs the player only gas across a place-then-expire round trip", async function () {
+    const before = await ethers.provider.getBalance(players[0].address);
+
+    const placeTx = await wager.connect(players[0]).placeWager({ value: WAGER_AMOUNT });
+    const placeReceipt = await placeTx.wait();
+    const gasCost = placeReceipt.gasUsed * placeReceipt.gasPrice;
+
+    const wagerId = await wager.nextWagerId();
+    await time.increase(WAGER_EXPIRY + 1);
+
+    // Someone else expires, so the player pays no further gas.
+    await wager.connect(players[1]).expireWager(wagerId);
+
+    const after = await ethers.provider.getBalance(players[0].address);
+    expect(before - after).to.equal(gasCost);
+  });
+
+  it("lets the same player expire two consecutive wagers", async function () {
+    const firstId = await placePending(players[0]);
+    await time.increase(WAGER_EXPIRY + 1);
+    await expect(wager.expireWager(firstId)).to.changeEtherBalance(
+      players[0],
+      WAGER_AMOUNT
+    );
+
+    const secondId = await placePending(players[0]);
+    await time.increase(WAGER_EXPIRY + 1);
+    await expect(wager.expireWager(secondId)).to.changeEtherBalance(
+      players[0],
+      WAGER_AMOUNT
+    );
+
+    expect(await wager.totalPendingLiabilities()).to.equal(0);
+  });
+
+  it("drops liabilities by the odd wager's exact potentialPayout", async function () {
+    const wagerId = await placePending(players[0], ODD_WAGER);
+    expect(await wager.totalPendingLiabilities()).to.equal(payoutOf(ODD_WAGER));
+
+    await time.increase(WAGER_EXPIRY + 1);
+    await wager.expireWager(wagerId);
+
+    expect(await wager.totalPendingLiabilities()).to.equal(0);
+  });
+
+  it("drops the contract balance by exactly the max wager stake", async function () {
+    const wagerId = await placePending(players[0], MAX_WAGER);
+    await time.increase(WAGER_EXPIRY + 1);
+
+    // Only the 10 CELO stake leaves, never the 20 CELO potential payout.
+    await expect(wager.expireWager(wagerId)).to.changeEtherBalance(
+      wager,
+      -MAX_WAGER
+    );
+  });
+
+  it("emits neither WagerResolved nor WagerClaimed on expiry", async function () {
+    const wagerId = await placePending(players[0]);
+    await time.increase(WAGER_EXPIRY + 1);
+
+    const tx = wager.expireWager(wagerId);
+    await expect(tx).to.emit(wager, "WagerExpired");
+    await expect(tx).to.not.emit(wager, "WagerResolved");
+    await expect(tx).to.not.emit(wager, "WagerClaimed");
+  });
+
+  it("gives the replacement wager a fresh full expiry window", async function () {
+    const firstId = await placePending(players[0]);
+    await time.increase(WAGER_EXPIRY + 1);
+    await wager.expireWager(firstId);
+
+    const secondId = await placePending(players[0]);
+
+    // The old wager's age must not bleed into the new one.
+    await expect(wager.expireWager(secondId)).to.be.revertedWithCustomError(
+      wager,
+      "WagerNotExpired"
+    );
+
+    await time.increase(WAGER_EXPIRY + 1);
+    await expect(wager.expireWager(secondId)).to.changeEtherBalance(
+      players[0],
+      WAGER_AMOUNT
+    );
+  });
+
+  it("returns the expired stake to the player instead of booking house profit", async function () {
+    // A lost wager leaves its stake behind as house profit.
+    await placeAndResolve(players[1], SCORE_THRESHOLD - 1);
+    expect(await wager.getHouseReserve()).to.equal(FUND_AMOUNT + WAGER_AMOUNT);
+
+    // An expired wager must not: the reserve stays exactly where it was.
+    const wagerId = await placePending(players[0]);
+    await time.increase(WAGER_EXPIRY + 1);
+    await wager.expireWager(wagerId);
+
+    expect(await wager.getHouseReserve()).to.equal(FUND_AMOUNT + WAGER_AMOUNT);
+  });
+});
