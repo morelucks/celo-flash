@@ -3355,6 +3355,20 @@ describe("CeloFlashTournament — Leaderboard (insertion sort boundaries)", func
 
       expect(boardScores(await tournament.getLeaderboard(id))).to.deep.equal(before);
     });
+
+    it("Should ignore a resubmission lower than the player's best", async function () {
+      const id = await createFreeTournament();
+      await joinAll(id, players.slice(0, 2));
+
+      await submit(id, players[0], 500);
+      await submit(id, players[1], 400);
+
+      await submit(id, players[1], 10);
+
+      const lb = await tournament.getLeaderboard(id);
+      expect(lb[1].score).to.equal(400n);
+      expect(await tournament.playerBestScore(id, players[1].address)).to.equal(400n);
+    });
     // <<END:lb-updates>>
   });
 
