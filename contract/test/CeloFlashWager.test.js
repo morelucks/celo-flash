@@ -921,4 +921,23 @@ describe("CeloFlashWager — expireWager extended coverage", function () {
 
     expect(await wager.totalWagersPlaced()).to.equal(2);
   });
+
+  it("refunds five stale players independently and clears all liabilities", async function () {
+    const ids = [];
+    for (const player of players) {
+      ids.push(await placePending(player));
+    }
+    expect(await wager.totalPendingLiabilities()).to.equal(GROSS_PAYOUT * 5n);
+
+    await time.increase(WAGER_EXPIRY + 1);
+
+    for (let i = 0; i < players.length; i++) {
+      await expect(wager.expireWager(ids[i])).to.changeEtherBalance(
+        players[i],
+        WAGER_AMOUNT
+      );
+    }
+
+    expect(await wager.totalPendingLiabilities()).to.equal(0);
+  });
 });
