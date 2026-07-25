@@ -1133,4 +1133,21 @@ describe("CeloFlashWager — expireWager extended coverage", function () {
       WAGER_AMOUNT // full stake, not WAGER_AMOUNT - edgeCut
     );
   });
+
+  it("costs the player only gas across a place-then-expire round trip", async function () {
+    const before = await ethers.provider.getBalance(players[0].address);
+
+    const placeTx = await wager.connect(players[0]).placeWager({ value: WAGER_AMOUNT });
+    const placeReceipt = await placeTx.wait();
+    const gasCost = placeReceipt.gasUsed * placeReceipt.gasPrice;
+
+    const wagerId = await wager.nextWagerId();
+    await time.increase(WAGER_EXPIRY + 1);
+
+    // Someone else expires, so the player pays no further gas.
+    await wager.connect(players[1]).expireWager(wagerId);
+
+    const after = await ethers.provider.getBalance(players[0].address);
+    expect(before - after).to.equal(gasCost);
+  });
 });
