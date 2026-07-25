@@ -3154,5 +3154,17 @@ describe("CeloFlashTournament — Leaderboard (insertion sort boundaries)", func
     // <<END:lb-ordering>>
   });
 
+  describe("Top-10 cap and replacement", function () {
+    it("Should cap the board at exactly ten entries once ten players submit", async function () {
+      const id = await createFreeTournament();
+      await joinAll(id, players.slice(0, 10));
+
+      await fillBoard(id);
+
+      expect((await tournament.getLeaderboard(id)).length).to.equal(10);
+    });
+    // <<END:lb-cap>>
+  });
+
   // <<END:leaderboard-suite>>
 });
