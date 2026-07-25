@@ -2925,3 +2925,36 @@ describe("CeloFlashTournament — claimPrize & cancelTournament", function () {
 
   // __CLAIM_TESTS_MARKER__
 });
+
+describe("CeloFlashTournament — Leaderboard (insertion sort boundaries)", function () {
+  const DURATION = 3600; // 1 hour (MIN_DURATION)
+
+  let tournament;
+  let usdm;
+  let owner;
+  let verifier;
+  let feeRecipient;
+  let creator;
+  let players;
+
+  // Fresh deployment per test — leaderboard state must start empty.
+  beforeEach(async function () {
+    const signers = await ethers.getSigners();
+    [owner, verifier, feeRecipient, creator] = signers;
+    players = signers.slice(4, 16);
+
+    const MockERC20 = await ethers.getContractFactory("MockERC20");
+    usdm = await MockERC20.deploy("Mock USDm", "USDm", 18);
+    await usdm.waitForDeployment();
+
+    const CeloFlashTournament = await ethers.getContractFactory("CeloFlashTournament");
+    tournament = await CeloFlashTournament.deploy(
+      await usdm.getAddress(),
+      verifier.address,
+      feeRecipient.address
+    );
+    await tournament.waitForDeployment();
+  });
+
+  // <<END:leaderboard-suite>>
+});
