@@ -968,4 +968,24 @@ describe("CeloFlashWager — expireWager extended coverage", function () {
       (GROSS_PAYOUT * HOUSE_EDGE_BPS) / BPS_DENOMINATOR
     );
   });
+
+  it("expires staggered wagers only after their own deadlines", async function () {
+    const idA = await placePending(players[0]);
+    const { createdAt: createdA } = await wager.getWager(idA);
+
+    await time.increase(WAGER_EXPIRY / 2);
+    const idB = await placePending(players[1]);
+
+    // A is past its window, B is only ~30 minutes old.
+    await time.setNextBlockTimestamp(Number(createdA) + WAGER_EXPIRY + 1);
+    await expect(wager.expireWager(idA)).to.changeEtherBalance(
+      players[0],
+      WAGER_AMOUNT
+    );
+
+    await expect(wager.expireWager(idB)).to.be.revertedWithCustomError(
+      wager,
+      "WagerNotExpired"
+    );
+  });
 });
