@@ -3451,5 +3451,26 @@ describe("CeloFlashTournament — Leaderboard (insertion sort boundaries)", func
     // <<END:lb-ties>>
   });
 
+  describe("View consistency & isolation", function () {
+    it("Should return identical data from repeated getLeaderboard calls and match playerBestScore", async function () {
+      const id = await createFreeTournament();
+      await joinAll(id, players.slice(0, 10));
+
+      for (let i = 0; i < 10; i++) {
+        await submit(id, players[i], RANDOM_SCORES[i]);
+      }
+
+      const first = await tournament.getLeaderboard(id);
+      const second = await tournament.getLeaderboard(id);
+      expect(boardScores(first)).to.deep.equal(boardScores(second));
+      expect(boardPlayers(first)).to.deep.equal(boardPlayers(second));
+
+      for (const entry of first) {
+        expect(await tournament.playerBestScore(id, entry.player)).to.equal(entry.score);
+      }
+    });
+    // <<END:lb-views>>
+  });
+
   // <<END:leaderboard-suite>>
 });
