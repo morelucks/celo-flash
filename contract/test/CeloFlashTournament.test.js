@@ -2957,6 +2957,22 @@ describe("CeloFlashTournament — Leaderboard (insertion sort boundaries)", func
     return tournament.connect(player).submitScore(tournamentId, score, nonce, signature);
   }
 
+  // Free tournament: no entry fee or seed, so no token funding is needed
+  // and the leaderboard logic is exercised in isolation.
+  async function createFreeTournament() {
+    const id = await tournament.nextTournamentId();
+    await tournament
+      .connect(creator)
+      .createTournament("Leaderboard Cup", 0n, 0n, DURATION, false, { value: 0n });
+    return id;
+  }
+
+  async function joinAll(tournamentId, joiners) {
+    for (const player of joiners) {
+      await tournament.connect(player).joinTournament(tournamentId);
+    }
+  }
+
   // Fresh deployment per test — leaderboard state must start empty.
   beforeEach(async function () {
     const signers = await ethers.getSigners();
