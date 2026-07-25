@@ -761,4 +761,12 @@ describe("CeloFlashWager — expireWager extended coverage", function () {
     await wager.connect(player).resolveWager(wagerId, score, nonce, signature);
     return wagerId;
   }
+
+  // Assert the contract stays solvent: balance covers liabilities + edge.
+  async function expectSolvent() {
+    const balance = await ethers.provider.getBalance(await wager.getAddress());
+    const liabilities = await wager.totalPendingLiabilities();
+    const edge = await wager.accumulatedHouseEdge();
+    expect(balance).to.be.gte(liabilities + edge);
+  }
 });
