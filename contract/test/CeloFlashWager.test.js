@@ -1094,4 +1094,16 @@ describe("CeloFlashWager — expireWager extended coverage", function () {
       wager.connect(players[2]).expireWager(wagerId)
     ).to.be.revertedWithCustomError(wager, "WagerNotPending");
   });
+
+  it("leaves another player's pending wager untouched by the expiry", async function () {
+    const idA = await placePending(players[0]);
+    const idB = await placePending(players[1]);
+
+    await time.increase(WAGER_EXPIRY + 1);
+    await wager.expireWager(idA);
+
+    const storedB = await wager.getWager(idB);
+    expect(storedB.status).to.equal(0); // still Pending
+    expect(await wager.getActiveWager(players[1].address)).to.equal(idB);
+  });
 });
