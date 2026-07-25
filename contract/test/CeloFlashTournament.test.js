@@ -3416,6 +3416,22 @@ describe("CeloFlashTournament — Leaderboard (insertion sort boundaries)", func
         players[1].address,
       ]);
     });
+
+    it("Should rank the earlier submitter ahead on a tied score", async function () {
+      const id = await createFreeTournament();
+      await joinAll(id, players.slice(0, 3));
+
+      await submit(id, players[0], 700);
+      await submit(id, players[1], 500);
+      await submit(id, players[2], 500);
+
+      const lb = await tournament.getLeaderboard(id);
+      expect(boardPlayers(lb)).to.deep.equal([
+        players[0].address,
+        players[1].address,
+        players[2].address,
+      ]);
+    });
     // <<END:lb-ties>>
   });
 
