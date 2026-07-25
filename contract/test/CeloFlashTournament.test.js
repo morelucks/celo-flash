@@ -3384,6 +3384,20 @@ describe("CeloFlashTournament — Leaderboard (insertion sort boundaries)", func
       ]);
       expect(lb[3].player).to.equal(players[4].address);
     });
+
+    it("Should refresh submittedAt when an entry is updated in place", async function () {
+      const id = await createFreeTournament();
+      await joinAll(id, [players[0]]);
+
+      await submit(id, players[0], 100);
+      const [before] = await tournament.getLeaderboard(id);
+
+      await time.increase(120);
+      await submit(id, players[0], 200);
+
+      const [after] = await tournament.getLeaderboard(id);
+      expect(after.submittedAt).to.be.gt(before.submittedAt);
+    });
     // <<END:lb-updates>>
   });
 
