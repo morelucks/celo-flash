@@ -3208,6 +3208,16 @@ describe("CeloFlashTournament — Leaderboard (insertion sort boundaries)", func
       expect(boardPlayers(lb)).to.not.include(players[10].address);
       expect(lb[9].player).to.equal(players[0].address);
     });
+
+    it("Should keep the board at ten entries when the 11th score beats the last", async function () {
+      const id = await createFreeTournament();
+      await joinAll(id, players.slice(0, 11));
+      await fillBoard(id);
+
+      await submit(id, players[10], 550);
+
+      expect((await tournament.getLeaderboard(id)).length).to.equal(10);
+    });
     // <<END:lb-cap>>
   });
 
