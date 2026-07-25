@@ -805,4 +805,15 @@ describe("CeloFlashWager — expireWager extended coverage", function () {
     await expect(wager.expireWager(999)).to.changeEtherBalance(wager, 0n);
     expect(await wager.totalPendingLiabilities()).to.equal(GROSS_PAYOUT);
   });
+
+  it("reverts with WagerNotExpired at the half-hour mark", async function () {
+    const wagerId = await placePending(players[0]);
+
+    await time.increase(WAGER_EXPIRY / 2); // 30 minutes in, half the window
+
+    await expect(wager.expireWager(wagerId)).to.be.revertedWithCustomError(
+      wager,
+      "WagerNotExpired"
+    );
+  });
 });
