@@ -889,4 +889,15 @@ describe("CeloFlashWager — expireWager extended coverage", function () {
     const { createdAt: secondCreatedAt } = await wager.getWager(secondId);
     expect(secondCreatedAt).to.be.gt(firstCreatedAt);
   });
+
+  it("points the activeWager mapping at the replacement wager", async function () {
+    const firstId = await placePending(players[0]);
+    await time.increase(WAGER_EXPIRY + 1);
+    await wager.expireWager(firstId);
+
+    const secondId = await placePending(players[0]);
+
+    expect(await wager.activeWager(players[0].address)).to.equal(secondId);
+    expect(secondId).to.not.equal(firstId);
+  });
 });
