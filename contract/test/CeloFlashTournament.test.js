@@ -2929,6 +2929,10 @@ describe("CeloFlashTournament — claimPrize & cancelTournament", function () {
 describe("CeloFlashTournament — Leaderboard (insertion sort boundaries)", function () {
   const DURATION = 3600; // 1 hour (MIN_DURATION)
 
+  // Ten distinct ascending scores for players[0..9]; submitting them in order
+  // produces a full board sorted 1000 → 100 with players in reverse order.
+  const FILL_SCORES = [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000];
+
   let tournament;
   let usdm;
   let owner;
@@ -2985,6 +2989,14 @@ describe("CeloFlashTournament — Leaderboard (insertion sort boundaries)", func
 
   function boardPlayers(lb) {
     return lb.map((entry) => entry.player);
+  }
+
+  // Fills the board with players[0..9] submitting FILL_SCORES in ascending
+  // order, leaving a full 10-entry leaderboard sorted 1000 → 100.
+  async function fillBoard(tournamentId) {
+    for (let i = 0; i < 10; i++) {
+      await submit(tournamentId, players[i], FILL_SCORES[i]);
+    }
   }
 
   // Fresh deployment per test — leaderboard state must start empty.
