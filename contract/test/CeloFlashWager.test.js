@@ -866,4 +866,15 @@ describe("CeloFlashWager — expireWager extended coverage", function () {
     const stored = await wager.getWager(wagerId);
     expect(stored.score).to.equal(0);
   });
+
+  it("preserves the original createdAt timestamp through expiry", async function () {
+    const wagerId = await placePending(players[0]);
+    const { createdAt: before } = await wager.getWager(wagerId);
+
+    await time.increase(WAGER_EXPIRY + 1);
+    await wager.expireWager(wagerId);
+
+    const { createdAt: after } = await wager.getWager(wagerId);
+    expect(after).to.equal(before);
+  });
 });
