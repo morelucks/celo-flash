@@ -1150,4 +1150,22 @@ describe("CeloFlashWager — expireWager extended coverage", function () {
     const after = await ethers.provider.getBalance(players[0].address);
     expect(before - after).to.equal(gasCost);
   });
+
+  it("lets the same player expire two consecutive wagers", async function () {
+    const firstId = await placePending(players[0]);
+    await time.increase(WAGER_EXPIRY + 1);
+    await expect(wager.expireWager(firstId)).to.changeEtherBalance(
+      players[0],
+      WAGER_AMOUNT
+    );
+
+    const secondId = await placePending(players[0]);
+    await time.increase(WAGER_EXPIRY + 1);
+    await expect(wager.expireWager(secondId)).to.changeEtherBalance(
+      players[0],
+      WAGER_AMOUNT
+    );
+
+    expect(await wager.totalPendingLiabilities()).to.equal(0);
+  });
 });
