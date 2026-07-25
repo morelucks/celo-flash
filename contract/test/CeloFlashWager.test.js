@@ -792,4 +792,17 @@ describe("CeloFlashWager — expireWager extended coverage", function () {
       ODD_WAGER
     );
   });
+
+  it("expiring an unknown wager id moves no funds and no real liability", async function () {
+    // A genuine pending wager locks a liability the phantom expiry must not touch.
+    await placePending(players[0]);
+    expect(await wager.totalPendingLiabilities()).to.equal(GROSS_PAYOUT);
+
+    await time.increase(WAGER_EXPIRY + 1);
+
+    // Id 999 was never created: its record is zeroed, so even though the call
+    // goes through, it refunds 0 wei to address(0) and cannot drain anything.
+    await expect(wager.expireWager(999)).to.changeEtherBalance(wager, 0n);
+    expect(await wager.totalPendingLiabilities()).to.equal(GROSS_PAYOUT);
+  });
 });
