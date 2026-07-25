@@ -701,3 +701,27 @@ describe("CeloFlashWager — expireWager (time-based expiry & refunds)", functio
 // Wager 5-won-wager balance accounting invariant
 
 // Solvency invariant check
+
+describe("CeloFlashWager — expireWager extended coverage", function () {
+  const SCORE_THRESHOLD = 100;
+  const FUND_AMOUNT = ethers.parseEther("100");
+  const WAGER_AMOUNT = ethers.parseEther("1");
+  const MID_WAGER = ethers.parseEther("2.5");
+  const ODD_WAGER = ethers.parseEther("1.337");
+  const MAX_WAGER = ethers.parseEther("10");
+
+  const WIN_MULTIPLIER_BPS = 20_000n;
+  const HOUSE_EDGE_BPS = 500n;
+  const BPS_DENOMINATOR = 10_000n;
+  const WAGER_EXPIRY = 3600; // 1 hour, matches WAGER_EXPIRY in the contract
+
+  // Gross payout locked as a liability for a given stake (2x).
+  const payoutOf = (amount) => (amount * WIN_MULTIPLIER_BPS) / BPS_DENOMINATOR;
+  const GROSS_PAYOUT = payoutOf(WAGER_AMOUNT);
+
+  let wager;
+  let owner;
+  let verifier;
+  let treasury;
+  let players;
+});
