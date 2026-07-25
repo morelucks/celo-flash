@@ -3073,6 +3073,18 @@ describe("CeloFlashTournament — Leaderboard (insertion sort boundaries)", func
       const lb = await tournament.getLeaderboard(id);
       expect(boardScores(lb)).to.deep.equal([900n, 100n]);
     });
+
+    it("Should re-sort two entries submitted low-then-high", async function () {
+      const id = await createFreeTournament();
+      await joinAll(id, players.slice(0, 2));
+
+      await submit(id, players[0], 100);
+      await submit(id, players[1], 900);
+
+      const lb = await tournament.getLeaderboard(id);
+      expect(boardScores(lb)).to.deep.equal([900n, 100n]);
+      expect(boardPlayers(lb)).to.deep.equal([players[1].address, players[0].address]);
+    });
     // <<END:lb-ordering>>
   });
 
