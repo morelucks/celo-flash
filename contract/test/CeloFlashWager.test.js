@@ -780,4 +780,16 @@ describe("CeloFlashWager — expireWager extended coverage", function () {
       MID_WAGER
     );
   });
+
+  it("refunds the exact stake for an odd 1.337 CELO wager", async function () {
+    const wagerId = await placePending(players[0], ODD_WAGER);
+
+    await time.increase(WAGER_EXPIRY + 1);
+
+    // No rounding anywhere: the refund is the stake to the wei.
+    await expect(wager.expireWager(wagerId)).to.changeEtherBalance(
+      players[0],
+      ODD_WAGER
+    );
+  });
 });
