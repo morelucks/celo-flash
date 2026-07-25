@@ -1119,4 +1119,18 @@ describe("CeloFlashWager — expireWager extended coverage", function () {
     expect(first.status).to.equal(3); // Expired
     expect(second.status).to.equal(0); // Pending
   });
+
+  it("takes no house edge cut out of the refund", async function () {
+    const wagerId = await placePending(players[0]);
+    await time.increase(WAGER_EXPIRY + 1);
+
+    // A win pays out net of the 5% edge; a refund must not.
+    const edgeCut = (WAGER_AMOUNT * HOUSE_EDGE_BPS) / BPS_DENOMINATOR;
+    expect(edgeCut).to.be.gt(0);
+
+    await expect(wager.expireWager(wagerId)).to.changeEtherBalance(
+      players[0],
+      WAGER_AMOUNT // full stake, not WAGER_AMOUNT - edgeCut
+    );
+  });
 });
