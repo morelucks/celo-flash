@@ -1635,4 +1635,20 @@ describe("CeloFlashWager — placeWager (bounds, solvency & state)", function ()
     ).to.be.revertedWithCustomError(bare, "InsufficientHouseReserve");
   });
 
+  it("accepts a previously rejected wager once the house is topped up", async function () {
+    const bare = await deployBare();
+    await bare.connect(players[0]).placeWager({ value: WAGER_AMOUNT });
+
+    await expect(
+      bare.connect(players[1]).placeWager({ value: WAGER_AMOUNT })
+    ).to.be.revertedWithCustomError(bare, "InsufficientHouseReserve");
+
+    await bare.connect(owner).fundHouse({ value: WAGER_AMOUNT });
+
+    await expect(bare.connect(players[1]).placeWager({ value: WAGER_AMOUNT })).to.emit(
+      bare,
+      "WagerPlaced"
+    );
+  });
+
 });
