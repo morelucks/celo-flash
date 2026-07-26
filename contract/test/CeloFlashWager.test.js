@@ -2165,4 +2165,14 @@ describe("CeloFlashWager — resolveWager outcomes & claimWinnings payouts", fun
     expect(await wager.totalWagersWon()).to.equal(0);
   });
 
+
+
+  it("applies a lowered scoreThreshold to later resolutions", async function () {
+    await wager.connect(owner).setScoreThreshold(10);
+    const wagerId = await placeAndResolve(players[0], 10);
+
+    expect((await wager.getWager(wagerId)).status).to.equal(WON);
+    expect(await wager.accumulatedHouseEdge()).to.equal(HOUSE_EDGE);
+  });
+
 });
