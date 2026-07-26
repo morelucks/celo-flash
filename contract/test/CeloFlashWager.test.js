@@ -1358,4 +1358,10 @@ describe("CeloFlashWager — placeWager (bounds, solvency & state)", function ()
     expect(stored.status).to.equal(PENDING);
   });
 
+  it("emits WagerPlaced with the id, player, stake and potential payout", async function () {
+    await expect(wager.connect(players[0]).placeWager({ value: WAGER_AMOUNT }))
+      .to.emit(wager, "WagerPlaced")
+      .withArgs(1, players[0].address, WAGER_AMOUNT, GROSS_PAYOUT);
+  });
+
 });
