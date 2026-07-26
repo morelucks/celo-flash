@@ -2154,4 +2154,15 @@ describe("CeloFlashWager — resolveWager outcomes & claimWinnings payouts", fun
     expect(await wager.activeWager(players[0].address)).to.equal(wagerId);
   });
 
+
+
+  it("applies a raised scoreThreshold to later resolutions", async function () {
+    await wager.connect(owner).setScoreThreshold(500);
+    const wagerId = await placeAndResolve(players[0], 400);
+
+    // 400 would have won under the original threshold of 100.
+    expect((await wager.getWager(wagerId)).status).to.equal(LOST);
+    expect(await wager.totalWagersWon()).to.equal(0);
+  });
+
 });
