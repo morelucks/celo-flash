@@ -1837,4 +1837,13 @@ describe("CeloFlashWager — resolveWager outcomes & claimWinnings payouts", fun
     expect((await wager.getWager(wagerId)).status).to.equal(WON);
   });
 
+
+
+  it("treats a score exactly at the threshold as a win", async function () {
+    // The win condition is score >= scoreThreshold, so the boundary wins.
+    const wagerId = await placeAndResolve(players[0], SCORE_THRESHOLD);
+
+    expect((await wager.getWager(wagerId)).status).to.equal(WON);
+  });
+
 });
