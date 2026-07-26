@@ -1530,4 +1530,13 @@ describe("CeloFlashWager — placeWager (bounds, solvency & state)", function ()
     expect(await wager.totalWagersPlaced()).to.equal(1);
   });
 
+  it("blocks a duplicate wager of any size, not just the same stake", async function () {
+    await placePending(players[0], MIN_WAGER);
+
+    // The guard is on the pending status alone; the new amount is irrelevant.
+    await expect(
+      wager.connect(players[0]).placeWager({ value: MAX_WAGER })
+    ).to.be.revertedWithCustomError(wager, "ActiveWagerExists");
+  });
+
 });
