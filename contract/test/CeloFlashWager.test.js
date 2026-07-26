@@ -2262,4 +2262,17 @@ describe("CeloFlashWager — resolveWager outcomes & claimWinnings payouts", fun
     ).to.be.revertedWithCustomError(wager, "WagerNotWon");
   });
 
+
+
+  it("reverts WagerNotWon when claiming an expired wager", async function () {
+    const wagerId = await placePending(players[0]);
+    await time.increase(WAGER_EXPIRY + 1);
+    await wager.connect(players[0]).expireWager(wagerId);
+
+    expect((await wager.getWager(wagerId)).status).to.equal(EXPIRED);
+    await expect(
+      wager.connect(players[0]).claimWinnings(wagerId)
+    ).to.be.revertedWithCustomError(wager, "WagerNotWon");
+  });
+
 });
