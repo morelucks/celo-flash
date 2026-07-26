@@ -1510,4 +1510,12 @@ describe("CeloFlashWager — placeWager (bounds, solvency & state)", function ()
     expect(await readCounters(players[0])).to.deep.equal(before);
   });
 
+  it("reverts a second pending wager with ActiveWagerExists", async function () {
+    await placePending(players[0]);
+
+    await expect(
+      wager.connect(players[0]).placeWager({ value: WAGER_AMOUNT })
+    ).to.be.revertedWithCustomError(wager, "ActiveWagerExists");
+  });
+
 });
