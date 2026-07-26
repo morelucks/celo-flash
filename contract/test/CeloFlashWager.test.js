@@ -2048,4 +2048,22 @@ describe("CeloFlashWager — resolveWager outcomes & claimWinnings payouts", fun
     ).to.be.revertedWithCustomError(wager, "NoActiveWager");
   });
 
+
+
+  it("reverts NonceAlreadyUsed when a nonce is replayed", async function () {
+    const score = SCORE_THRESHOLD + 5;
+    const nonce = uniqueNonce();
+
+    const first = await placePending(players[0]);
+    let signature = await signScore(first, players[0].address, score, nonce);
+    await wager.connect(players[0]).resolveWager(first, score, nonce, signature);
+
+    const second = await placePending(players[1]);
+    signature = await signScore(second, players[1].address, score, nonce);
+
+    await expect(
+      wager.connect(players[1]).resolveWager(second, score, nonce, signature)
+    ).to.be.revertedWithCustomError(wager, "NonceAlreadyUsed");
+  });
+
 });
