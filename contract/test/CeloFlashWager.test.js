@@ -1433,4 +1433,14 @@ describe("CeloFlashWager — placeWager (bounds, solvency & state)", function ()
     expect(await wager.totalPendingLiabilities()).to.equal(expected);
   });
 
+  it("shrinks getHouseReserve by the net house risk, not the full payout", async function () {
+    expect(await wager.getHouseReserve()).to.equal(FUND_AMOUNT);
+
+    await placePending(players[0]);
+
+    // The stake itself lands in the contract, so only payout - stake is at risk.
+    const netRisk = GROSS_PAYOUT - WAGER_AMOUNT;
+    expect(await wager.getHouseReserve()).to.equal(FUND_AMOUNT - netRisk);
+  });
+
 });
