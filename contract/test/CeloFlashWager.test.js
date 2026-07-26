@@ -1892,4 +1892,15 @@ describe("CeloFlashWager — resolveWager outcomes & claimWinnings payouts", fun
       .withArgs(wagerId, players[0].address, score, WON, NET_PAYOUT);
   });
 
+
+
+  it("emits WagerResolved with the Lost status and a zero payout", async function () {
+    const wagerId = await placePending(players[0]);
+    const score = SCORE_THRESHOLD - 10;
+
+    await expect(resolve(players[0], wagerId, score))
+      .to.emit(wager, "WagerResolved")
+      .withArgs(wagerId, players[0].address, score, LOST, 0);
+  });
+
 });
