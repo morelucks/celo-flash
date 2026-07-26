@@ -1903,4 +1903,14 @@ describe("CeloFlashWager — resolveWager outcomes & claimWinnings payouts", fun
       .withArgs(wagerId, players[0].address, score, LOST, 0);
   });
 
+
+
+  it("increments totalWagersWon on a win", async function () {
+    expect(await wager.totalWagersWon()).to.equal(0);
+
+    await placeAndWin(players[0]);
+
+    expect(await wager.totalWagersWon()).to.equal(1);
+  });
+
 });
