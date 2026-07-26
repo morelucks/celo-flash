@@ -1416,4 +1416,12 @@ describe("CeloFlashWager — placeWager (bounds, solvency & state)", function ()
     expect(multiplier).to.equal(2n);
   });
 
+  it("raises totalPendingLiabilities by the wager's potentialPayout", async function () {
+    expect(await wager.totalPendingLiabilities()).to.equal(0);
+
+    await placePending(players[0]);
+
+    expect(await wager.totalPendingLiabilities()).to.equal(GROSS_PAYOUT);
+  });
+
 });
