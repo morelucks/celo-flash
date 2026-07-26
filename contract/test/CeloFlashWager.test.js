@@ -1880,4 +1880,16 @@ describe("CeloFlashWager — resolveWager outcomes & claimWinnings payouts", fun
     expect(await wager.accumulatedHouseEdge()).to.equal(0);
   });
 
+
+
+  it("emits WagerResolved with the Won status and the net payout", async function () {
+    const wagerId = await placePending(players[0]);
+    const score = SCORE_THRESHOLD + 10;
+
+    // The event carries the net payout, i.e. gross minus the house edge.
+    await expect(resolve(players[0], wagerId, score))
+      .to.emit(wager, "WagerResolved")
+      .withArgs(wagerId, players[0].address, score, WON, NET_PAYOUT);
+  });
+
 });
