@@ -2230,4 +2230,16 @@ describe("CeloFlashWager — resolveWager outcomes & claimWinnings payouts", fun
       .withArgs(wagerId, players[0].address, NET_PAYOUT);
   });
 
+
+
+  it("reverts WagerNotWon on a second claim", async function () {
+    const wagerId = await placeAndWin(players[0]);
+    await wager.connect(players[0]).claimWinnings(wagerId);
+
+    // The status is Claimed by now, so the Won check rejects the replay.
+    await expect(
+      wager.connect(players[0]).claimWinnings(wagerId)
+    ).to.be.revertedWithCustomError(wager, "WagerNotWon");
+  });
+
 });
