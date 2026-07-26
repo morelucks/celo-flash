@@ -1443,4 +1443,14 @@ describe("CeloFlashWager — placeWager (bounds, solvency & state)", function ()
     expect(await wager.getHouseReserve()).to.equal(FUND_AMOUNT - netRisk);
   });
 
+  it("increments totalWagersPlaced once per placement", async function () {
+    expect(await wager.totalWagersPlaced()).to.equal(0);
+
+    await placePending(players[0]);
+    expect(await wager.totalWagersPlaced()).to.equal(1);
+
+    await placePending(players[1]);
+    expect(await wager.totalWagersPlaced()).to.equal(2);
+  });
+
 });
