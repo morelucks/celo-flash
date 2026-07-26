@@ -1518,4 +1518,16 @@ describe("CeloFlashWager — placeWager (bounds, solvency & state)", function ()
     ).to.be.revertedWithCustomError(wager, "ActiveWagerExists");
   });
 
+  it("keeps the first wager and its liability intact when the second is rejected", async function () {
+    const firstId = await placePending(players[0]);
+
+    await expect(
+      wager.connect(players[0]).placeWager({ value: MID_WAGER })
+    ).to.be.revertedWithCustomError(wager, "ActiveWagerExists");
+
+    expect(await wager.activeWager(players[0].address)).to.equal(firstId);
+    expect(await wager.totalPendingLiabilities()).to.equal(GROSS_PAYOUT);
+    expect(await wager.totalWagersPlaced()).to.equal(1);
+  });
+
 });
