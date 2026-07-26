@@ -1913,4 +1913,16 @@ describe("CeloFlashWager — resolveWager outcomes & claimWinnings payouts", fun
     expect(await wager.totalWagersWon()).to.equal(1);
   });
 
+
+
+  it("leaves totalWagersWon untouched on a loss", async function () {
+    await placeAndWin(players[0]);
+    await placeAndResolve(players[1], SCORE_THRESHOLD - 1);
+    await placeAndResolve(players[2], 0);
+
+    // Three wagers placed, only the first one counts as a win.
+    expect(await wager.totalWagersWon()).to.equal(1);
+    expect(await wager.totalWagersPlaced()).to.equal(3);
+  });
+
 });
