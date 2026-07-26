@@ -2299,4 +2299,21 @@ describe("CeloFlashWager — resolveWager outcomes & claimWinnings payouts", fun
     ).to.be.revertedWithCustomError(wager, "NoActiveWager");
   });
 
+
+
+  it("pays the exact 500 bps-reduced payout on a max-size win and stays solvent", async function () {
+    const wagerId = await placeAndWin(players[0], MAX_WAGER);
+    const net = netOf(payoutOf(MAX_WAGER));
+    expect(net).to.equal(ethers.parseEther("19"));
+
+    const edgeBefore = await wager.accumulatedHouseEdge();
+    await expect(
+      wager.connect(players[0]).claimWinnings(wagerId)
+    ).to.changeEtherBalances([wager, players[0]], [-net, net]);
+
+    // The claim only pays the player; the edge stays booked for the treasury.
+    expect(await wager.accumulatedHouseEdge()).to.equal(edgeBefore);
+    expect(await wager.totalPendingLiabilities()).to.equal(0);
+    await expectSolvent();
+  });
 });
