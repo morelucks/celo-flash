@@ -1,6 +1,6 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
-const { time } = require("@nomicfoundation/hardhat-network-helpers");
+const { loadFixture, time } = require("@nomicfoundation/hardhat-network-helpers");
 
 describe("CeloFlashWager — House Edge Withdrawal & Accounting", function () {
   const SCORE_THRESHOLD = 100;
@@ -1232,4 +1232,116 @@ describe("CeloFlashWager — expireWager extended coverage", function () {
 
     expect(await wager.getHouseReserve()).to.equal(FUND_AMOUNT + WAGER_AMOUNT);
   });
+});
+
+describe("CeloFlashWager — placeWager (bounds, solvency & state)", function () {
+  const SCORE_THRESHOLD = 100;
+  const FUND_AMOUNT = ethers.parseEther("100");
+  const WAGER_AMOUNT = ethers.parseEther("1");
+  const MID_WAGER = ethers.parseEther("2.5");
+  const ODD_WAGER = ethers.parseEther("1.337");
+  const MIN_WAGER = ethers.parseEther("0.001");
+  const MAX_WAGER = ethers.parseEther("10");
+
+  const WIN_MULTIPLIER_BPS = 20_000n;
+  const HOUSE_EDGE_BPS = 500n;
+  const BPS_DENOMINATOR = 10_000n;
+
+  // The 2x liability the house locks for a given stake.
+  const payoutOf = (amount) => (amount * WIN_MULTIPLIER_BPS) / BPS_DENOMINATOR;
+  const GROSS_PAYOUT = payoutOf(WAGER_AMOUNT);
+
+  // WagerStatus enum values, mirrored from the contract.
+  const PENDING = 0n;
+
+  let wager;
+  let owner;
+  let verifier;
+  let treasury;
+  let houseFunder;
+  let players;
+
+  let nonceCounter = 0;
+  const uniqueNonce = () => ethers.encodeBytes32String(`pwb-nonce-${nonceCounter++}`);
+
+  // Deploy a house pre-funded with 100 CELO of reserve.
+  async function deployFundedWager() {
+    const signers = await ethers.getSigners();
+    const [deployer, signer, treasuryAccount] = signers;
+    // The reserve is a one-way deposit, so it comes from a signer no other
+    // suite spends, keeping the shared accounts out of it.
+    const funder = signers[signers.length - 1];
+
+    const CeloFlashWager = await ethers.getContractFactory("CeloFlashWager");
+    const contract = await CeloFlashWager.deploy(
+      signer.address,
+      treasuryAccount.address,
+      SCORE_THRESHOLD
+    );
+    await contract.waitForDeployment();
+
+    await contract.connect(funder).fundHouse({ value: FUND_AMOUNT });
+
+    return {
+      wager: contract,
+      owner: deployer,
+      verifier: signer,
+      treasury: treasuryAccount,
+      houseFunder: funder,
+      players: signers.slice(3, 8),
+    };
+  }
+
+  beforeEach(async function () {
+    // A snapshot-backed fixture: every test starts from the same balances
+    // instead of permanently draining the shared signers on each run.
+    ({ wager, owner, verifier, treasury, houseFunder, players } =
+      await loadFixture(deployFundedWager));
+  });
+
+  async function signScore(wagerId, playerAddress, score, nonce) {
+    const messageHash = ethers.solidityPackedKeccak256(
+      ["uint256", "address", "uint256", "bytes32"],
+      [wagerId, playerAddress, score, nonce]
+    );
+    return verifier.signMessage(ethers.getBytes(messageHash));
+  }
+
+  // Place a pending wager for `player` and return its id.
+  async function placePending(player, amount = WAGER_AMOUNT) {
+    await wager.connect(player).placeWager({ value: amount });
+    return wager.nextWagerId();
+  }
+
+  // Place a wager then settle it with the given score (won or lost).
+  async function placeAndResolve(player, score, amount = WAGER_AMOUNT) {
+    const wagerId = await placePending(player, amount);
+    const nonce = uniqueNonce();
+    const signature = await signScore(wagerId, player.address, score, nonce);
+    await wager.connect(player).resolveWager(wagerId, score, nonce, signature);
+    return wagerId;
+  }
+
+  // A second, deliberately unfunded contract for house-solvency scenarios.
+  async function deployBare(fundWith = 0n) {
+    const CeloFlashWager = await ethers.getContractFactory("CeloFlashWager");
+    const bare = await CeloFlashWager.deploy(
+      verifier.address,
+      treasury.address,
+      SCORE_THRESHOLD
+    );
+    await bare.waitForDeployment();
+    if (fundWith > 0n) await bare.connect(houseFunder).fundHouse({ value: fundWith });
+    return bare;
+  }
+
+  // Snapshot of every counter placeWager is expected to move.
+  async function readCounters(player) {
+    return {
+      nextWagerId: await wager.nextWagerId(),
+      totalWagersPlaced: await wager.totalWagersPlaced(),
+      totalPendingLiabilities: await wager.totalPendingLiabilities(),
+      activeWager: await wager.activeWager(player.address),
+    };
+  }
 });
