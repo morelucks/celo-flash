@@ -2175,4 +2175,16 @@ describe("CeloFlashWager — resolveWager outcomes & claimWinnings payouts", fun
     expect(await wager.accumulatedHouseEdge()).to.equal(HOUSE_EDGE);
   });
 
+
+
+  it("accrues house edge across successive wins", async function () {
+    await placeAndWin(players[0]);
+    await placeAndWin(players[1], MAX_WAGER);
+    await placeAndWin(players[2]);
+
+    const expected = HOUSE_EDGE * 2n + edgeOf(payoutOf(MAX_WAGER));
+    expect(await wager.accumulatedHouseEdge()).to.equal(expected);
+    expect(await wager.totalWagersWon()).to.equal(3);
+  });
+
 });
