@@ -1472,4 +1472,10 @@ describe("CeloFlashWager — placeWager (bounds, solvency & state)", function ()
       .withArgs(1, players[0].address, MIN_WAGER, payoutOf(MIN_WAGER));
   });
 
+  it("reverts one wei above MAX_WAGER with WagerTooHigh", async function () {
+    await expect(
+      wager.connect(players[0]).placeWager({ value: MAX_WAGER + 1n })
+    ).to.be.revertedWithCustomError(wager, "WagerTooHigh");
+  });
+
 });
