@@ -2198,4 +2198,16 @@ describe("CeloFlashWager — resolveWager outcomes & claimWinnings payouts", fun
     await expectSolvent();
   });
 
+
+
+  it("transfers potentialPayout less 500 bps to the winner", async function () {
+    const wagerId = await placeAndWin(players[0]);
+
+    // 1 CELO staked -> 2 CELO gross -> 1.9 CELO net.
+    expect(NET_PAYOUT).to.equal(ethers.parseEther("1.9"));
+    await expect(
+      wager.connect(players[0]).claimWinnings(wagerId)
+    ).to.changeEtherBalances([wager, players[0]], [-NET_PAYOUT, NET_PAYOUT]);
+  });
+
 });
