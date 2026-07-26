@@ -1862,4 +1862,14 @@ describe("CeloFlashWager — resolveWager outcomes & claimWinnings payouts", fun
     expect((await wager.getWager(wagerId)).score).to.equal(175n);
   });
 
+
+
+  it("adds 5% of the gross payout to accumulatedHouseEdge on a win", async function () {
+    await placeAndWin(players[0]);
+
+    expect(await wager.accumulatedHouseEdge()).to.equal(HOUSE_EDGE);
+    // 1 CELO staked -> 2 CELO gross -> 0.1 CELO edge.
+    expect(HOUSE_EDGE).to.equal(ethers.parseEther("0.1"));
+  });
+
 });
