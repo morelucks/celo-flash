@@ -1550,4 +1550,15 @@ describe("CeloFlashWager — placeWager (bounds, solvency & state)", function ()
     expect(await wager.getActiveWager(players[0].address)).to.equal(wonId + 1n);
   });
 
+  it("lets the player place again after their wager was Lost", async function () {
+    const lostId = await placeAndResolve(players[0], SCORE_THRESHOLD - 1);
+    expect((await wager.getWager(lostId)).status).to.equal(2n); // Lost
+
+    await expect(
+      wager.connect(players[0]).placeWager({ value: WAGER_AMOUNT })
+    ).to.emit(wager, "WagerPlaced");
+
+    expect(await wager.getActiveWager(players[0].address)).to.equal(lostId + 1n);
+  });
+
 });
