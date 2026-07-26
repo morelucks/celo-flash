@@ -1663,4 +1663,20 @@ describe("CeloFlashWager — placeWager (bounds, solvency & state)", function ()
     expect(await wager.getHouseReserve()).to.be.lt(balance);
   });
 
+  it("stays solvent while five max wagers are pending at once", async function () {
+    for (const player of players) {
+      await wager.connect(player).placeWager({ value: MAX_WAGER });
+    }
+
+    // Each max wager puts 10 CELO of net risk on the house.
+    const netRisk = (payoutOf(MAX_WAGER) - MAX_WAGER) * 5n;
+    expect(await wager.totalPendingLiabilities()).to.equal(payoutOf(MAX_WAGER) * 5n);
+    expect(await wager.getHouseReserve()).to.equal(FUND_AMOUNT - netRisk);
+
+    const balance = await ethers.provider.getBalance(await wager.getAddress());
+    expect(balance).to.be.gte(
+      (await wager.totalPendingLiabilities()) + (await wager.accumulatedHouseEdge())
+    );
+  });
+
 });
