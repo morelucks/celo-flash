@@ -1980,4 +1980,18 @@ describe("CeloFlashWager — resolveWager outcomes & claimWinnings payouts", fun
     expect((await wager.getWager(wagerId)).status).to.equal(WON);
   });
 
+
+
+  it("reverts NoActiveWager when another player resolves the wager", async function () {
+    const wagerId = await placePending(players[0]);
+    const score = SCORE_THRESHOLD + 5;
+    const nonce = uniqueNonce();
+    // The attestation is bound to the real player, but the caller is not them.
+    const signature = await signScore(wagerId, players[0].address, score, nonce);
+
+    await expect(
+      wager.connect(players[1]).resolveWager(wagerId, score, nonce, signature)
+    ).to.be.revertedWithCustomError(wager, "NoActiveWager");
+  });
+
 });
