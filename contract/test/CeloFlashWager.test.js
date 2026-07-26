@@ -1701,4 +1701,12 @@ describe("CeloFlashWager — placeWager (bounds, solvency & state)", function ()
     expect(await wager.getHouseReserve()).to.equal(FUND_AMOUNT + topUp);
   });
 
+  it("reverts a zero-value fundHouse deposit with WagerTooLow", async function () {
+    await expect(
+      wager.connect(owner).fundHouse({ value: 0 })
+    ).to.be.revertedWithCustomError(wager, "WagerTooLow");
+
+    expect(await wager.getHouseReserve()).to.equal(FUND_AMOUNT);
+  });
+
 });
