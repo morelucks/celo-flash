@@ -1651,4 +1651,16 @@ describe("CeloFlashWager — placeWager (bounds, solvency & state)", function ()
     );
   });
 
+  it("treats accumulated house edge as locked rather than free reserve", async function () {
+    await placeAndResolve(players[0], SCORE_THRESHOLD + 10);
+
+    const edge = await wager.accumulatedHouseEdge();
+    expect(edge).to.equal((GROSS_PAYOUT * HOUSE_EDGE_BPS) / BPS_DENOMINATOR);
+
+    // The unclaimed edge is owed to the treasury, so it cannot back new wagers.
+    const balance = await ethers.provider.getBalance(await wager.getAddress());
+    expect(await wager.getHouseReserve()).to.equal(balance - edge);
+    expect(await wager.getHouseReserve()).to.be.lt(balance);
+  });
+
 });
