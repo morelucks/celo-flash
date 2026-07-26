@@ -2033,4 +2033,19 @@ describe("CeloFlashWager — resolveWager outcomes & claimWinnings payouts", fun
     expect((await wager.getWager(wagerId)).status).to.equal(LOST);
   });
 
+
+
+  it("reverts NoActiveWager for an unknown wager id", async function () {
+    const unknownId = 9999;
+    const score = SCORE_THRESHOLD + 5;
+    const nonce = uniqueNonce();
+    const signature = await signScore(unknownId, players[0].address, score, nonce);
+
+    // An unwritten slot reads as Pending with a zero player, so the caller
+    // check is what rejects it.
+    await expect(
+      wager.connect(players[0]).resolveWager(unknownId, score, nonce, signature)
+    ).to.be.revertedWithCustomError(wager, "NoActiveWager");
+  });
+
 });
