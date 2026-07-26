@@ -1390,4 +1390,12 @@ describe("CeloFlashWager — placeWager (bounds, solvency & state)", function ()
     expect(stored.potentialPayout).to.equal(payoutOf(MIN_WAGER));
   });
 
+  it("doubles a maximum-sized stake exactly", async function () {
+    await placePending(players[0], MAX_WAGER);
+
+    const stored = await wager.getWager(1);
+    expect(stored.potentialPayout).to.equal(MAX_WAGER * 2n);
+    expect(stored.potentialPayout).to.equal(ethers.parseEther("20"));
+  });
+
 });
