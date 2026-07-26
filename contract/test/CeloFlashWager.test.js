@@ -1407,4 +1407,13 @@ describe("CeloFlashWager — placeWager (bounds, solvency & state)", function ()
     expect(stored.potentialPayout).to.equal(stake * 2n);
   });
 
+  it("exposes the win multiplier as 20000 bps over a 10000 denominator", async function () {
+    expect(await wager.WIN_MULTIPLIER_BPS()).to.equal(20_000);
+    expect(await wager.BPS_DENOMINATOR()).to.equal(10_000);
+
+    // The pair encodes a flat 2x, which is what placeWager must apply.
+    const multiplier = (await wager.WIN_MULTIPLIER_BPS()) / (await wager.BPS_DENOMINATOR());
+    expect(multiplier).to.equal(2n);
+  });
+
 });
