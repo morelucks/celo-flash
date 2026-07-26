@@ -1721,3 +1721,599 @@ describe("CeloFlashWager — placeWager (bounds, solvency & state)", function ()
   });
 
 });
+
+describe("CeloFlashWager — resolveWager outcomes & claimWinnings payouts", function () {
+  const SCORE_THRESHOLD = 100;
+  const FUND_AMOUNT = ethers.parseEther("100");
+  const WAGER_AMOUNT = ethers.parseEther("1");
+  const MAX_WAGER = ethers.parseEther("10");
+  const WAGER_EXPIRY = 3600;
+
+  const WIN_MULTIPLIER_BPS = 20_000n;
+  const HOUSE_EDGE_BPS = 500n;
+  const BPS_DENOMINATOR = 10_000n;
+
+  // The gross payout is 2x the stake; the house keeps 500 bps of it on a win.
+  const payoutOf = (amount) => (amount * WIN_MULTIPLIER_BPS) / BPS_DENOMINATOR;
+  const edgeOf = (gross) => (gross * HOUSE_EDGE_BPS) / BPS_DENOMINATOR;
+  const netOf = (gross) => gross - edgeOf(gross);
+
+  const GROSS_PAYOUT = payoutOf(WAGER_AMOUNT);
+  const HOUSE_EDGE = edgeOf(GROSS_PAYOUT);
+  const NET_PAYOUT = netOf(GROSS_PAYOUT);
+
+  // WagerStatus enum values, mirrored from the contract.
+  const PENDING = 0n;
+  const WON = 1n;
+  const LOST = 2n;
+  const EXPIRED = 3n;
+  const CLAIMED = 4n;
+
+  let wager;
+  let owner;
+  let verifier;
+  let treasury;
+  let houseFunder;
+  let players;
+
+  let nonceCounter = 0;
+  const uniqueNonce = () => ethers.encodeBytes32String(`rwc-nonce-${nonceCounter++}`);
+
+  async function deployFundedWager() {
+    const signers = await ethers.getSigners();
+    const [deployer, signer, treasuryAccount] = signers;
+    // Reserve deposits are one-way, so they are paid by a signer none of the
+    // player accounts below ever touch.
+    const funder = signers[signers.length - 1];
+
+    const CeloFlashWager = await ethers.getContractFactory("CeloFlashWager");
+    const contract = await CeloFlashWager.deploy(
+      signer.address,
+      treasuryAccount.address,
+      SCORE_THRESHOLD
+    );
+    await contract.waitForDeployment();
+
+    await contract.connect(funder).fundHouse({ value: FUND_AMOUNT });
+
+    return {
+      wager: contract,
+      owner: deployer,
+      verifier: signer,
+      treasury: treasuryAccount,
+      houseFunder: funder,
+      players: signers.slice(3, 8),
+    };
+  }
+
+  beforeEach(async function () {
+    ({ wager, owner, verifier, treasury, houseFunder, players } =
+      await loadFixture(deployFundedWager));
+  });
+
+  // The server attestation resolveWager expects: keccak(id, player, score, nonce).
+  async function signScore(wagerId, playerAddress, score, nonce, signer = verifier) {
+    const messageHash = ethers.solidityPackedKeccak256(
+      ["uint256", "address", "uint256", "bytes32"],
+      [wagerId, playerAddress, score, nonce]
+    );
+    return signer.signMessage(ethers.getBytes(messageHash));
+  }
+
+  async function placePending(player, amount = WAGER_AMOUNT) {
+    await wager.connect(player).placeWager({ value: amount });
+    return wager.nextWagerId();
+  }
+
+  // Settle `wagerId` for `player` with a freshly signed score.
+  async function resolve(player, wagerId, score) {
+    const nonce = uniqueNonce();
+    const signature = await signScore(wagerId, player.address, score, nonce);
+    return wager.connect(player).resolveWager(wagerId, score, nonce, signature);
+  }
+
+  async function placeAndResolve(player, score, amount = WAGER_AMOUNT) {
+    const wagerId = await placePending(player, amount);
+    await resolve(player, wagerId, score);
+    return wagerId;
+  }
+
+  // Place a wager, clear the threshold, and return the claimable id.
+  async function placeAndWin(player, amount = WAGER_AMOUNT) {
+    return placeAndResolve(player, SCORE_THRESHOLD + 25, amount);
+  }
+
+  async function expectSolvent() {
+    const balance = await ethers.provider.getBalance(await wager.getAddress());
+    const locked =
+      (await wager.totalPendingLiabilities()) + (await wager.accumulatedHouseEdge());
+    expect(balance).to.be.gte(locked);
+  }
+
+
+  it("marks a wager Won when the score clears the threshold", async function () {
+    const wagerId = await placeAndResolve(players[0], SCORE_THRESHOLD + 50);
+
+    expect((await wager.getWager(wagerId)).status).to.equal(WON);
+  });
+
+
+
+  it("treats a score exactly at the threshold as a win", async function () {
+    // The win condition is score >= scoreThreshold, so the boundary wins.
+    const wagerId = await placeAndResolve(players[0], SCORE_THRESHOLD);
+
+    expect((await wager.getWager(wagerId)).status).to.equal(WON);
+  });
+
+
+
+  it("marks a wager Lost one point below the threshold", async function () {
+    const wagerId = await placeAndResolve(players[0], SCORE_THRESHOLD - 1);
+
+    expect((await wager.getWager(wagerId)).status).to.equal(LOST);
+  });
+
+
+
+  it("stores the attested score on the wager", async function () {
+    const wagerId = await placeAndResolve(players[0], 175);
+
+    expect((await wager.getWager(wagerId)).score).to.equal(175n);
+  });
+
+
+
+  it("adds 5% of the gross payout to accumulatedHouseEdge on a win", async function () {
+    await placeAndWin(players[0]);
+
+    expect(await wager.accumulatedHouseEdge()).to.equal(HOUSE_EDGE);
+    // 1 CELO staked -> 2 CELO gross -> 0.1 CELO edge.
+    expect(HOUSE_EDGE).to.equal(ethers.parseEther("0.1"));
+  });
+
+
+
+  it("accrues no house edge on a loss", async function () {
+    await placeAndResolve(players[0], SCORE_THRESHOLD - 40);
+
+    expect(await wager.accumulatedHouseEdge()).to.equal(0);
+  });
+
+
+
+  it("emits WagerResolved with the Won status and the net payout", async function () {
+    const wagerId = await placePending(players[0]);
+    const score = SCORE_THRESHOLD + 10;
+
+    // The event carries the net payout, i.e. gross minus the house edge.
+    await expect(resolve(players[0], wagerId, score))
+      .to.emit(wager, "WagerResolved")
+      .withArgs(wagerId, players[0].address, score, WON, NET_PAYOUT);
+  });
+
+
+
+  it("emits WagerResolved with the Lost status and a zero payout", async function () {
+    const wagerId = await placePending(players[0]);
+    const score = SCORE_THRESHOLD - 10;
+
+    await expect(resolve(players[0], wagerId, score))
+      .to.emit(wager, "WagerResolved")
+      .withArgs(wagerId, players[0].address, score, LOST, 0);
+  });
+
+
+
+  it("increments totalWagersWon on a win", async function () {
+    expect(await wager.totalWagersWon()).to.equal(0);
+
+    await placeAndWin(players[0]);
+
+    expect(await wager.totalWagersWon()).to.equal(1);
+  });
+
+
+
+  it("leaves totalWagersWon untouched on a loss", async function () {
+    await placeAndWin(players[0]);
+    await placeAndResolve(players[1], SCORE_THRESHOLD - 1);
+    await placeAndResolve(players[2], 0);
+
+    // Three wagers placed, only the first one counts as a win.
+    expect(await wager.totalWagersWon()).to.equal(1);
+    expect(await wager.totalWagersPlaced()).to.equal(3);
+  });
+
+
+
+  it("drops totalPendingLiabilities by potentialPayout on a win", async function () {
+    const wagerId = await placePending(players[0]);
+    expect(await wager.totalPendingLiabilities()).to.equal(GROSS_PAYOUT);
+
+    await resolve(players[0], wagerId, SCORE_THRESHOLD + 1);
+
+    expect(await wager.totalPendingLiabilities()).to.equal(0);
+  });
+
+
+
+  it("drops totalPendingLiabilities by potentialPayout on a loss", async function () {
+    const wagerId = await placePending(players[0], MAX_WAGER);
+    const gross = payoutOf(MAX_WAGER);
+    expect(await wager.totalPendingLiabilities()).to.equal(gross);
+
+    await resolve(players[0], wagerId, SCORE_THRESHOLD - 1);
+
+    expect(await wager.totalPendingLiabilities()).to.equal(0);
+  });
+
+
+
+  it("unwinds liabilities one wager at a time across several players", async function () {
+    const first = await placePending(players[0]);
+    const second = await placePending(players[1], MAX_WAGER);
+    const third = await placePending(players[2]);
+
+    const total = GROSS_PAYOUT * 2n + payoutOf(MAX_WAGER);
+    expect(await wager.totalPendingLiabilities()).to.equal(total);
+
+    await resolve(players[1], second, SCORE_THRESHOLD + 5);
+    expect(await wager.totalPendingLiabilities()).to.equal(total - payoutOf(MAX_WAGER));
+
+    await resolve(players[0], first, SCORE_THRESHOLD - 5);
+    await resolve(players[2], third, SCORE_THRESHOLD);
+
+    expect(await wager.totalPendingLiabilities()).to.equal(0);
+  });
+
+
+
+  it("moves no CELO at resolution time — winnings must be pulled", async function () {
+    const wagerId = await placePending(players[0]);
+
+    await expect(resolve(players[0], wagerId, SCORE_THRESHOLD + 5)).to.changeEtherBalance(
+      wager,
+      0
+    );
+
+    expect((await wager.getWager(wagerId)).status).to.equal(WON);
+  });
+
+
+
+  it("reverts NoActiveWager when another player resolves the wager", async function () {
+    const wagerId = await placePending(players[0]);
+    const score = SCORE_THRESHOLD + 5;
+    const nonce = uniqueNonce();
+    // The attestation is bound to the real player, but the caller is not them.
+    const signature = await signScore(wagerId, players[0].address, score, nonce);
+
+    await expect(
+      wager.connect(players[1]).resolveWager(wagerId, score, nonce, signature)
+    ).to.be.revertedWithCustomError(wager, "NoActiveWager");
+  });
+
+
+
+  it("reverts NoActiveWager when the owner resolves on a player's behalf", async function () {
+    const wagerId = await placePending(players[0]);
+    const score = SCORE_THRESHOLD + 5;
+    const nonce = uniqueNonce();
+    const signature = await signScore(wagerId, players[0].address, score, nonce);
+
+    // Ownership grants no authority over an individual wager.
+    await expect(
+      wager.connect(owner).resolveWager(wagerId, score, nonce, signature)
+    ).to.be.revertedWithCustomError(wager, "NoActiveWager");
+
+    expect((await wager.getWager(wagerId)).status).to.equal(PENDING);
+  });
+
+
+
+  it("reverts WagerNotPending when a won wager is resolved twice", async function () {
+    const wagerId = await placeAndWin(players[0]);
+
+    await expect(
+      resolve(players[0], wagerId, SCORE_THRESHOLD + 5)
+    ).to.be.revertedWithCustomError(wager, "WagerNotPending");
+  });
+
+
+
+  it("reverts WagerNotPending when a lost wager is resolved twice", async function () {
+    const wagerId = await placeAndResolve(players[0], SCORE_THRESHOLD - 1);
+
+    // A loss is final — it cannot be re-attested into a win.
+    await expect(
+      resolve(players[0], wagerId, SCORE_THRESHOLD + 100)
+    ).to.be.revertedWithCustomError(wager, "WagerNotPending");
+
+    expect((await wager.getWager(wagerId)).status).to.equal(LOST);
+  });
+
+
+
+  it("reverts NoActiveWager for an unknown wager id", async function () {
+    const unknownId = 9999;
+    const score = SCORE_THRESHOLD + 5;
+    const nonce = uniqueNonce();
+    const signature = await signScore(unknownId, players[0].address, score, nonce);
+
+    // An unwritten slot reads as Pending with a zero player, so the caller
+    // check is what rejects it.
+    await expect(
+      wager.connect(players[0]).resolveWager(unknownId, score, nonce, signature)
+    ).to.be.revertedWithCustomError(wager, "NoActiveWager");
+  });
+
+
+
+  it("reverts NonceAlreadyUsed when a nonce is replayed", async function () {
+    const score = SCORE_THRESHOLD + 5;
+    const nonce = uniqueNonce();
+
+    const first = await placePending(players[0]);
+    let signature = await signScore(first, players[0].address, score, nonce);
+    await wager.connect(players[0]).resolveWager(first, score, nonce, signature);
+
+    const second = await placePending(players[1]);
+    signature = await signScore(second, players[1].address, score, nonce);
+
+    await expect(
+      wager.connect(players[1]).resolveWager(second, score, nonce, signature)
+    ).to.be.revertedWithCustomError(wager, "NonceAlreadyUsed");
+  });
+
+
+
+  it("reverts InvalidSignature when the score is signed by a non-verifier", async function () {
+    const wagerId = await placePending(players[0]);
+    const score = SCORE_THRESHOLD + 5;
+    const nonce = uniqueNonce();
+    const signature = await signScore(
+      wagerId,
+      players[0].address,
+      score,
+      nonce,
+      players[0]
+    );
+
+    await expect(
+      wager.connect(players[0]).resolveWager(wagerId, score, nonce, signature)
+    ).to.be.revertedWithCustomError(wager, "InvalidSignature");
+  });
+
+
+
+  it("reverts InvalidSignature when the submitted score differs from the signed one", async function () {
+    const wagerId = await placePending(players[0]);
+    const nonce = uniqueNonce();
+    // Signed for a losing score, submitted as a winning one.
+    const signature = await signScore(
+      wagerId,
+      players[0].address,
+      SCORE_THRESHOLD - 1,
+      nonce
+    );
+
+    await expect(
+      wager
+        .connect(players[0])
+        .resolveWager(wagerId, SCORE_THRESHOLD + 500, nonce, signature)
+    ).to.be.revertedWithCustomError(wager, "InvalidSignature");
+  });
+
+
+
+  it("reverts resolveWager while the contract is paused", async function () {
+    const wagerId = await placePending(players[0]);
+    await wager.connect(owner).pause();
+
+    await expect(
+      resolve(players[0], wagerId, SCORE_THRESHOLD + 5)
+    ).to.be.revertedWithCustomError(wager, "EnforcedPause");
+  });
+
+
+
+  it("records the attestation nonce as used", async function () {
+    const wagerId = await placePending(players[0]);
+    const score = SCORE_THRESHOLD + 5;
+    const nonce = uniqueNonce();
+    expect(await wager.usedNonces(nonce)).to.equal(false);
+
+    const signature = await signScore(wagerId, players[0].address, score, nonce);
+    await wager.connect(players[0]).resolveWager(wagerId, score, nonce, signature);
+
+    expect(await wager.usedNonces(nonce)).to.equal(true);
+  });
+
+
+
+  it("clears getActiveWager once a wager is won", async function () {
+    const wagerId = await placePending(players[0]);
+    expect(await wager.getActiveWager(players[0].address)).to.equal(wagerId);
+
+    await resolve(players[0], wagerId, SCORE_THRESHOLD + 5);
+
+    expect(await wager.getActiveWager(players[0].address)).to.equal(0);
+  });
+
+
+
+  it("clears getActiveWager once a wager is lost", async function () {
+    const wagerId = await placePending(players[0]);
+    expect(await wager.getActiveWager(players[0].address)).to.equal(wagerId);
+
+    await resolve(players[0], wagerId, SCORE_THRESHOLD - 1);
+
+    // activeWager still points at the id, but it is no longer pending.
+    expect(await wager.getActiveWager(players[0].address)).to.equal(0);
+    expect(await wager.activeWager(players[0].address)).to.equal(wagerId);
+  });
+
+
+
+  it("applies a raised scoreThreshold to later resolutions", async function () {
+    await wager.connect(owner).setScoreThreshold(500);
+    const wagerId = await placeAndResolve(players[0], 400);
+
+    // 400 would have won under the original threshold of 100.
+    expect((await wager.getWager(wagerId)).status).to.equal(LOST);
+    expect(await wager.totalWagersWon()).to.equal(0);
+  });
+
+
+
+  it("applies a lowered scoreThreshold to later resolutions", async function () {
+    await wager.connect(owner).setScoreThreshold(10);
+    const wagerId = await placeAndResolve(players[0], 10);
+
+    expect((await wager.getWager(wagerId)).status).to.equal(WON);
+    expect(await wager.accumulatedHouseEdge()).to.equal(HOUSE_EDGE);
+  });
+
+
+
+  it("accrues house edge across successive wins", async function () {
+    await placeAndWin(players[0]);
+    await placeAndWin(players[1], MAX_WAGER);
+    await placeAndWin(players[2]);
+
+    const expected = HOUSE_EDGE * 2n + edgeOf(payoutOf(MAX_WAGER));
+    expect(await wager.accumulatedHouseEdge()).to.equal(expected);
+    expect(await wager.totalWagersWon()).to.equal(3);
+  });
+
+
+
+  it("keeps the forfeited stake in the house reserve after a loss", async function () {
+    await placeAndResolve(players[0], SCORE_THRESHOLD - 1);
+
+    // Nothing is locked any more, so the whole balance is reserve again.
+    expect(await wager.totalPendingLiabilities()).to.equal(0);
+    expect(await wager.getHouseReserve()).to.equal(FUND_AMOUNT + WAGER_AMOUNT);
+    await expectSolvent();
+  });
+
+
+
+  it("transfers potentialPayout less 500 bps to the winner", async function () {
+    const wagerId = await placeAndWin(players[0]);
+
+    // 1 CELO staked -> 2 CELO gross -> 1.9 CELO net.
+    expect(NET_PAYOUT).to.equal(ethers.parseEther("1.9"));
+    await expect(
+      wager.connect(players[0]).claimWinnings(wagerId)
+    ).to.changeEtherBalances([wager, players[0]], [-NET_PAYOUT, NET_PAYOUT]);
+  });
+
+
+
+  it("sets the wager status to Claimed", async function () {
+    const wagerId = await placeAndWin(players[0]);
+
+    await wager.connect(players[0]).claimWinnings(wagerId);
+
+    expect((await wager.getWager(wagerId)).status).to.equal(CLAIMED);
+  });
+
+
+
+  it("emits WagerClaimed with the net payout", async function () {
+    const wagerId = await placeAndWin(players[0]);
+
+    await expect(wager.connect(players[0]).claimWinnings(wagerId))
+      .to.emit(wager, "WagerClaimed")
+      .withArgs(wagerId, players[0].address, NET_PAYOUT);
+  });
+
+
+
+  it("reverts WagerNotWon on a second claim", async function () {
+    const wagerId = await placeAndWin(players[0]);
+    await wager.connect(players[0]).claimWinnings(wagerId);
+
+    // The status is Claimed by now, so the Won check rejects the replay.
+    await expect(
+      wager.connect(players[0]).claimWinnings(wagerId)
+    ).to.be.revertedWithCustomError(wager, "WagerNotWon");
+  });
+
+
+
+  it("reverts WagerNotWon when claiming a lost wager", async function () {
+    const wagerId = await placeAndResolve(players[0], SCORE_THRESHOLD - 1);
+
+    await expect(
+      wager.connect(players[0]).claimWinnings(wagerId)
+    ).to.be.revertedWithCustomError(wager, "WagerNotWon");
+  });
+
+
+
+  it("reverts WagerNotWon when claiming a wager that is still pending", async function () {
+    const wagerId = await placePending(players[0]);
+
+    await expect(
+      wager.connect(players[0]).claimWinnings(wagerId)
+    ).to.be.revertedWithCustomError(wager, "WagerNotWon");
+  });
+
+
+
+  it("reverts WagerNotWon when claiming an expired wager", async function () {
+    const wagerId = await placePending(players[0]);
+    await time.increase(WAGER_EXPIRY + 1);
+    await wager.connect(players[0]).expireWager(wagerId);
+
+    expect((await wager.getWager(wagerId)).status).to.equal(EXPIRED);
+    await expect(
+      wager.connect(players[0]).claimWinnings(wagerId)
+    ).to.be.revertedWithCustomError(wager, "WagerNotWon");
+  });
+
+
+
+  it("reverts NoActiveWager when someone other than the player claims", async function () {
+    const wagerId = await placeAndWin(players[0]);
+
+    await expect(
+      wager.connect(players[1]).claimWinnings(wagerId)
+    ).to.be.revertedWithCustomError(wager, "NoActiveWager");
+    await expect(
+      wager.connect(owner).claimWinnings(wagerId)
+    ).to.be.revertedWithCustomError(wager, "NoActiveWager");
+
+    // The winner's claim survives the failed attempts intact.
+    expect((await wager.getWager(wagerId)).status).to.equal(WON);
+  });
+
+
+
+  it("reverts NoActiveWager when claiming an unknown wager id", async function () {
+    await expect(
+      wager.connect(players[0]).claimWinnings(4242)
+    ).to.be.revertedWithCustomError(wager, "NoActiveWager");
+  });
+
+
+
+  it("pays the exact 500 bps-reduced payout on a max-size win and stays solvent", async function () {
+    const wagerId = await placeAndWin(players[0], MAX_WAGER);
+    const net = netOf(payoutOf(MAX_WAGER));
+    expect(net).to.equal(ethers.parseEther("19"));
+
+    const edgeBefore = await wager.accumulatedHouseEdge();
+    await expect(
+      wager.connect(players[0]).claimWinnings(wagerId)
+    ).to.changeEtherBalances([wager, players[0]], [-net, net]);
+
+    // The claim only pays the player; the edge stays booked for the treasury.
+    expect(await wager.accumulatedHouseEdge()).to.equal(edgeBefore);
+    expect(await wager.totalPendingLiabilities()).to.equal(0);
+    await expectSolvent();
+  });
+});
