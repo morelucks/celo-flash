@@ -1561,4 +1561,14 @@ describe("CeloFlashWager — placeWager (bounds, solvency & state)", function ()
     expect(await wager.getActiveWager(players[0].address)).to.equal(lostId + 1n);
   });
 
+  it("lets the player place again after claiming their winnings", async function () {
+    const wonId = await placeAndResolve(players[0], SCORE_THRESHOLD + 10);
+    await wager.connect(players[0]).claimWinnings(wonId);
+    expect((await wager.getWager(wonId)).status).to.equal(4n); // Claimed
+
+    await expect(
+      wager.connect(players[0]).placeWager({ value: WAGER_AMOUNT })
+    ).to.emit(wager, "WagerPlaced");
+  });
+
 });
