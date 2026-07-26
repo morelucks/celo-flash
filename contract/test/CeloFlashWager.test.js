@@ -1500,4 +1500,14 @@ describe("CeloFlashWager — placeWager (bounds, solvency & state)", function ()
     expect(await readCounters(players[0])).to.deep.equal(before);
   });
 
+  it("mutates no state when an above-maximum wager reverts", async function () {
+    const before = await readCounters(players[0]);
+
+    await expect(
+      wager.connect(players[0]).placeWager({ value: MAX_WAGER + 1n })
+    ).to.be.revertedWithCustomError(wager, "WagerTooHigh");
+
+    expect(await readCounters(players[0])).to.deep.equal(before);
+  });
+
 });
