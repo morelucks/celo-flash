@@ -2020,4 +2020,17 @@ describe("CeloFlashWager — resolveWager outcomes & claimWinnings payouts", fun
     ).to.be.revertedWithCustomError(wager, "WagerNotPending");
   });
 
+
+
+  it("reverts WagerNotPending when a lost wager is resolved twice", async function () {
+    const wagerId = await placeAndResolve(players[0], SCORE_THRESHOLD - 1);
+
+    // A loss is final — it cannot be re-attested into a win.
+    await expect(
+      resolve(players[0], wagerId, SCORE_THRESHOLD + 100)
+    ).to.be.revertedWithCustomError(wager, "WagerNotPending");
+
+    expect((await wager.getWager(wagerId)).status).to.equal(LOST);
+  });
+
 });
