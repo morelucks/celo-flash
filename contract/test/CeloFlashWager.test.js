@@ -1,6 +1,6 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
-const { time } = require("@nomicfoundation/hardhat-network-helpers");
+const { loadFixture, time } = require("@nomicfoundation/hardhat-network-helpers");
 
 describe("CeloFlashWager — House Edge Withdrawal & Accounting", function () {
   const SCORE_THRESHOLD = 100;
@@ -1232,4 +1232,492 @@ describe("CeloFlashWager — expireWager extended coverage", function () {
 
     expect(await wager.getHouseReserve()).to.equal(FUND_AMOUNT + WAGER_AMOUNT);
   });
+});
+
+describe("CeloFlashWager — placeWager (bounds, solvency & state)", function () {
+  const SCORE_THRESHOLD = 100;
+  const FUND_AMOUNT = ethers.parseEther("100");
+  const WAGER_AMOUNT = ethers.parseEther("1");
+  const MID_WAGER = ethers.parseEther("2.5");
+  const ODD_WAGER = ethers.parseEther("1.337");
+  const MIN_WAGER = ethers.parseEther("0.001");
+  const MAX_WAGER = ethers.parseEther("10");
+
+  const WIN_MULTIPLIER_BPS = 20_000n;
+  const HOUSE_EDGE_BPS = 500n;
+  const BPS_DENOMINATOR = 10_000n;
+
+  // The 2x liability the house locks for a given stake.
+  const payoutOf = (amount) => (amount * WIN_MULTIPLIER_BPS) / BPS_DENOMINATOR;
+  const GROSS_PAYOUT = payoutOf(WAGER_AMOUNT);
+
+  // WagerStatus enum values, mirrored from the contract.
+  const PENDING = 0n;
+
+  let wager;
+  let owner;
+  let verifier;
+  let treasury;
+  let houseFunder;
+  let players;
+
+  let nonceCounter = 0;
+  const uniqueNonce = () => ethers.encodeBytes32String(`pwb-nonce-${nonceCounter++}`);
+
+  // Deploy a house pre-funded with 100 CELO of reserve.
+  async function deployFundedWager() {
+    const signers = await ethers.getSigners();
+    const [deployer, signer, treasuryAccount] = signers;
+    // The reserve is a one-way deposit, so it comes from a signer no other
+    // suite spends, keeping the shared accounts out of it.
+    const funder = signers[signers.length - 1];
+
+    const CeloFlashWager = await ethers.getContractFactory("CeloFlashWager");
+    const contract = await CeloFlashWager.deploy(
+      signer.address,
+      treasuryAccount.address,
+      SCORE_THRESHOLD
+    );
+    await contract.waitForDeployment();
+
+    await contract.connect(funder).fundHouse({ value: FUND_AMOUNT });
+
+    return {
+      wager: contract,
+      owner: deployer,
+      verifier: signer,
+      treasury: treasuryAccount,
+      houseFunder: funder,
+      players: signers.slice(3, 8),
+    };
+  }
+
+  beforeEach(async function () {
+    // A snapshot-backed fixture: every test starts from the same balances
+    // instead of permanently draining the shared signers on each run.
+    ({ wager, owner, verifier, treasury, houseFunder, players } =
+      await loadFixture(deployFundedWager));
+  });
+
+  async function signScore(wagerId, playerAddress, score, nonce) {
+    const messageHash = ethers.solidityPackedKeccak256(
+      ["uint256", "address", "uint256", "bytes32"],
+      [wagerId, playerAddress, score, nonce]
+    );
+    return verifier.signMessage(ethers.getBytes(messageHash));
+  }
+
+  // Place a pending wager for `player` and return its id.
+  async function placePending(player, amount = WAGER_AMOUNT) {
+    await wager.connect(player).placeWager({ value: amount });
+    return wager.nextWagerId();
+  }
+
+  // Place a wager then settle it with the given score (won or lost).
+  async function placeAndResolve(player, score, amount = WAGER_AMOUNT) {
+    const wagerId = await placePending(player, amount);
+    const nonce = uniqueNonce();
+    const signature = await signScore(wagerId, player.address, score, nonce);
+    await wager.connect(player).resolveWager(wagerId, score, nonce, signature);
+    return wagerId;
+  }
+
+  // A second, deliberately unfunded contract for house-solvency scenarios.
+  async function deployBare(fundWith = 0n) {
+    const CeloFlashWager = await ethers.getContractFactory("CeloFlashWager");
+    const bare = await CeloFlashWager.deploy(
+      verifier.address,
+      treasury.address,
+      SCORE_THRESHOLD
+    );
+    await bare.waitForDeployment();
+    if (fundWith > 0n) await bare.connect(houseFunder).fundHouse({ value: fundWith });
+    return bare;
+  }
+
+  // Snapshot of every counter placeWager is expected to move.
+  async function readCounters(player) {
+    return {
+      nextWagerId: await wager.nextWagerId(),
+      totalWagersPlaced: await wager.totalWagersPlaced(),
+      totalPendingLiabilities: await wager.totalPendingLiabilities(),
+      activeWager: await wager.activeWager(player.address),
+    };
+  }
+  it("stores every field of the Wager struct on a valid placement", async function () {
+    const tx = await wager.connect(players[0]).placeWager({ value: WAGER_AMOUNT });
+    const receipt = await tx.wait();
+    const block = await ethers.provider.getBlock(receipt.blockNumber);
+
+    const stored = await wager.getWager(1);
+    expect(stored.player).to.equal(players[0].address);
+    expect(stored.amount).to.equal(WAGER_AMOUNT);
+    expect(stored.potentialPayout).to.equal(GROSS_PAYOUT);
+    expect(stored.createdAt).to.equal(block.timestamp);
+    expect(stored.score).to.equal(0);
+    expect(stored.status).to.equal(PENDING);
+  });
+
+  it("emits WagerPlaced with the id, player, stake and potential payout", async function () {
+    await expect(wager.connect(players[0]).placeWager({ value: WAGER_AMOUNT }))
+      .to.emit(wager, "WagerPlaced")
+      .withArgs(1, players[0].address, WAGER_AMOUNT, GROSS_PAYOUT);
+  });
+
+  it("assigns sequential wager ids starting at 1", async function () {
+    expect(await wager.nextWagerId()).to.equal(0);
+
+    expect(await placePending(players[0])).to.equal(1);
+    expect(await placePending(players[1])).to.equal(2);
+    expect(await placePending(players[2])).to.equal(3);
+  });
+
+  it("computes potentialPayout as (amount * 20000) / 10000", async function () {
+    await placePending(players[0]);
+
+    const stored = await wager.getWager(1);
+    expect(stored.potentialPayout).to.equal(
+      (WAGER_AMOUNT * 20_000n) / 10_000n
+    );
+    expect(stored.potentialPayout).to.equal(WAGER_AMOUNT * 2n);
+  });
+
+  it("doubles a minimum-sized stake exactly", async function () {
+    await placePending(players[0], MIN_WAGER);
+
+    const stored = await wager.getWager(1);
+    expect(stored.potentialPayout).to.equal(MIN_WAGER * 2n);
+    expect(stored.potentialPayout).to.equal(payoutOf(MIN_WAGER));
+  });
+
+  it("doubles a maximum-sized stake exactly", async function () {
+    await placePending(players[0], MAX_WAGER);
+
+    const stored = await wager.getWager(1);
+    expect(stored.potentialPayout).to.equal(MAX_WAGER * 2n);
+    expect(stored.potentialPayout).to.equal(ethers.parseEther("20"));
+  });
+
+  it("doubles an odd stake with no rounding loss", async function () {
+    // 1.337 CELO plus a single wei — the bps math must stay exact.
+    const stake = ODD_WAGER + 1n;
+    await placePending(players[0], stake);
+
+    const stored = await wager.getWager(1);
+    expect(stored.potentialPayout).to.equal(stake * 2n);
+  });
+
+  it("exposes the win multiplier as 20000 bps over a 10000 denominator", async function () {
+    expect(await wager.WIN_MULTIPLIER_BPS()).to.equal(20_000);
+    expect(await wager.BPS_DENOMINATOR()).to.equal(10_000);
+
+    // The pair encodes a flat 2x, which is what placeWager must apply.
+    const multiplier = (await wager.WIN_MULTIPLIER_BPS()) / (await wager.BPS_DENOMINATOR());
+    expect(multiplier).to.equal(2n);
+  });
+
+  it("raises totalPendingLiabilities by the wager's potentialPayout", async function () {
+    expect(await wager.totalPendingLiabilities()).to.equal(0);
+
+    await placePending(players[0]);
+
+    expect(await wager.totalPendingLiabilities()).to.equal(GROSS_PAYOUT);
+  });
+
+  it("tracks liabilities exactly across mixed stake sizes", async function () {
+    await placePending(players[0], MIN_WAGER);
+    await placePending(players[1], ODD_WAGER);
+    await placePending(players[2], MID_WAGER);
+
+    const expected = payoutOf(MIN_WAGER) + payoutOf(ODD_WAGER) + payoutOf(MID_WAGER);
+    expect(await wager.totalPendingLiabilities()).to.equal(expected);
+  });
+
+  it("shrinks getHouseReserve by the net house risk, not the full payout", async function () {
+    expect(await wager.getHouseReserve()).to.equal(FUND_AMOUNT);
+
+    await placePending(players[0]);
+
+    // The stake itself lands in the contract, so only payout - stake is at risk.
+    const netRisk = GROSS_PAYOUT - WAGER_AMOUNT;
+    expect(await wager.getHouseReserve()).to.equal(FUND_AMOUNT - netRisk);
+  });
+
+  it("increments totalWagersPlaced once per placement", async function () {
+    expect(await wager.totalWagersPlaced()).to.equal(0);
+
+    await placePending(players[0]);
+    expect(await wager.totalWagersPlaced()).to.equal(1);
+
+    await placePending(players[1]);
+    expect(await wager.totalWagersPlaced()).to.equal(2);
+  });
+
+  it("reverts a zero-value wager with WagerTooLow", async function () {
+    await expect(
+      wager.connect(players[0]).placeWager({ value: 0 })
+    ).to.be.revertedWithCustomError(wager, "WagerTooLow");
+  });
+
+  it("reverts one wei below MIN_WAGER with WagerTooLow", async function () {
+    await expect(
+      wager.connect(players[0]).placeWager({ value: MIN_WAGER - 1n })
+    ).to.be.revertedWithCustomError(wager, "WagerTooLow");
+  });
+
+  it("accepts a stake at exactly MIN_WAGER", async function () {
+    // The lower bound is inclusive: 0.001 CELO is a valid wager.
+    await expect(wager.connect(players[0]).placeWager({ value: MIN_WAGER }))
+      .to.emit(wager, "WagerPlaced")
+      .withArgs(1, players[0].address, MIN_WAGER, payoutOf(MIN_WAGER));
+  });
+
+  it("reverts one wei above MAX_WAGER with WagerTooHigh", async function () {
+    await expect(
+      wager.connect(players[0]).placeWager({ value: MAX_WAGER + 1n })
+    ).to.be.revertedWithCustomError(wager, "WagerTooHigh");
+  });
+
+  it("accepts a stake at exactly MAX_WAGER", async function () {
+    // The upper bound is inclusive: 10 CELO is a valid wager.
+    await expect(wager.connect(players[0]).placeWager({ value: MAX_WAGER }))
+      .to.emit(wager, "WagerPlaced")
+      .withArgs(1, players[0].address, MAX_WAGER, payoutOf(MAX_WAGER));
+  });
+
+  it("exposes MIN_WAGER as 0.001 CELO and MAX_WAGER as 10 CELO", async function () {
+    expect(await wager.MIN_WAGER()).to.equal(ethers.parseEther("0.001"));
+    expect(await wager.MAX_WAGER()).to.equal(ethers.parseEther("10"));
+  });
+
+  it("mutates no state when a below-minimum wager reverts", async function () {
+    const before = await readCounters(players[0]);
+
+    await expect(
+      wager.connect(players[0]).placeWager({ value: MIN_WAGER - 1n })
+    ).to.be.revertedWithCustomError(wager, "WagerTooLow");
+
+    expect(await readCounters(players[0])).to.deep.equal(before);
+  });
+
+  it("mutates no state when an above-maximum wager reverts", async function () {
+    const before = await readCounters(players[0]);
+
+    await expect(
+      wager.connect(players[0]).placeWager({ value: MAX_WAGER + 1n })
+    ).to.be.revertedWithCustomError(wager, "WagerTooHigh");
+
+    expect(await readCounters(players[0])).to.deep.equal(before);
+  });
+
+  it("reverts a second pending wager with ActiveWagerExists", async function () {
+    await placePending(players[0]);
+
+    await expect(
+      wager.connect(players[0]).placeWager({ value: WAGER_AMOUNT })
+    ).to.be.revertedWithCustomError(wager, "ActiveWagerExists");
+  });
+
+  it("keeps the first wager and its liability intact when the second is rejected", async function () {
+    const firstId = await placePending(players[0]);
+
+    await expect(
+      wager.connect(players[0]).placeWager({ value: MID_WAGER })
+    ).to.be.revertedWithCustomError(wager, "ActiveWagerExists");
+
+    expect(await wager.activeWager(players[0].address)).to.equal(firstId);
+    expect(await wager.totalPendingLiabilities()).to.equal(GROSS_PAYOUT);
+    expect(await wager.totalWagersPlaced()).to.equal(1);
+  });
+
+  it("blocks a duplicate wager of any size, not just the same stake", async function () {
+    await placePending(players[0], MIN_WAGER);
+
+    // The guard is on the pending status alone; the new amount is irrelevant.
+    await expect(
+      wager.connect(players[0]).placeWager({ value: MAX_WAGER })
+    ).to.be.revertedWithCustomError(wager, "ActiveWagerExists");
+  });
+
+  it("lets the player place again after their wager was Won", async function () {
+    const wonId = await placeAndResolve(players[0], SCORE_THRESHOLD + 10);
+    expect((await wager.getWager(wonId)).status).to.equal(1n); // Won
+
+    await expect(
+      wager.connect(players[0]).placeWager({ value: WAGER_AMOUNT })
+    ).to.emit(wager, "WagerPlaced");
+
+    expect(await wager.getActiveWager(players[0].address)).to.equal(wonId + 1n);
+  });
+
+  it("lets the player place again after their wager was Lost", async function () {
+    const lostId = await placeAndResolve(players[0], SCORE_THRESHOLD - 1);
+    expect((await wager.getWager(lostId)).status).to.equal(2n); // Lost
+
+    await expect(
+      wager.connect(players[0]).placeWager({ value: WAGER_AMOUNT })
+    ).to.emit(wager, "WagerPlaced");
+
+    expect(await wager.getActiveWager(players[0].address)).to.equal(lostId + 1n);
+  });
+
+  it("lets the player place again after claiming their winnings", async function () {
+    const wonId = await placeAndResolve(players[0], SCORE_THRESHOLD + 10);
+    await wager.connect(players[0]).claimWinnings(wonId);
+    expect((await wager.getWager(wonId)).status).to.equal(4n); // Claimed
+
+    await expect(
+      wager.connect(players[0]).placeWager({ value: WAGER_AMOUNT })
+    ).to.emit(wager, "WagerPlaced");
+  });
+
+  it("repoints activeWager at the replacement wager after a loss", async function () {
+    const lostId = await placeAndResolve(players[0], SCORE_THRESHOLD - 1);
+
+    const replacementId = await placePending(players[0]);
+
+    expect(replacementId).to.not.equal(lostId);
+    expect(await wager.activeWager(players[0].address)).to.equal(replacementId);
+    expect(await wager.getActiveWager(players[0].address)).to.equal(replacementId);
+  });
+
+  it("relocks a fresh liability for the replacement wager", async function () {
+    await placeAndResolve(players[0], SCORE_THRESHOLD - 1);
+    expect(await wager.totalPendingLiabilities()).to.equal(0);
+
+    await placePending(players[0], MID_WAGER);
+
+    expect(await wager.totalPendingLiabilities()).to.equal(payoutOf(MID_WAGER));
+    expect(await wager.totalWagersPlaced()).to.equal(2);
+  });
+
+  it("reverts InsufficientHouseReserve when an outstanding liability drains the reserve", async function () {
+    const bare = await deployBare();
+
+    // The first stake backs its own risk, but leaves nothing over for a second.
+    await bare.connect(players[0]).placeWager({ value: WAGER_AMOUNT });
+
+    await expect(
+      bare.connect(players[1]).placeWager({ value: WAGER_AMOUNT })
+    ).to.be.revertedWithCustomError(bare, "InsufficientHouseReserve");
+  });
+
+  it("accepts a wager when the reserve exactly covers the outstanding risk", async function () {
+    const bare = await deployBare(WAGER_AMOUNT);
+
+    await bare.connect(players[0]).placeWager({ value: WAGER_AMOUNT });
+
+    // Reserve is exactly the 1 CELO of net risk still owed — the boundary passes.
+    await expect(bare.connect(players[1]).placeWager({ value: WAGER_AMOUNT })).to.emit(
+      bare,
+      "WagerPlaced"
+    );
+  });
+
+  it("reverts when the reserve is one wei short of the outstanding risk", async function () {
+    const bare = await deployBare(WAGER_AMOUNT - 1n);
+
+    await bare.connect(players[0]).placeWager({ value: WAGER_AMOUNT });
+
+    await expect(
+      bare.connect(players[1]).placeWager({ value: WAGER_AMOUNT })
+    ).to.be.revertedWithCustomError(bare, "InsufficientHouseReserve");
+  });
+
+  it("reverts a max wager the thinly funded house cannot cover", async function () {
+    const bare = await deployBare(ethers.parseEther("0.5"));
+
+    await bare.connect(players[0]).placeWager({ value: WAGER_AMOUNT });
+
+    // 9.5 CELO of free reserve against 10 CELO of new risk.
+    await expect(
+      bare.connect(players[1]).placeWager({ value: MAX_WAGER })
+    ).to.be.revertedWithCustomError(bare, "InsufficientHouseReserve");
+  });
+
+  it("accepts a previously rejected wager once the house is topped up", async function () {
+    const bare = await deployBare();
+    await bare.connect(players[0]).placeWager({ value: WAGER_AMOUNT });
+
+    await expect(
+      bare.connect(players[1]).placeWager({ value: WAGER_AMOUNT })
+    ).to.be.revertedWithCustomError(bare, "InsufficientHouseReserve");
+
+    await bare.connect(owner).fundHouse({ value: WAGER_AMOUNT });
+
+    await expect(bare.connect(players[1]).placeWager({ value: WAGER_AMOUNT })).to.emit(
+      bare,
+      "WagerPlaced"
+    );
+  });
+
+  it("treats accumulated house edge as locked rather than free reserve", async function () {
+    await placeAndResolve(players[0], SCORE_THRESHOLD + 10);
+
+    const edge = await wager.accumulatedHouseEdge();
+    expect(edge).to.equal((GROSS_PAYOUT * HOUSE_EDGE_BPS) / BPS_DENOMINATOR);
+
+    // The unclaimed edge is owed to the treasury, so it cannot back new wagers.
+    const balance = await ethers.provider.getBalance(await wager.getAddress());
+    expect(await wager.getHouseReserve()).to.equal(balance - edge);
+    expect(await wager.getHouseReserve()).to.be.lt(balance);
+  });
+
+  it("stays solvent while five max wagers are pending at once", async function () {
+    for (const player of players) {
+      await wager.connect(player).placeWager({ value: MAX_WAGER });
+    }
+
+    // Each max wager puts 10 CELO of net risk on the house.
+    const netRisk = (payoutOf(MAX_WAGER) - MAX_WAGER) * 5n;
+    expect(await wager.totalPendingLiabilities()).to.equal(payoutOf(MAX_WAGER) * 5n);
+    expect(await wager.getHouseReserve()).to.equal(FUND_AMOUNT - netRisk);
+
+    const balance = await ethers.provider.getBalance(await wager.getAddress());
+    expect(balance).to.be.gte(
+      (await wager.totalPendingLiabilities()) + (await wager.accumulatedHouseEdge())
+    );
+  });
+
+  it("emits HouseFunded and grows the reserve on fundHouse", async function () {
+    const topUp = ethers.parseEther("5");
+
+    await expect(wager.connect(owner).fundHouse({ value: topUp }))
+      .to.emit(wager, "HouseFunded")
+      .withArgs(owner.address, topUp);
+
+    expect(await wager.getHouseReserve()).to.equal(FUND_AMOUNT + topUp);
+  });
+
+  it("accepts plain CELO through receive and emits HouseFunded", async function () {
+    const topUp = ethers.parseEther("3");
+
+    await expect(
+      players[0].sendTransaction({ to: await wager.getAddress(), value: topUp })
+    )
+      .to.emit(wager, "HouseFunded")
+      .withArgs(players[0].address, topUp);
+
+    expect(await wager.getHouseReserve()).to.equal(FUND_AMOUNT + topUp);
+  });
+
+  it("reverts a zero-value fundHouse deposit with WagerTooLow", async function () {
+    await expect(
+      wager.connect(owner).fundHouse({ value: 0 })
+    ).to.be.revertedWithCustomError(wager, "WagerTooLow");
+
+    expect(await wager.getHouseReserve()).to.equal(FUND_AMOUNT);
+  });
+
+  it("lets any account fund the house, not just the owner", async function () {
+    const topUp = ethers.parseEther("7");
+
+    // fundHouse carries no onlyOwner guard — anyone may back the house.
+    await expect(wager.connect(players[3]).fundHouse({ value: topUp }))
+      .to.emit(wager, "HouseFunded")
+      .withArgs(players[3].address, topUp);
+
+    expect(await wager.getHouseReserve()).to.equal(FUND_AMOUNT + topUp);
+  });
+
 });
