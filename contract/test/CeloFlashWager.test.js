@@ -2252,4 +2252,14 @@ describe("CeloFlashWager — resolveWager outcomes & claimWinnings payouts", fun
     ).to.be.revertedWithCustomError(wager, "WagerNotWon");
   });
 
+
+
+  it("reverts WagerNotWon when claiming a wager that is still pending", async function () {
+    const wagerId = await placePending(players[0]);
+
+    await expect(
+      wager.connect(players[0]).claimWinnings(wagerId)
+    ).to.be.revertedWithCustomError(wager, "WagerNotWon");
+  });
+
 });
