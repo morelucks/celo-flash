@@ -1465,4 +1465,11 @@ describe("CeloFlashWager — placeWager (bounds, solvency & state)", function ()
     ).to.be.revertedWithCustomError(wager, "WagerTooLow");
   });
 
+  it("accepts a stake at exactly MIN_WAGER", async function () {
+    // The lower bound is inclusive: 0.001 CELO is a valid wager.
+    await expect(wager.connect(players[0]).placeWager({ value: MIN_WAGER }))
+      .to.emit(wager, "WagerPlaced")
+      .withArgs(1, players[0].address, MIN_WAGER, payoutOf(MIN_WAGER));
+  });
+
 });
