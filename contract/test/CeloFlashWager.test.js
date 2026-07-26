@@ -2210,4 +2210,14 @@ describe("CeloFlashWager — resolveWager outcomes & claimWinnings payouts", fun
     ).to.changeEtherBalances([wager, players[0]], [-NET_PAYOUT, NET_PAYOUT]);
   });
 
+
+
+  it("sets the wager status to Claimed", async function () {
+    const wagerId = await placeAndWin(players[0]);
+
+    await wager.connect(players[0]).claimWinnings(wagerId);
+
+    expect((await wager.getWager(wagerId)).status).to.equal(CLAIMED);
+  });
+
 });
