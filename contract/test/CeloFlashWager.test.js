@@ -2130,4 +2130,15 @@ describe("CeloFlashWager — resolveWager outcomes & claimWinnings payouts", fun
     expect(await wager.usedNonces(nonce)).to.equal(true);
   });
 
+
+
+  it("clears getActiveWager once a wager is won", async function () {
+    const wagerId = await placePending(players[0]);
+    expect(await wager.getActiveWager(players[0].address)).to.equal(wagerId);
+
+    await resolve(players[0], wagerId, SCORE_THRESHOLD + 5);
+
+    expect(await wager.getActiveWager(players[0].address)).to.equal(0);
+  });
+
 });
