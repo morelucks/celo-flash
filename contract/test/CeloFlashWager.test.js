@@ -1721,3 +1721,120 @@ describe("CeloFlashWager — placeWager (bounds, solvency & state)", function ()
   });
 
 });
+
+describe("CeloFlashWager — resolveWager outcomes & claimWinnings payouts", function () {
+  const SCORE_THRESHOLD = 100;
+  const FUND_AMOUNT = ethers.parseEther("100");
+  const WAGER_AMOUNT = ethers.parseEther("1");
+  const MAX_WAGER = ethers.parseEther("10");
+  const WAGER_EXPIRY = 3600;
+
+  const WIN_MULTIPLIER_BPS = 20_000n;
+  const HOUSE_EDGE_BPS = 500n;
+  const BPS_DENOMINATOR = 10_000n;
+
+  // The gross payout is 2x the stake; the house keeps 500 bps of it on a win.
+  const payoutOf = (amount) => (amount * WIN_MULTIPLIER_BPS) / BPS_DENOMINATOR;
+  const edgeOf = (gross) => (gross * HOUSE_EDGE_BPS) / BPS_DENOMINATOR;
+  const netOf = (gross) => gross - edgeOf(gross);
+
+  const GROSS_PAYOUT = payoutOf(WAGER_AMOUNT);
+  const HOUSE_EDGE = edgeOf(GROSS_PAYOUT);
+  const NET_PAYOUT = netOf(GROSS_PAYOUT);
+
+  // WagerStatus enum values, mirrored from the contract.
+  const PENDING = 0n;
+  const WON = 1n;
+  const LOST = 2n;
+  const EXPIRED = 3n;
+  const CLAIMED = 4n;
+
+  let wager;
+  let owner;
+  let verifier;
+  let treasury;
+  let houseFunder;
+  let players;
+
+  let nonceCounter = 0;
+  const uniqueNonce = () => ethers.encodeBytes32String(`rwc-nonce-${nonceCounter++}`);
+
+  async function deployFundedWager() {
+    const signers = await ethers.getSigners();
+    const [deployer, signer, treasuryAccount] = signers;
+    // Reserve deposits are one-way, so they are paid by a signer none of the
+    // player accounts below ever touch.
+    const funder = signers[signers.length - 1];
+
+    const CeloFlashWager = await ethers.getContractFactory("CeloFlashWager");
+    const contract = await CeloFlashWager.deploy(
+      signer.address,
+      treasuryAccount.address,
+      SCORE_THRESHOLD
+    );
+    await contract.waitForDeployment();
+
+    await contract.connect(funder).fundHouse({ value: FUND_AMOUNT });
+
+    return {
+      wager: contract,
+      owner: deployer,
+      verifier: signer,
+      treasury: treasuryAccount,
+      houseFunder: funder,
+      players: signers.slice(3, 8),
+    };
+  }
+
+  beforeEach(async function () {
+    ({ wager, owner, verifier, treasury, houseFunder, players } =
+      await loadFixture(deployFundedWager));
+  });
+
+  // The server attestation resolveWager expects: keccak(id, player, score, nonce).
+  async function signScore(wagerId, playerAddress, score, nonce, signer = verifier) {
+    const messageHash = ethers.solidityPackedKeccak256(
+      ["uint256", "address", "uint256", "bytes32"],
+      [wagerId, playerAddress, score, nonce]
+    );
+    return signer.signMessage(ethers.getBytes(messageHash));
+  }
+
+  async function placePending(player, amount = WAGER_AMOUNT) {
+    await wager.connect(player).placeWager({ value: amount });
+    return wager.nextWagerId();
+  }
+
+  // Settle `wagerId` for `player` with a freshly signed score.
+  async function resolve(player, wagerId, score) {
+    const nonce = uniqueNonce();
+    const signature = await signScore(wagerId, player.address, score, nonce);
+    return wager.connect(player).resolveWager(wagerId, score, nonce, signature);
+  }
+
+  async function placeAndResolve(player, score, amount = WAGER_AMOUNT) {
+    const wagerId = await placePending(player, amount);
+    await resolve(player, wagerId, score);
+    return wagerId;
+  }
+
+  // Place a wager, clear the threshold, and return the claimable id.
+  async function placeAndWin(player, amount = WAGER_AMOUNT) {
+    return placeAndResolve(player, SCORE_THRESHOLD + 25, amount);
+  }
+
+  async function expectSolvent() {
+    const balance = await ethers.provider.getBalance(await wager.getAddress());
+    const locked =
+      (await wager.totalPendingLiabilities()) + (await wager.accumulatedHouseEdge());
+    expect(balance).to.be.gte(locked);
+  }
+
+
+  it("marks a wager Won when the score clears the threshold", async function () {
+    const wagerId = await placeAndResolve(players[0], SCORE_THRESHOLD + 50);
+
+    expect((await wager.getWager(wagerId)).status).to.equal(WON);
+  });
+
+});
