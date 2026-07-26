@@ -2275,4 +2275,20 @@ describe("CeloFlashWager — resolveWager outcomes & claimWinnings payouts", fun
     ).to.be.revertedWithCustomError(wager, "WagerNotWon");
   });
 
+
+
+  it("reverts NoActiveWager when someone other than the player claims", async function () {
+    const wagerId = await placeAndWin(players[0]);
+
+    await expect(
+      wager.connect(players[1]).claimWinnings(wagerId)
+    ).to.be.revertedWithCustomError(wager, "NoActiveWager");
+    await expect(
+      wager.connect(owner).claimWinnings(wagerId)
+    ).to.be.revertedWithCustomError(wager, "NoActiveWager");
+
+    // The winner's claim survives the failed attempts intact.
+    expect((await wager.getWager(wagerId)).status).to.equal(WON);
+  });
+
 });
