@@ -2220,4 +2220,14 @@ describe("CeloFlashWager — resolveWager outcomes & claimWinnings payouts", fun
     expect((await wager.getWager(wagerId)).status).to.equal(CLAIMED);
   });
 
+
+
+  it("emits WagerClaimed with the net payout", async function () {
+    const wagerId = await placeAndWin(players[0]);
+
+    await expect(wager.connect(players[0]).claimWinnings(wagerId))
+      .to.emit(wager, "WagerClaimed")
+      .withArgs(wagerId, players[0].address, NET_PAYOUT);
+  });
+
 });
