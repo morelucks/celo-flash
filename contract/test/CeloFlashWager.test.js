@@ -1478,4 +1478,11 @@ describe("CeloFlashWager — placeWager (bounds, solvency & state)", function ()
     ).to.be.revertedWithCustomError(wager, "WagerTooHigh");
   });
 
+  it("accepts a stake at exactly MAX_WAGER", async function () {
+    // The upper bound is inclusive: 10 CELO is a valid wager.
+    await expect(wager.connect(players[0]).placeWager({ value: MAX_WAGER }))
+      .to.emit(wager, "WagerPlaced")
+      .withArgs(1, players[0].address, MAX_WAGER, payoutOf(MAX_WAGER));
+  });
+
 });
