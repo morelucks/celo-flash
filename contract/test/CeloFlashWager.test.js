@@ -2187,4 +2187,15 @@ describe("CeloFlashWager — resolveWager outcomes & claimWinnings payouts", fun
     expect(await wager.totalWagersWon()).to.equal(3);
   });
 
+
+
+  it("keeps the forfeited stake in the house reserve after a loss", async function () {
+    await placeAndResolve(players[0], SCORE_THRESHOLD - 1);
+
+    // Nothing is locked any more, so the whole balance is reserve again.
+    expect(await wager.totalPendingLiabilities()).to.equal(0);
+    expect(await wager.getHouseReserve()).to.equal(FUND_AMOUNT + WAGER_AMOUNT);
+    await expectSolvent();
+  });
+
 });
