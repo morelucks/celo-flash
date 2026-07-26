@@ -2105,4 +2105,15 @@ describe("CeloFlashWager — resolveWager outcomes & claimWinnings payouts", fun
     ).to.be.revertedWithCustomError(wager, "InvalidSignature");
   });
 
+
+
+  it("reverts resolveWager while the contract is paused", async function () {
+    const wagerId = await placePending(players[0]);
+    await wager.connect(owner).pause();
+
+    await expect(
+      resolve(players[0], wagerId, SCORE_THRESHOLD + 5)
+    ).to.be.revertedWithCustomError(wager, "EnforcedPause");
+  });
+
 });
