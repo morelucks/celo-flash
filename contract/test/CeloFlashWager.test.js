@@ -1591,4 +1591,15 @@ describe("CeloFlashWager — placeWager (bounds, solvency & state)", function ()
     expect(await wager.totalWagersPlaced()).to.equal(2);
   });
 
+  it("reverts InsufficientHouseReserve when an outstanding liability drains the reserve", async function () {
+    const bare = await deployBare();
+
+    // The first stake backs its own risk, but leaves nothing over for a second.
+    await bare.connect(players[0]).placeWager({ value: WAGER_AMOUNT });
+
+    await expect(
+      bare.connect(players[1]).placeWager({ value: WAGER_AMOUNT })
+    ).to.be.revertedWithCustomError(bare, "InsufficientHouseReserve");
+  });
+
 });
