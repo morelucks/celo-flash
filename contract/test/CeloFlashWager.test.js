@@ -1624,4 +1624,15 @@ describe("CeloFlashWager — placeWager (bounds, solvency & state)", function ()
     ).to.be.revertedWithCustomError(bare, "InsufficientHouseReserve");
   });
 
+  it("reverts a max wager the thinly funded house cannot cover", async function () {
+    const bare = await deployBare(ethers.parseEther("0.5"));
+
+    await bare.connect(players[0]).placeWager({ value: WAGER_AMOUNT });
+
+    // 9.5 CELO of free reserve against 10 CELO of new risk.
+    await expect(
+      bare.connect(players[1]).placeWager({ value: MAX_WAGER })
+    ).to.be.revertedWithCustomError(bare, "InsufficientHouseReserve");
+  });
+
 });
