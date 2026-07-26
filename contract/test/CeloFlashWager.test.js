@@ -1490,4 +1490,14 @@ describe("CeloFlashWager — placeWager (bounds, solvency & state)", function ()
     expect(await wager.MAX_WAGER()).to.equal(ethers.parseEther("10"));
   });
 
+  it("mutates no state when a below-minimum wager reverts", async function () {
+    const before = await readCounters(players[0]);
+
+    await expect(
+      wager.connect(players[0]).placeWager({ value: MIN_WAGER - 1n })
+    ).to.be.revertedWithCustomError(wager, "WagerTooLow");
+
+    expect(await readCounters(players[0])).to.deep.equal(before);
+  });
+
 });
