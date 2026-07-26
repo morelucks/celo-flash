@@ -2085,4 +2085,24 @@ describe("CeloFlashWager — resolveWager outcomes & claimWinnings payouts", fun
     ).to.be.revertedWithCustomError(wager, "InvalidSignature");
   });
 
+
+
+  it("reverts InvalidSignature when the submitted score differs from the signed one", async function () {
+    const wagerId = await placePending(players[0]);
+    const nonce = uniqueNonce();
+    // Signed for a losing score, submitted as a winning one.
+    const signature = await signScore(
+      wagerId,
+      players[0].address,
+      SCORE_THRESHOLD - 1,
+      nonce
+    );
+
+    await expect(
+      wager
+        .connect(players[0])
+        .resolveWager(wagerId, SCORE_THRESHOLD + 500, nonce, signature)
+    ).to.be.revertedWithCustomError(wager, "InvalidSignature");
+  });
+
 });
