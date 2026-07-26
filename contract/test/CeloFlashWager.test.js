@@ -2010,4 +2010,14 @@ describe("CeloFlashWager — resolveWager outcomes & claimWinnings payouts", fun
     expect((await wager.getWager(wagerId)).status).to.equal(PENDING);
   });
 
+
+
+  it("reverts WagerNotPending when a won wager is resolved twice", async function () {
+    const wagerId = await placeAndWin(players[0]);
+
+    await expect(
+      resolve(players[0], wagerId, SCORE_THRESHOLD + 5)
+    ).to.be.revertedWithCustomError(wager, "WagerNotPending");
+  });
+
 });
