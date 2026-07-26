@@ -2066,4 +2066,23 @@ describe("CeloFlashWager — resolveWager outcomes & claimWinnings payouts", fun
     ).to.be.revertedWithCustomError(wager, "NonceAlreadyUsed");
   });
 
+
+
+  it("reverts InvalidSignature when the score is signed by a non-verifier", async function () {
+    const wagerId = await placePending(players[0]);
+    const score = SCORE_THRESHOLD + 5;
+    const nonce = uniqueNonce();
+    const signature = await signScore(
+      wagerId,
+      players[0].address,
+      score,
+      nonce,
+      players[0]
+    );
+
+    await expect(
+      wager.connect(players[0]).resolveWager(wagerId, score, nonce, signature)
+    ).to.be.revertedWithCustomError(wager, "InvalidSignature");
+  });
+
 });
