@@ -1854,4 +1854,12 @@ describe("CeloFlashWager — resolveWager outcomes & claimWinnings payouts", fun
     expect((await wager.getWager(wagerId)).status).to.equal(LOST);
   });
 
+
+
+  it("stores the attested score on the wager", async function () {
+    const wagerId = await placeAndResolve(players[0], 175);
+
+    expect((await wager.getWager(wagerId)).score).to.equal(175n);
+  });
+
 });
