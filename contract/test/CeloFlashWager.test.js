@@ -1994,4 +1994,20 @@ describe("CeloFlashWager — resolveWager outcomes & claimWinnings payouts", fun
     ).to.be.revertedWithCustomError(wager, "NoActiveWager");
   });
 
+
+
+  it("reverts NoActiveWager when the owner resolves on a player's behalf", async function () {
+    const wagerId = await placePending(players[0]);
+    const score = SCORE_THRESHOLD + 5;
+    const nonce = uniqueNonce();
+    const signature = await signScore(wagerId, players[0].address, score, nonce);
+
+    // Ownership grants no authority over an individual wager.
+    await expect(
+      wager.connect(owner).resolveWager(wagerId, score, nonce, signature)
+    ).to.be.revertedWithCustomError(wager, "NoActiveWager");
+
+    expect((await wager.getWager(wagerId)).status).to.equal(PENDING);
+  });
+
 });
