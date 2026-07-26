@@ -2141,4 +2141,17 @@ describe("CeloFlashWager — resolveWager outcomes & claimWinnings payouts", fun
     expect(await wager.getActiveWager(players[0].address)).to.equal(0);
   });
 
+
+
+  it("clears getActiveWager once a wager is lost", async function () {
+    const wagerId = await placePending(players[0]);
+    expect(await wager.getActiveWager(players[0].address)).to.equal(wagerId);
+
+    await resolve(players[0], wagerId, SCORE_THRESHOLD - 1);
+
+    // activeWager still points at the id, but it is no longer pending.
+    expect(await wager.getActiveWager(players[0].address)).to.equal(0);
+    expect(await wager.activeWager(players[0].address)).to.equal(wagerId);
+  });
+
 });
