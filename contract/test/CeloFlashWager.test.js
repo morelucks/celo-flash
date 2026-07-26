@@ -1614,4 +1614,14 @@ describe("CeloFlashWager — placeWager (bounds, solvency & state)", function ()
     );
   });
 
+  it("reverts when the reserve is one wei short of the outstanding risk", async function () {
+    const bare = await deployBare(WAGER_AMOUNT - 1n);
+
+    await bare.connect(players[0]).placeWager({ value: WAGER_AMOUNT });
+
+    await expect(
+      bare.connect(players[1]).placeWager({ value: WAGER_AMOUNT })
+    ).to.be.revertedWithCustomError(bare, "InsufficientHouseReserve");
+  });
+
 });
