@@ -1453,4 +1453,10 @@ describe("CeloFlashWager — placeWager (bounds, solvency & state)", function ()
     expect(await wager.totalWagersPlaced()).to.equal(2);
   });
 
+  it("reverts a zero-value wager with WagerTooLow", async function () {
+    await expect(
+      wager.connect(players[0]).placeWager({ value: 0 })
+    ).to.be.revertedWithCustomError(wager, "WagerTooLow");
+  });
+
 });
