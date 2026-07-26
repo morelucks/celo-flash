@@ -1372,4 +1372,14 @@ describe("CeloFlashWager — placeWager (bounds, solvency & state)", function ()
     expect(await placePending(players[2])).to.equal(3);
   });
 
+  it("computes potentialPayout as (amount * 20000) / 10000", async function () {
+    await placePending(players[0]);
+
+    const stored = await wager.getWager(1);
+    expect(stored.potentialPayout).to.equal(
+      (WAGER_AMOUNT * 20_000n) / 10_000n
+    );
+    expect(stored.potentialPayout).to.equal(WAGER_AMOUNT * 2n);
+  });
+
 });
