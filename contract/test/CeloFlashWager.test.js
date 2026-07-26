@@ -1485,4 +1485,9 @@ describe("CeloFlashWager — placeWager (bounds, solvency & state)", function ()
       .withArgs(1, players[0].address, MAX_WAGER, payoutOf(MAX_WAGER));
   });
 
+  it("exposes MIN_WAGER as 0.001 CELO and MAX_WAGER as 10 CELO", async function () {
+    expect(await wager.MIN_WAGER()).to.equal(ethers.parseEther("0.001"));
+    expect(await wager.MAX_WAGER()).to.equal(ethers.parseEther("10"));
+  });
+
 });
