@@ -1602,4 +1602,16 @@ describe("CeloFlashWager — placeWager (bounds, solvency & state)", function ()
     ).to.be.revertedWithCustomError(bare, "InsufficientHouseReserve");
   });
 
+  it("accepts a wager when the reserve exactly covers the outstanding risk", async function () {
+    const bare = await deployBare(WAGER_AMOUNT);
+
+    await bare.connect(players[0]).placeWager({ value: WAGER_AMOUNT });
+
+    // Reserve is exactly the 1 CELO of net risk still owed — the boundary passes.
+    await expect(bare.connect(players[1]).placeWager({ value: WAGER_AMOUNT })).to.emit(
+      bare,
+      "WagerPlaced"
+    );
+  });
+
 });
