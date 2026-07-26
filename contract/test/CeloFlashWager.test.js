@@ -1872,4 +1872,12 @@ describe("CeloFlashWager — resolveWager outcomes & claimWinnings payouts", fun
     expect(HOUSE_EDGE).to.equal(ethers.parseEther("0.1"));
   });
 
+
+
+  it("accrues no house edge on a loss", async function () {
+    await placeAndResolve(players[0], SCORE_THRESHOLD - 40);
+
+    expect(await wager.accumulatedHouseEdge()).to.equal(0);
+  });
+
 });
