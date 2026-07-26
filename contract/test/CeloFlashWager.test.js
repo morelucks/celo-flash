@@ -1967,4 +1967,17 @@ describe("CeloFlashWager — resolveWager outcomes & claimWinnings payouts", fun
     expect(await wager.totalPendingLiabilities()).to.equal(0);
   });
 
+
+
+  it("moves no CELO at resolution time — winnings must be pulled", async function () {
+    const wagerId = await placePending(players[0]);
+
+    await expect(resolve(players[0], wagerId, SCORE_THRESHOLD + 5)).to.changeEtherBalance(
+      wager,
+      0
+    );
+
+    expect((await wager.getWager(wagerId)).status).to.equal(WON);
+  });
+
 });
