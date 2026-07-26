@@ -1689,4 +1689,16 @@ describe("CeloFlashWager — placeWager (bounds, solvency & state)", function ()
     expect(await wager.getHouseReserve()).to.equal(FUND_AMOUNT + topUp);
   });
 
+  it("accepts plain CELO through receive and emits HouseFunded", async function () {
+    const topUp = ethers.parseEther("3");
+
+    await expect(
+      players[0].sendTransaction({ to: await wager.getAddress(), value: topUp })
+    )
+      .to.emit(wager, "HouseFunded")
+      .withArgs(players[0].address, topUp);
+
+    expect(await wager.getHouseReserve()).to.equal(FUND_AMOUNT + topUp);
+  });
+
 });
