@@ -1424,4 +1424,13 @@ describe("CeloFlashWager — placeWager (bounds, solvency & state)", function ()
     expect(await wager.totalPendingLiabilities()).to.equal(GROSS_PAYOUT);
   });
 
+  it("tracks liabilities exactly across mixed stake sizes", async function () {
+    await placePending(players[0], MIN_WAGER);
+    await placePending(players[1], ODD_WAGER);
+    await placePending(players[2], MID_WAGER);
+
+    const expected = payoutOf(MIN_WAGER) + payoutOf(ODD_WAGER) + payoutOf(MID_WAGER);
+    expect(await wager.totalPendingLiabilities()).to.equal(expected);
+  });
+
 });
