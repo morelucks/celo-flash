@@ -1846,4 +1846,12 @@ describe("CeloFlashWager — resolveWager outcomes & claimWinnings payouts", fun
     expect((await wager.getWager(wagerId)).status).to.equal(WON);
   });
 
+
+
+  it("marks a wager Lost one point below the threshold", async function () {
+    const wagerId = await placeAndResolve(players[0], SCORE_THRESHOLD - 1);
+
+    expect((await wager.getWager(wagerId)).status).to.equal(LOST);
+  });
+
 });
