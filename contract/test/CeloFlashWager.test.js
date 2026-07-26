@@ -1709,4 +1709,15 @@ describe("CeloFlashWager — placeWager (bounds, solvency & state)", function ()
     expect(await wager.getHouseReserve()).to.equal(FUND_AMOUNT);
   });
 
+  it("lets any account fund the house, not just the owner", async function () {
+    const topUp = ethers.parseEther("7");
+
+    // fundHouse carries no onlyOwner guard — anyone may back the house.
+    await expect(wager.connect(players[3]).fundHouse({ value: topUp }))
+      .to.emit(wager, "HouseFunded")
+      .withArgs(players[3].address, topUp);
+
+    expect(await wager.getHouseReserve()).to.equal(FUND_AMOUNT + topUp);
+  });
+
 });
