@@ -1364,4 +1364,12 @@ describe("CeloFlashWager — placeWager (bounds, solvency & state)", function ()
       .withArgs(1, players[0].address, WAGER_AMOUNT, GROSS_PAYOUT);
   });
 
+  it("assigns sequential wager ids starting at 1", async function () {
+    expect(await wager.nextWagerId()).to.equal(0);
+
+    expect(await placePending(players[0])).to.equal(1);
+    expect(await placePending(players[1])).to.equal(2);
+    expect(await placePending(players[2])).to.equal(3);
+  });
+
 });
