@@ -2291,4 +2291,12 @@ describe("CeloFlashWager — resolveWager outcomes & claimWinnings payouts", fun
     expect((await wager.getWager(wagerId)).status).to.equal(WON);
   });
 
+
+
+  it("reverts NoActiveWager when claiming an unknown wager id", async function () {
+    await expect(
+      wager.connect(players[0]).claimWinnings(4242)
+    ).to.be.revertedWithCustomError(wager, "NoActiveWager");
+  });
+
 });
