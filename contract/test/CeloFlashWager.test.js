@@ -1344,4 +1344,18 @@ describe("CeloFlashWager — placeWager (bounds, solvency & state)", function ()
       activeWager: await wager.activeWager(player.address),
     };
   }
+  it("stores every field of the Wager struct on a valid placement", async function () {
+    const tx = await wager.connect(players[0]).placeWager({ value: WAGER_AMOUNT });
+    const receipt = await tx.wait();
+    const block = await ethers.provider.getBlock(receipt.blockNumber);
+
+    const stored = await wager.getWager(1);
+    expect(stored.player).to.equal(players[0].address);
+    expect(stored.amount).to.equal(WAGER_AMOUNT);
+    expect(stored.potentialPayout).to.equal(GROSS_PAYOUT);
+    expect(stored.createdAt).to.equal(block.timestamp);
+    expect(stored.score).to.equal(0);
+    expect(stored.status).to.equal(PENDING);
+  });
+
 });
