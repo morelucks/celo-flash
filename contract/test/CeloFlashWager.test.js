@@ -1398,4 +1398,13 @@ describe("CeloFlashWager — placeWager (bounds, solvency & state)", function ()
     expect(stored.potentialPayout).to.equal(ethers.parseEther("20"));
   });
 
+  it("doubles an odd stake with no rounding loss", async function () {
+    // 1.337 CELO plus a single wei — the bps math must stay exact.
+    const stake = ODD_WAGER + 1n;
+    await placePending(players[0], stake);
+
+    const stored = await wager.getWager(1);
+    expect(stored.potentialPayout).to.equal(stake * 2n);
+  });
+
 });
