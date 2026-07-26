@@ -1936,4 +1936,16 @@ describe("CeloFlashWager — resolveWager outcomes & claimWinnings payouts", fun
     expect(await wager.totalPendingLiabilities()).to.equal(0);
   });
 
+
+
+  it("drops totalPendingLiabilities by potentialPayout on a loss", async function () {
+    const wagerId = await placePending(players[0], MAX_WAGER);
+    const gross = payoutOf(MAX_WAGER);
+    expect(await wager.totalPendingLiabilities()).to.equal(gross);
+
+    await resolve(players[0], wagerId, SCORE_THRESHOLD - 1);
+
+    expect(await wager.totalPendingLiabilities()).to.equal(0);
+  });
+
 });
