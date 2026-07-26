@@ -2116,4 +2116,18 @@ describe("CeloFlashWager — resolveWager outcomes & claimWinnings payouts", fun
     ).to.be.revertedWithCustomError(wager, "EnforcedPause");
   });
 
+
+
+  it("records the attestation nonce as used", async function () {
+    const wagerId = await placePending(players[0]);
+    const score = SCORE_THRESHOLD + 5;
+    const nonce = uniqueNonce();
+    expect(await wager.usedNonces(nonce)).to.equal(false);
+
+    const signature = await signScore(wagerId, players[0].address, score, nonce);
+    await wager.connect(players[0]).resolveWager(wagerId, score, nonce, signature);
+
+    expect(await wager.usedNonces(nonce)).to.equal(true);
+  });
+
 });
