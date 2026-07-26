@@ -1679,4 +1679,14 @@ describe("CeloFlashWager — placeWager (bounds, solvency & state)", function ()
     );
   });
 
+  it("emits HouseFunded and grows the reserve on fundHouse", async function () {
+    const topUp = ethers.parseEther("5");
+
+    await expect(wager.connect(owner).fundHouse({ value: topUp }))
+      .to.emit(wager, "HouseFunded")
+      .withArgs(owner.address, topUp);
+
+    expect(await wager.getHouseReserve()).to.equal(FUND_AMOUNT + topUp);
+  });
+
 });
